@@ -1,7 +1,5 @@
 package com.shop.app;
 
-import com.shop.config.Config;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.*;
