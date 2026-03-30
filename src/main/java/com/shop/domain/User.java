@@ -1,8 +1,9 @@
 package com.shop.domain;
 
-public abstract class User {
+public class User {
     public final int id;
     protected String username;
+    public Set<Role> roles;
 
     User(int id, String username) {
         this.id = id;
