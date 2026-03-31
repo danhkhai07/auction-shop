@@ -1,5 +1,7 @@
 package com.shop.domain;
 
+import java.util.Set;
+
 public class User {
     public final int id;
     protected String username;
