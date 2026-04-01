@@ -3,11 +3,11 @@ package com.shop.domain;
 import java.util.Set;
 
 public class User {
-    public final int id;
+    public final String id;
     protected String username;
     public Set<Role> roles;
 
-    User(int id, String username) {
+    User(String id, String username) {
         this.id = id;
         this.username = username;
     }
