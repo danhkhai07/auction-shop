@@ -7,7 +7,7 @@ public class CacheManager {
     private int cleanUpInterval = 10 * 60;
     private CacheStore<?, ?> c;
 
-    CacheManager(CacheStore<?, ?> cacheStore) {
+    public CacheManager(CacheStore<?, ?> cacheStore) {
         this.c = cacheStore;
     }
 
