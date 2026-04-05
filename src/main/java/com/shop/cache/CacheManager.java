@@ -7,7 +7,12 @@ public class CacheManager {
     private int cleanUpInterval = 10 * 60;
     private CacheStore<?, ?> c;
 
+    CacheManager(CacheStore<?, ?> cacheStore) {
+        this.c = cacheStore;
+    }
+
     // should be threaded
     public Mono<Void> Run(){
+        return Mono.just(null);
     }
 }
