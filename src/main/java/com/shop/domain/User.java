@@ -5,23 +5,39 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class User {
-    public final String id;
-    protected String username;
-    public Set<Role> roles = new HashSet<>();
+    private final String id;
+    private String username;
+    private Set<Role> roles = new HashSet<>();
 
-    User(String id, String username) {
+    public User(String id, String username) {
         this.id = id;
         this.username = username;
     }
 
-    public String getUsername() { return this.username; }
-    protected void setUsername(String newUsername) { this.username = newUsername; }
+    public String getId() {
+        return id;
+    }
+
+    public String getUsername() {
+        return this.username;
+    }
+
+    protected void setUsername(String newUsername) {
+        this.username = newUsername;
+    }
 
     public boolean hasRole(Role role) {
         return roles != null && roles.contains(role);
     }
+
     public Set<Role> getRoles() {
         return Collections.unmodifiableSet(roles);
+    }
+
+    public void addRole(Role role) {
+        if (role != null) {
+            this.roles.add(role);
+        }
     }
 
     public boolean hasPermission(Permission permission) {
@@ -30,6 +46,7 @@ public class User {
         }
         return false;
     }
+
     public Set<Permission> getPermissions() {
         Set<Permission> perms = new HashSet<>();
         for (Role role : roles) {
