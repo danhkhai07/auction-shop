@@ -10,5 +10,5 @@ public interface AuctionRepository {
     // get all active auctions
     Flux<Auction> getActive();
     Mono<Void> save(Auction auction);
-    Mono<Void> delete(int id);
+    Mono<Void> delete(String id);
 }
