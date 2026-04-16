@@ -11,6 +11,7 @@ public interface UserRepository {
     Mono<User> getByID(String id);
     Mono<Integer> getIDByUsername(String username);
 
-    Mono<Void> setByID(String id, User user);
+    Mono<Void> saveUser(User user);
     Mono<Void> deleteByID(String id);
+    Mono<Void> newUser(String user);
 }
