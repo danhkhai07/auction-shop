@@ -1,0 +1,31 @@
+package com.shop.config;
+
+import com.shop.handler.AuthHandler;
+import com.shop.handler.IndexHandler;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.reactive.function.server.RouterFunction;
+import org.springframework.web.reactive.function.server.RouterFunctions;
+import org.springframework.web.reactive.function.server.ServerResponse;
+
+@Configuration
+public class RouterConfig {
+
+    @Bean
+    RouterFunction<ServerResponse> routes(
+        IndexHandler indexHandler,
+        AuthHandler authHandler
+    ) {
+        return RouterFunctions.route()
+                // Index
+                .path("/", builder -> builder
+                        .GET("", indexHandler::index)
+                )
+                // Auth
+                .path("/auth", builder -> builder
+                        .POST("/register", authHandler::register)
+                )
+                .build()
+        ;
+    }
+}

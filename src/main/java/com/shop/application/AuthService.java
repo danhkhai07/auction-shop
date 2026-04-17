@@ -1,9 +1,18 @@
 package com.shop.application;
 
-public class AuthService {
-    private final UserRepository repo;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
-    public AuthService(UserRepository repo) {
-        this.repo = repo;
+@Service
+@RequiredArgsConstructor
+public class AuthService {
+    private final UserRepository userRepository;
+
+    public boolean isValidPassword(String password) {
+        return true;
+    }
+
+    public boolean isValidUsername(String username) {
+        return true;
     }
 }

@@ -1,9 +1,11 @@
 package com.shop.application;
 
-public class AuctionService {
-    private final AuctionRepository repo;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
-    public AuctionService(AuctionRepository repo) {
-        this.repo = repo;
-    }
+@Service
+@RequiredArgsConstructor
+public class AuctionService {
+    private final AuctionRepository auctionRepository;
+
 }
