@@ -9,7 +9,7 @@ public class User {
     protected String username;
     public Set<Role> roles = new HashSet<>();
 
-    User(String id, String username) {
+    public User(String id, String username) {
         this.id = id;
         this.username = username;
     }
