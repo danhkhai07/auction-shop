@@ -8,7 +8,9 @@ import reactor.core.publisher.Flux;
 public interface AuctionRepository {
     Mono<Auction> getByID(String id);
     // get all active auctions
-    Flux<Auction> getActive();
-    Mono<Void> save(Auction auction);
-    Mono<Void> delete(int id);
+    Flux<Auction> getActives();
+
+    Mono<Void> saveAuction(Auction auction);
+    Mono<Void> deleteByID(String id);
+    Mono<Void> newAuction(Auction auction);
 }

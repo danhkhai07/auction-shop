@@ -1,4 +1,36 @@
 package com.shop.infra;
 
-public class PostgresAuctionRepo {
+import com.shop.application.AuctionRepository;
+import com.shop.domain.Auction;
+import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+@Repository
+public class PostgresAuctionRepo implements AuctionRepository {
+
+    @Override
+    public Mono<Auction> getByID(String id) {
+        return null;
+    }
+
+    @Override
+    public Flux<Auction> getActives() {
+        return null;
+    }
+
+    @Override
+    public Mono<Void> saveAuction(Auction auction) {
+        return null;
+    }
+
+    @Override
+    public Mono<Void> deleteByID(String id) {
+        return null;
+    }
+
+    @Override
+    public Mono<Void> newAuction(Auction auction) {
+        return null;
+    }
 }
