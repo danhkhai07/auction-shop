@@ -19,7 +19,7 @@ public class PostgresUserRepo implements UserRepository {
     }
 
     @Override
-    public Mono<Integer> getIDByUsername(String username) {
+    public Mono<String> getIDByUsername(String username) {
         return null;
     }
 

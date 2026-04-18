@@ -6,16 +6,14 @@ import java.util.Set;
 
 public class User {
     public final String id;
-    protected String username;
+    public String username;
+    public String passwordHash;
     public Set<Role> roles = new HashSet<>();
 
     public User(String id, String username) {
         this.id = id;
         this.username = username;
     }
-
-    public String getUsername() { return this.username; }
-    protected void setUsername(String newUsername) { this.username = newUsername; }
 
     public boolean hasRole(Role role) {
         return roles != null && roles.contains(role);

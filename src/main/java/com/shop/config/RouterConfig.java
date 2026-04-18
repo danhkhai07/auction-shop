@@ -18,12 +18,11 @@ public class RouterConfig {
     ) {
         return RouterFunctions.route()
                 // Index
-                .path("/", builder -> builder
-                        .GET("", indexHandler::index)
-                )
+                .GET("/", indexHandler::index)
                 // Auth
                 .path("/auth", builder -> builder
                         .POST("/register", authHandler::register)
+                        .POST("/login", authHandler::login)
                 )
                 .build()
         ;
