@@ -67,8 +67,7 @@ public class InMemoryCacheStore<K, V> implements CacheStore<K, V> {
 
         // Quet toan bo cache va xoa tung entry het han mot cach an toan voi da luong.
         for (Map.Entry<K, CacheEntry<V>> entry : cache.entrySet()) {
-            if (isExpired(entry.getValue(), currentTime)
-                    && cache.remove(entry.getKey(), entry.getValue())) {
+            if (isExpired(entry.getValue(), currentTime) && cache.remove(entry.getKey(), entry.getValue())) {
                 removedEntries++;
             }
         }
