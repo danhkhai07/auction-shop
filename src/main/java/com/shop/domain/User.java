@@ -14,6 +14,7 @@ public class User {
         this.id = id;
         this.username = username;
     }
+
     public String getId() {
         return id;
     }
@@ -21,8 +22,15 @@ public class User {
     public boolean hasRole(Role role) {
         return roles != null && roles.contains(role);
     }
+
     public Set<Role> getRoles() {
         return Collections.unmodifiableSet(roles);
+    }
+
+    public void addRole(Role role) {
+        if (role != null) {
+            this.roles.add(role);
+        }
     }
 
     public boolean hasPermission(Permission permission) {
@@ -31,6 +39,7 @@ public class User {
         }
         return false;
     }
+
     public Set<Permission> getPermissions() {
         Set<Permission> perms = new HashSet<>();
         for (Role role : roles) {
