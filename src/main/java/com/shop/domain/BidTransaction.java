@@ -4,10 +4,10 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class BidTransaction {
-    private String transactionId;
-    private User bidder;
-    private BigDecimal bidAmount;
-    private LocalDateTime timestamp;
+    private final String transactionId;
+    private final User bidder;
+    private final BigDecimal bidAmount;
+    private final LocalDateTime timestamp;
 
     public BidTransaction(String transactionId, User bidder, BigDecimal bidAmount) {
         if (transactionId == null)
@@ -30,7 +30,7 @@ public class BidTransaction {
         return bidder;
     }
 
-    public double getBidAmount() {
+    public BigDecimal getBidAmount() {
         return bidAmount;
     }
 
