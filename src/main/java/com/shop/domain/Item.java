@@ -1,12 +1,18 @@
 package com.shop.domain;
 
 public class Item {
-    private String id;
+    private final String id;
     private String name;
     private String description;
-    private User seller;
+    private final User seller;
 
     public Item(String id, String name, String description, User seller) {
+        if (id == null)
+            throw new IllegalArgumentException("ID sản phẩm không được để trống.");
+        if (name == null)
+            throw new IllegalArgumentException("Tên sản phẩm không được để trống.");
+        if (seller == null)
+            throw new IllegalArgumentException("Phải có người bán.");
         this.id = id;
         this.name = name;
         this.description = description;
