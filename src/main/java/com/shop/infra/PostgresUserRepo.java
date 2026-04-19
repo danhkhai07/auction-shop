@@ -1,23 +1,45 @@
 package com.shop.infra;
 
 import com.shop.application.UserRepository;
-import com.shop.db.DB;
-import com.shop.domain.Role;
 import com.shop.domain.User;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.EnumSet;
-import java.util.Set;
 
 @Repository
-public class PostgresUserRepo {
+public class PostgresUserRepo implements UserRepository {
 
+    @Override
+    public Mono<Boolean> existsByID(String id) {
+        return null;
+    }
+
+    @Override
+    public Mono<User> getByID(String id) {
+        return null;
+    }
+
+    @Override
+    public Mono<String> getIDByUsername(String username) {
+        return null;
+    }
+
+    @Override
+    public Mono<Void> saveUser(User user) {
+        return null;
+    }
+
+    @Override
+    public Mono<Void> deleteByID(String id) {
+        return null;
+    }
+
+    @Override
+    public Mono<Void> newUser(User user, String password) {
+        return null;
+    }
+
+    @Override
+    public Mono<Void> changePassword(String id, String password) {
+        return null;
+    }
 }

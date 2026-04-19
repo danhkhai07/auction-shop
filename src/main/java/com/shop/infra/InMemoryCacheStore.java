@@ -1,9 +1,12 @@
 package com.shop.infra;
 
 import com.shop.cache.CacheStore;
+import org.springframework.stereotype.Repository;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Repository
 public class InMemoryCacheStore<K, V> implements CacheStore<K, V> {
     //Khoi tao Wrapper Class CacheEntry luu tru don vi du lieu cua Cache
     private static class CacheEntry<V>{

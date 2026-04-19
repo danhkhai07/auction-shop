@@ -1,0 +1,8 @@
+server:
+  port: 1234
+
+security:
+  jwt:
+    issuer: auction-shop
+    expiration-ms: 86400000
+    secret: cmFwaWRseWJyb2tlbG93YXdhcmVzaW1wbGVzdGZhbGxza2lsbHRvbW9ycm93b25ldHI=
