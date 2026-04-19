@@ -5,14 +5,17 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class User {
-    public final String id;
-    public String username;
-    public String passwordHash;
-    public Set<Role> roles = new HashSet<>();
+    private final String id;
+    private String username;
+    private String passwordHash;
+    private Set<Role> roles = new HashSet<>();
 
     public User(String id, String username) {
         this.id = id;
         this.username = username;
+    }
+    public String getId() {
+        return id;
     }
 
     public boolean hasRole(Role role) {
