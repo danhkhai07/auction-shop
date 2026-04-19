@@ -13,7 +13,7 @@ public class BidTransaction {
         if (transactionId == null)
             throw new IllegalArgumentException("Transaction ID không được để trống.");
         if (bidder == null)
-            throw new IllegalArgumentException("Phải có gười đấu giá.");
+            throw new IllegalArgumentException("Phải có người đấu giá.");
         if (bidAmount == null || bidAmount.compareTo(BigDecimal.ZERO) <= 0)
             throw new IllegalArgumentException("Số tiền đặt giá phải lớn hơn 0.");
         this.transactionId = transactionId;
