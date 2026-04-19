@@ -43,4 +43,8 @@ public class Item {
         return seller;
     }
 
+    public boolean isOwnedBy(User user) {
+        if (user == null || this.seller == null) return false;
+        return this.seller.getId().equals(user.getId());
+    }
 }
