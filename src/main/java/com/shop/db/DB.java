@@ -3,7 +3,6 @@ package com.shop.db;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,7 +14,6 @@ import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
 
-@Component
 public class DB {
     private static final String SCHEMA_RESOURCE = "db/schema.sql";  //file chứa schema
 
