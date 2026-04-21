@@ -9,7 +9,7 @@ public interface UserRepository {
     Mono<Boolean> existsByID(String id);
 
     Mono<User> getByID(String id);
-    Mono<String> getIDByUsername(String username);
+    Mono<User> getByName(String name);
 
     Mono<Void> saveUser(User user);
     Mono<Void> deleteByID(String id);
