@@ -1,5 +1,7 @@
 package com.shop.config;
 
+import com.shop.application.AuthService;
+import com.shop.handler.AuthFilter;
 import com.shop.handler.AuthHandler;
 import com.shop.handler.IndexHandler;
 import org.springframework.context.annotation.Bean;
@@ -14,7 +16,8 @@ public class RouterConfig {
     @Bean
     RouterFunction<ServerResponse> routes(
         IndexHandler indexHandler,
-        AuthHandler authHandler
+        AuthHandler authHandler,
+        AuthFilter authFilter
     ) {
         return RouterFunctions.route()
                 // Index
@@ -23,6 +26,8 @@ public class RouterConfig {
                 .path("/auth", builder -> builder
                         .POST("/register", authHandler::register)
                         .POST("/login", authHandler::login)
+                        .filter(authFilter)
+                        .GET("/me", authHandler::me)
                 )
                 .build()
         ;
