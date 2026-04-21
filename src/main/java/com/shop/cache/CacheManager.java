@@ -31,15 +31,18 @@ public class CacheManager<K, V> implements AutoCloseable {
 
     public CacheManager(CacheStore<K, V> cacheStore, long instanceExpiration, long cleanUpInterval) {
         if (instanceExpiration <= 0) {
-            throw new IllegalArgumentException("instanceExpiration can lon hon 0");
+            throw new IllegalArgumentException("instanceExpiration must be bigger than 0");
         }
         if (cleanUpInterval <= 0) {
-            throw new IllegalArgumentException("cleanUpInterval can lon hon 0");
+            throw new IllegalArgumentException("cleanUpInterval must be bigger than 0");
         }
 
         this.cacheStore = Objects.requireNonNull(cacheStore, "cacheStore nullError");
         this.instanceExpiration = instanceExpiration;
         this.cleanUpInterval = cleanUpInterval;
+
+        // Tu dong bat cleanup task ngay khi tao manager.
+        startCleanupTask();
     }
 
     // Luu vao cache voi TTL mac dinh khi caller khong truyen ttl rieng.
@@ -78,14 +81,9 @@ public class CacheManager<K, V> implements AutoCloseable {
         return cleanUpInterval;
     }
 
-    // Khoi dong cleanup task tren mot thread nen rieng.
+    // Cho phep khoi dong lai cleanup task neu manager da bi stop truoc do.
     public Mono<Void> run() {
         return Mono.fromRunnable(this::startCleanupTask).then();
-    }
-
-    // Giu ten method cu de code hien tai khong bi vo trong luc don dep API.
-    public Mono<Void> Run() {
-        return run();
     }
 
     // Tao mot scheduler chi dung 1 luong nen de don dep cache theo chu ky.
