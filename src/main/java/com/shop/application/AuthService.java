@@ -45,11 +45,10 @@ public class AuthService {
 
     public Mono<LoginResponse> login(LoginRequest request) {
         String invalidCredentialsMessage = "username or password is invalid";
-        return userRepository.getIDByUsername(request.username)
+        return userRepository.getByName(request.username)
                 .switchIfEmpty(Mono.error(
                         new IllegalStateException(invalidCredentialsMessage)
                 ))
-                .flatMap(userRepository::getByID)
                 .filter(user ->
                         BCryptHash.compareHash(request.password, user.passwordHash)
                 )
