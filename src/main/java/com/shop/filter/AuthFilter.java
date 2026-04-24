@@ -1,4 +1,4 @@
-package com.shop.handler;
+package com.shop.filter;
 
 import com.shop.security.jwt.JWTService;
 import lombok.RequiredArgsConstructor;
