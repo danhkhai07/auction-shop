@@ -1,6 +1,12 @@
 server:
   port: 1234
 
+spring:
+  r2dbc:
+    url: ${APP_DB_URL:r2dbc:postgresql://localhost:5432/auction_shop}
+    username: ${APP_DB_USERNAME:postgres}
+    password: ${APP_DB_PASSWORD:}
+
 security:
   jwt:
     issuer: auction-shop
