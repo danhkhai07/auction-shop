@@ -5,9 +5,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class User {
-    private final String id;
-    private String username;
-    private String passwordHash;
+    public final String id;
+    public String username;
+    public String passwordHash;
     private Set<Role> roles = new HashSet<>();
 
     public User(String id, String username) {
