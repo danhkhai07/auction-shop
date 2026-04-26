@@ -1,7 +1,7 @@
 package com.shop.config;
 
 import com.shop.application.AuthService;
-import com.shop.handler.AuthFilter;
+import com.shop.filter.AuthFilter;
 import com.shop.handler.AuthHandler;
 import com.shop.handler.IndexHandler;
 import org.springframework.context.annotation.Bean;
