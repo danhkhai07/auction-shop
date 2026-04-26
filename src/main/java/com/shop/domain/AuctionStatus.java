@@ -7,14 +7,14 @@ public enum AuctionStatus {
     RUNNING,
     FINISHED,
     PAID,
-    CANCELED;
+    CANCELLED;
 
     public boolean canTransitionTo(AuctionStatus next) {
         return switch (this) {
-            case OPEN     -> Set.of(RUNNING, CANCELED).contains(next);
-            case RUNNING  -> Set.of(FINISHED, CANCELED).contains(next);
+            case OPEN     -> Set.of(RUNNING, CANCELLED).contains(next);
+            case RUNNING  -> Set.of(FINISHED, CANCELLED).contains(next);
             case FINISHED -> Set.of(PAID).contains(next);
-            case PAID, CANCELED -> false;
+            case PAID, CANCELLED -> false;
         };
     }
 }
