@@ -20,6 +20,11 @@ public class PostgresAuctionRepo implements AuctionRepository {
     }
 
     @Override
+    public Mono<Boolean> existsByID(String id) {
+        return null;
+    }
+
+    @Override
     public Mono<Void> saveAuction(Auction auction) {
         return Mono.empty();
     }
