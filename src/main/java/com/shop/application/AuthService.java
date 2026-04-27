@@ -36,7 +36,7 @@ public class AuthService {
         String passwordHash = BCryptHash.hash(request.password);
         return userRepository.getByName(request.username)
                 .flatMap(id ->
-                        Mono.<RegisterResponse>error(new IllegalStateException("username already exists")))
+                        Mono.<RegisterResponse>error(new IllegalAccessException("username already exists")))
                 .switchIfEmpty(
                         userRepository.newUser(user, passwordHash)
                                 .thenReturn(new RegisterResponse("User created"))
@@ -47,13 +47,13 @@ public class AuthService {
         String invalidCredentialsMessage = "username or password is invalid";
         return userRepository.getByName(request.username)
                 .switchIfEmpty(Mono.error(
-                        new IllegalStateException(invalidCredentialsMessage)
+                        new IllegalAccessException(invalidCredentialsMessage)
                 ))
                 .filter(user ->
                         BCryptHash.compareHash(request.password, user.passwordHash)
                 )
                 .switchIfEmpty(Mono.error(
-                        new IllegalStateException(invalidCredentialsMessage)
+                        new IllegalAccessException(invalidCredentialsMessage)
                 ))
                 .map(user ->
                         new LoginResponse(jwtService.generateToken(user.id))
