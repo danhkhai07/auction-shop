@@ -5,7 +5,6 @@ import com.shop.application.UserManager;
 import com.shop.dto.request.EmptyBodyRequest;
 import com.shop.dto.request.LoginRequest;
 import com.shop.dto.request.RegisterRequest;
-import com.shop.dto.response.MeResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -71,7 +70,6 @@ public class AuthHandler {
                                 String.valueOf(request.attribute("userID"))
                         )
                 )
-                .flatMap(user -> Mono.just(new MeResponse(user.id, user.username)))
                 .flatMap(response -> ServerResponse.status(200).bodyValue(response));
     }
 }
