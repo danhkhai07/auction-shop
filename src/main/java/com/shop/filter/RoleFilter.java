@@ -40,6 +40,7 @@ public class RoleFilter implements HandlerFilterFunction<ServerResponse, ServerR
                         Set<Role> roles = user.roles;
                         ServerRequest newRequest = ServerRequest.from(request)
                                 .attribute("resolved_role", roles)
+                                .attribute("userID", userID)
                                 .build();
                         return next.handle(newRequest);
                     });
