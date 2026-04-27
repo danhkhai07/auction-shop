@@ -10,36 +10,36 @@ public class PostgresUserRepo implements UserRepository {
 
     @Override
     public Mono<Boolean> existsByID(String id) {
-        return null;
+        return Mono.empty();
     }
 
     @Override
     public Mono<User> getByID(String id) {
-        return null;
+        return Mono.empty();
     }
 
     @Override
     public Mono<User> getByName(String name) {
-        return null;
+        return Mono.empty();
     }
 
     @Override
     public Mono<Void> saveUser(User user) {
-        return null;
+        return Mono.empty();
     }
 
     @Override
     public Mono<Void> deleteByID(String id) {
-        return null;
+        return Mono.empty();
     }
 
     @Override
     public Mono<Void> newUser(User user, String password) {
-        return null;
+        return Mono.empty();
     }
 
     @Override
     public Mono<Void> changePassword(String id, String password) {
-        return null;
+        return Mono.empty();
     }
 }

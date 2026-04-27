@@ -3,6 +3,7 @@ package com.shop.application;
 import com.shop.cache.CacheManager;
 import com.shop.cache.CacheStore;
 import com.shop.domain.User;
+import com.shop.dto.response.GetUserResponse;
 import com.shop.infra.InMemoryCacheStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,19 +24,55 @@ public class UserManager {
             10 * 60
     );
 
-    public Mono<User> getUserByID(String id){
-        return userRepository.getByID(id)
-                .filter(user -> {
-                    IDCache.put(id, user);
-                    return false;
+    public Mono<GetUserResponse> getUserByID(String id){
+        Mono<User> stream;
+        if (IDCache.contains(id)) {
+            stream = Mono.just(IDCache.get(id))
+                    .filter(obj -> obj instanceof User)
+                    .cast(User.class);
+        } else {
+            stream = userRepository.getByID(id)
+                    .filter(user -> {
+                        IDCache.put(id, user);
+                        return true;
+                    });
+        }
+
+        return stream
+                .switchIfEmpty(Mono.error(new IllegalAccessException("user not found")))
+                .map(user -> {
+                    GetUserResponse response = new GetUserResponse(
+                            user.id,
+                            user.username,
+                            user.getRoles()
+                    );
+                    return response;
                 });
     }
 
-    public Mono<User> getUserByName(String name){
-        return userRepository.getByName(name)
-                .filter(user -> {
-                    NameCache.put(name, user);
-                    return false;
+    public Mono<GetUserResponse> getUserByName(String name){
+        Mono<User> stream;
+        if (IDCache.contains(name)) {
+            stream = Mono.just(NameCache.get(name))
+                    .filter(obj -> obj instanceof User)
+                    .cast(User.class);
+        } else {
+            stream = userRepository.getByName(name)
+                    .filter(user -> {
+                        NameCache.put(name, user);
+                        return true;
+                    });
+        }
+
+        return stream
+                .switchIfEmpty(Mono.error(new IllegalAccessException("user not found")))
+                .map(user -> {
+                    GetUserResponse response = new GetUserResponse(
+                            user.id,
+                            user.username,
+                            user.getRoles()
+                    );
+                    return response;
                 });
     }
 }

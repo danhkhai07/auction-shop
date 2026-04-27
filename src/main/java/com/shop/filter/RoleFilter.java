@@ -29,7 +29,7 @@ public class RoleFilter implements HandlerFilterFunction<ServerResponse, ServerR
             ServerRequest newRequest = ServerRequest.from(request)
                     .attribute("resolved_role", roles)
                     .build();
-            next.handle(newRequest);
+            return next.handle(newRequest);
         }
 
         String token = auth.substring(7);
@@ -37,7 +37,7 @@ public class RoleFilter implements HandlerFilterFunction<ServerResponse, ServerR
             String userID = jwtService.extractUserId(token);
             return userManager.getUserByID(userID)
                     .flatMap(user -> {
-                        Set<Role> roles = user.getRoles();
+                        Set<Role> roles = user.roles;
                         ServerRequest newRequest = ServerRequest.from(request)
                                 .attribute("resolved_role", roles)
                                 .build();

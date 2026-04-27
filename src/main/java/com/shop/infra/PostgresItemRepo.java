@@ -9,31 +9,31 @@ import reactor.core.publisher.Mono;
 public class PostgresItemRepo implements ItemRepository {
     @Override
     public Mono<Boolean> existsByID(String id) {
-        return null;
+        return Mono.empty();
     }
 
     @Override
     public Mono<Item> getByID(String id) {
-        return null;
+        return Mono.empty();
     }
 
     @Override
     public Mono<Item> getByName(String name) {
-        return null;
+        return Mono.empty();
     }
 
     @Override
     public Mono<Void> saveItem(Item item) {
-        return null;
+        return Mono.empty();
     }
 
     @Override
     public Mono<Void> deleteByID(String id) {
-        return null;
+        return Mono.empty();
     }
 
     @Override
     public Mono<Void> newItem(Item item) {
-        return null;
+        return Mono.empty();
     }
 }

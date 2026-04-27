@@ -11,27 +11,26 @@ public class PostgresAuctionRepo implements AuctionRepository {
 
     @Override
     public Mono<Auction> getByID(String id) {
-        return null;
+        return Mono.empty();
     }
 
     @Override
     public Flux<Auction> getActives() {
-        return null;
+        return Flux.empty();
     }
 
     @Override
     public Mono<Void> saveAuction(Auction auction) {
-        return null;
+        return Mono.empty();
     }
 
     @Override
     public Mono<Void> deleteByID(String id) {
-        return null;
+        return Mono.empty();
     }
 
     @Override
     public Mono<Void> newAuction(Auction auction) {
-        return null;
+        return Mono.empty();
     }
-
 }
