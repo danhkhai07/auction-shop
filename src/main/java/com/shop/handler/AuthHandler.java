@@ -56,11 +56,12 @@ public class AuthHandler {
                 })
                 .flatMap(response -> ServerResponse.status(201).bodyValue(response))
                 .onErrorResume(IllegalAccessException.class,
-                        e -> ServerResponse.
-                                badRequest()
-                                .bodyValue(
-                                        Map.of("error", e.getMessage())
-                                ));
+                e -> ServerResponse.
+                        badRequest()
+                        .bodyValue(
+                                Map.of("error", e.getMessage())
+                        )
+                );
     }
 
     public Mono<ServerResponse> me(ServerRequest request) {

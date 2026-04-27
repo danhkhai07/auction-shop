@@ -29,7 +29,8 @@ public class ViewHandler {
                         badRequest()
                         .bodyValue(
                                 Map.of("error", e.getMessage())
-                        ));
+                        )
+                );
     }
 
     public Mono<ServerResponse> getItem(ServerRequest request) {
@@ -37,11 +38,12 @@ public class ViewHandler {
         return itemService.getItemByID(id)
                 .flatMap(response -> ServerResponse.status(200).bodyValue(response))
                 .onErrorResume(IllegalAccessException.class,
-                        e -> ServerResponse.
-                                badRequest()
-                                .bodyValue(
-                                        Map.of("error", e.getMessage())
-                                ));
+                e -> ServerResponse.
+                        badRequest()
+                        .bodyValue(
+                                Map.of("error", e.getMessage())
+                        )
+                );
     }
 
     public Mono<ServerResponse> getAuction(ServerRequest request) {
@@ -53,6 +55,7 @@ public class ViewHandler {
                         badRequest()
                         .bodyValue(
                                 Map.of("error", e.getMessage())
-                        ));
+                        )
+                );
     }
 }

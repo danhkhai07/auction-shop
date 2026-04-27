@@ -3,6 +3,7 @@ package com.shop.config;
 import com.shop.filter.AuthFilter;
 import com.shop.filter.RoleFilter;
 import com.shop.handler.AuthHandler;
+import com.shop.handler.DeleteHandler;
 import com.shop.handler.IndexHandler;
 import com.shop.handler.ViewHandler;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +22,7 @@ public class RouterConfig {
         IndexHandler indexHandler,
         AuthHandler authHandler,
         ViewHandler viewHandler,
+        DeleteHandler deleteHandler,
 
         AuthFilter authFilter,
         RoleFilter roleFilter
@@ -41,14 +43,17 @@ public class RouterConfig {
                 .path("/user", builder -> builder
                         .filter(roleFilter)
                         .GET("/{id}", viewHandler::getUser)
+                        .POST("/delete/{id}", deleteHandler::deleteUser)
                 )
                 .path("/item", builder -> builder
                         .filter(roleFilter)
                         .GET("/{id}", viewHandler::getItem)
+                        .POST("/delete/{id}", deleteHandler::deleteItem)
                 )
                 .path("/auction", builder -> builder
                         .filter(roleFilter)
                         .GET("/{id}", viewHandler::getAuction)
+                        .POST("/delete/{id}", deleteHandler::deleteAuction)
                 )
                 .build()
         ;
