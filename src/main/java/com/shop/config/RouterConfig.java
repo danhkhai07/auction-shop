@@ -1,11 +1,9 @@
 package com.shop.config;
 
+import com.shop.dto.request.UploadAuctionRequest;
 import com.shop.filter.AuthFilter;
 import com.shop.filter.RoleFilter;
-import com.shop.handler.AuthHandler;
-import com.shop.handler.DeleteHandler;
-import com.shop.handler.IndexHandler;
-import com.shop.handler.ViewHandler;
+import com.shop.handler.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -23,6 +21,7 @@ public class RouterConfig {
         AuthHandler authHandler,
         ViewHandler viewHandler,
         DeleteHandler deleteHandler,
+        UploadHandler uploadHandler,
 
         AuthFilter authFilter,
         RoleFilter roleFilter
@@ -41,19 +40,43 @@ public class RouterConfig {
                         )
                 )
                 .path("/user", builder -> builder
-                        .filter(roleFilter)
-                        .GET("/{id}", viewHandler::getUser)
-                        .POST("/delete/{id}", deleteHandler::deleteUser)
+                        .nest(RequestPredicates.accept(MediaType.APPLICATION_JSON),
+                                builder1 -> builder1
+                                        .filter(roleFilter)
+                                        .GET("/{id}", viewHandler::getUser)
+                                        .POST("/delete/{id}", deleteHandler::deleteUser)
+                        )
+                        .nest(RequestPredicates.accept(MediaType.APPLICATION_JSON),
+                                builder1 -> builder1
+                                        .filter(authFilter)
+                                        .POST("", authHandler::me)
+                        )
                 )
                 .path("/item", builder -> builder
-                        .filter(roleFilter)
-                        .GET("/{id}", viewHandler::getItem)
-                        .POST("/delete/{id}", deleteHandler::deleteItem)
+                        .nest(RequestPredicates.accept(MediaType.APPLICATION_JSON),
+                                builder1 -> builder1
+                                        .filter(roleFilter)
+                                        .GET("/{id}", viewHandler::getItem)
+                                        .POST("/delete/{id}", deleteHandler::deleteItem)
+                        )
+                        .nest(RequestPredicates.accept(MediaType.APPLICATION_JSON),
+                                builder1 -> builder1
+                                        .filter(authFilter)
+                                        .POST("", uploadHandler::uploadItem)
+                        )
                 )
                 .path("/auction", builder -> builder
-                        .filter(roleFilter)
-                        .GET("/{id}", viewHandler::getAuction)
-                        .POST("/delete/{id}", deleteHandler::deleteAuction)
+                        .nest(RequestPredicates.accept(MediaType.APPLICATION_JSON),
+                                builder1 -> builder1
+                                        .filter(roleFilter)
+                                        .GET("/{id}", viewHandler::getAuction)
+                                        .POST("/delete/{id}", deleteHandler::deleteAuction)
+                        )
+                        .nest(RequestPredicates.accept(MediaType.APPLICATION_JSON),
+                                builder1 -> builder1
+                                        .filter(authFilter)
+                                        .POST("", uploadHandler::uploadAuction)
+                        )
                 )
                 .build()
         ;
