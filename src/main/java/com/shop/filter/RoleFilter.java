@@ -37,7 +37,7 @@ public class RoleFilter implements HandlerFilterFunction<ServerResponse, ServerR
             String userID = jwtService.extractUserId(token);
             return userManager.getUserByID(userID)
                     .flatMap(user -> {
-                        Set<Role> roles = user.roles;
+                        Set<Role> roles = user.getRoles();
                         ServerRequest newRequest = ServerRequest.from(request)
                                 .attribute("resolved_role", roles)
                                 .attribute("userID", userID)
