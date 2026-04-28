@@ -4,6 +4,7 @@ import jakarta.annotation.PreDestroy;
 import jakarta.annotation.PostConstruct;
 
 import java.util.Objects;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -11,7 +12,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class CacheManager<K, V> implements AutoCloseable {
+public class CacheManager<K, V> {
     // Gia tri mac dinh cho truong hop chi can boc mot in-memory cache don gian.
     private static final long DEFAULT_MANAGER_EXPIRATION_SECONDS = 8 * 3600L;
     private static final long DEFAULT_CLEANUP_INTERVAL_SECONDS = 10 * 60L;
@@ -27,23 +28,14 @@ public class CacheManager<K, V> implements AutoCloseable {
     // Giu tham chieu toi luong nen chay cleanup dinh ky.
     private volatile ScheduledExecutorService cleanupExecutor;
 
-    // Constructor tien loi su dung cac gia tri thoi gian mac dinh cua manager.
-    public CacheManager(CacheStore<K, V> cacheStore) {
-        this(cacheStore, DEFAULT_MANAGER_EXPIRATION_SECONDS, DEFAULT_CLEANUP_INTERVAL_SECONDS);
-    }
-
-    public CacheManager(CacheStore<K, V> cacheStore, long instanceExpiration, long cleanUpInterval) {
-        if (instanceExpiration <= 0) {
-            throw new IllegalArgumentException("instanceExpiration must be bigger than 0");
-        }
-        if (cleanUpInterval <= 0) {
-            throw new IllegalArgumentException("cleanUpInterval must be bigger than 0");
-        }
-
+    public CacheManager(
+            CacheStore<K, V> cacheStore,
+            @Value("${cache.instance-expiration:28800}") long instanceExpiration,
+            @Value("${cache.cleanup-interval:600}") long cleanUpInterval
+    ) {
         this.cacheStore = Objects.requireNonNull(cacheStore, "cacheStore nullError");
         this.instanceExpiration = instanceExpiration;
         this.cleanUpInterval = cleanUpInterval;
-
     }
 
     // Luu vao cache voi TTL mac dinh khi caller khong truyen ttl rieng.
@@ -80,6 +72,15 @@ public class CacheManager<K, V> implements AutoCloseable {
 
     public long getCleanUpInterval() {
         return cleanUpInterval;
+    }
+
+    //
+    private void cleanExpiredEntriesSafely() {
+        try {
+            cacheStore.cleanExpiredEntries();
+        } catch (RuntimeException exception) {
+            System.err.println("Cache cleanup bi loi: " + exception.getMessage());
+        }
     }
 
     // Tao mot scheduler chi dung 1 luong nen de don dep cache theo chu ky.
@@ -121,20 +122,6 @@ public class CacheManager<K, V> implements AutoCloseable {
     public boolean isCleanupTaskRunning() {
         ScheduledExecutorService currentExecutor = cleanupExecutor;
         return currentExecutor != null && !currentExecutor.isShutdown();
-    }
-
-    @Override
-    public void close() {
-        stopCleanupTask();
-    }
-
-    private void cleanExpiredEntriesSafely() {
-        try {
-            cacheStore.cleanExpiredEntries();
-        } catch (RuntimeException exception) {
-            // Chan loi tai cleanup thread de task dinh ky khong bi chet dot ngot.
-            System.err.println("Cache cleanup bi loi: " + exception.getMessage());
-        }
     }
 
     private static class CleanupThreadFactory implements ThreadFactory {
