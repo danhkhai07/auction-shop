@@ -5,9 +5,9 @@ import java.time.LocalDateTime;
 
 public class BidTransaction {
     private final User bidder;
-    public final String transactionId;
-    public final BigDecimal bidAmount;
-    public final LocalDateTime timestamp;
+    private final String transactionId;
+    private final BigDecimal bidAmount;
+    private final LocalDateTime timestamp;
 
     public BidTransaction(String transactionId, User bidder, BigDecimal bidAmount) {
         if (transactionId == null || transactionId.isBlank())
