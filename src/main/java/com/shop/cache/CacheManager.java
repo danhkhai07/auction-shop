@@ -1,13 +1,16 @@
 package com.shop.cache;
 
-import reactor.core.publisher.Mono;
+import jakarta.annotation.PreDestroy;
+import jakarta.annotation.PostConstruct;
 
 import java.util.Objects;
+import org.springframework.stereotype.Component;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+@Component
 public class CacheManager<K, V> implements AutoCloseable {
     // Gia tri mac dinh cho truong hop chi can boc mot in-memory cache don gian.
     private static final long DEFAULT_MANAGER_EXPIRATION_SECONDS = 8 * 3600L;
@@ -41,8 +44,6 @@ public class CacheManager<K, V> implements AutoCloseable {
         this.instanceExpiration = instanceExpiration;
         this.cleanUpInterval = cleanUpInterval;
 
-        // Tu dong bat cleanup task ngay khi tao manager.
-        startCleanupTask();
     }
 
     // Luu vao cache voi TTL mac dinh khi caller khong truyen ttl rieng.
@@ -81,13 +82,8 @@ public class CacheManager<K, V> implements AutoCloseable {
         return cleanUpInterval;
     }
 
-    // Cho phep khoi dong lai cleanup task neu manager da bi stop truoc do.
-    public Mono<Void> run() {
-        return Mono.fromRunnable(this::startCleanupTask).then();
-    }
-
     // Tao mot scheduler chi dung 1 luong nen de don dep cache theo chu ky.
-    public void startCleanupTask() {
+    private void startCleanupTask() {
         synchronized (schedulerLock) {
             if (isCleanupTaskRunning()) {
                 return;
@@ -103,8 +99,14 @@ public class CacheManager<K, V> implements AutoCloseable {
         }
     }
 
+    //Tao Post Contruct
+    @PostConstruct
+    public void initCleanupTask(){
+        startCleanupTask();
+    }
     // Dung luong cleanup khi khong con can manager nay nua.
-    public void stopCleanupTask() {
+    @PreDestroy
+    private void stopCleanupTask() {
         synchronized (schedulerLock) {
             if (cleanupExecutor == null) {
                 return;
