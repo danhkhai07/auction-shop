@@ -27,7 +27,7 @@ public class UserManager {
             10 * 60
     );
 
-    public Mono<GetUserResponse> getUserByID(String id){
+    public Mono<User> getUserByID(String id){
         Mono<User> stream;
         if (IDCache.contains(id)) {
             stream = Mono.just(IDCache.get(id))
@@ -42,7 +42,11 @@ public class UserManager {
                     });
         }
 
-        return stream
+        return stream.switchIfEmpty(Mono.error(new IllegalAccessException("user not found")));
+    }
+
+    public Mono<GetUserResponse> getUserResponseByID(String id){
+        return getUserByID(id)
                 .switchIfEmpty(Mono.error(new IllegalAccessException("user not found")))
                 .map(user -> {
                     GetUserResponse response = new GetUserResponse(
@@ -54,7 +58,7 @@ public class UserManager {
                 });
     }
 
-    public Mono<GetUserResponse> getUserByName(String name){
+    public Mono<GetUserResponse> getUserResponseByName(String name){
         Mono<User> stream;
         if (IDCache.contains(name)) {
             stream = Mono.just(NameCache.get(name))

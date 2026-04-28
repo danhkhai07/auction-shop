@@ -2,10 +2,12 @@ package com.shop.application;
 
 import com.shop.cache.CacheManager;
 import com.shop.domain.Auction;
-import com.shop.domain.Item;
 import com.shop.domain.Role;
+import com.shop.dto.request.UploadAuctionRequest;
 import com.shop.dto.response.GetAuctionResponse;
+import com.shop.dto.response.IDResponse;
 import com.shop.infra.InMemoryCacheStore;
+import de.huxhorn.sulky.ulid.ULID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -16,13 +18,15 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class AuctionService {
     private final AuctionRepository auctionRepository;
+    private final ItemService itemService;
+    private final ULID ulid;
     private final CacheManager IDCache = new CacheManager(
             new InMemoryCacheStore<String, Auction>(),
             3 * 60,
             10 * 60
     );
 
-    public Mono<GetAuctionResponse> getAuctionByID(String id){
+    public Mono<Auction> getAuctionByID(String id){
         Mono<Auction> stream;
         if (IDCache.contains(id)) {
             stream = Mono.just(IDCache.get(id))
@@ -36,8 +40,12 @@ public class AuctionService {
                     });
         }
 
-        return stream
-                .switchIfEmpty(Mono.error(new IllegalAccessException("auction not found")))
+        return stream.switchIfEmpty(Mono.error(new IllegalStateException("auction not found")));
+    }
+
+    public Mono<GetAuctionResponse> getAuctionResponseByID(String id){
+        return getAuctionByID(id)
+                .switchIfEmpty(Mono.error(new IllegalStateException("auction not found")))
                 .map(auction -> {
                     GetAuctionResponse response = new GetAuctionResponse(
                             auction.getId(),
@@ -79,5 +87,24 @@ public class AuctionService {
                     IDCache.delete(id);
                     return true;
                 });
+    }
+
+    public Mono<IDResponse> newAuction(String posterID, UploadAuctionRequest request) {
+        String id = ulid.nextULID();
+        return itemService.getItemByID(request.itemID())
+                .switchIfEmpty(Mono.error(new IllegalStateException("item does not exist")))
+                .flatMap(item -> {
+                    if (posterID.equals(item.getSeller().id))
+                        return Mono.error(new IllegalAccessException("poster is not auction owner"));
+                    Auction auction = new Auction(
+                            id,
+                            item,
+                            request.startingPrice(),
+                            request.startTime(),
+                            request.endTime()
+                    );
+                    return auctionRepository.newAuction(auction);
+                })
+                .thenReturn(new IDResponse(id));
     }
 }

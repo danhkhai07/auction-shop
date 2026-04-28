@@ -3,9 +3,11 @@ package com.shop.application;
 import com.shop.cache.CacheManager;
 import com.shop.domain.Item;
 import com.shop.domain.Role;
-import com.shop.domain.User;
+import com.shop.dto.request.UploadItemRequest;
 import com.shop.dto.response.GetItemResponse;
+import com.shop.dto.response.IDResponse;
 import com.shop.infra.InMemoryCacheStore;
+import de.huxhorn.sulky.ulid.ULID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -16,13 +18,15 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class ItemService {
     private final ItemRepository itemRepository;
+    private final UserManager userManager;
     private final CacheManager IDCache = new CacheManager(
             new InMemoryCacheStore<String, Item>(),
             3 * 60,
             10 * 60
     );
+    private final ULID ulid;
 
-    public Mono<GetItemResponse> getItemByID(String id) {
+    public Mono<Item> getItemByID(String id) {
         Mono<Item> stream;
         if (IDCache.contains(id)) {
             stream = Mono.just(IDCache.get(id))
@@ -36,7 +40,11 @@ public class ItemService {
                     });
         }
 
-        return stream
+        return stream.switchIfEmpty(Mono.error(new IllegalAccessException("item not found")));
+    }
+
+    public Mono<GetItemResponse> getItemResponseByID(String id) {
+        return getItemByID(id)
                 .switchIfEmpty(Mono.error(new IllegalAccessException("item not found")))
                 .map(item -> {
                     GetItemResponse response = new GetItemResponse(
@@ -74,5 +82,22 @@ public class ItemService {
                     IDCache.delete(id);
                     return true;
                 });
+    }
+
+    public Mono<IDResponse> newItem(String posterID, UploadItemRequest request) {
+        String id = ulid.nextULID();
+        if (!posterID.equals(request.sellerID()))
+            return Mono.error(new IllegalAccessError("poster is not item owner"));
+        return userManager.getUserByID(request.sellerID())
+                .flatMap(owner -> {
+                    Item item = new Item(
+                            id,
+                            request.name(),
+                            request.description(),
+                            owner
+                    );
+                    return itemRepository.newItem(item);
+                })
+                .thenReturn(new IDResponse(id));
     }
 }

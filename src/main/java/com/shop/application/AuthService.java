@@ -32,9 +32,9 @@ public class AuthService {
     }
 
     public Mono<RegisterResponse> register(RegisterRequest request) {
-        User user = new User(ulid.nextULID(), request.username);
-        String passwordHash = BCryptHash.hash(request.password);
-        return userRepository.getByName(request.username)
+        User user = new User(ulid.nextULID(), request.username());
+        String passwordHash = BCryptHash.hash(request.password());
+        return userRepository.getByName(request.username())
                 .flatMap(id ->
                         Mono.<RegisterResponse>error(new IllegalAccessException("username already exists")))
                 .switchIfEmpty(
@@ -45,12 +45,12 @@ public class AuthService {
 
     public Mono<LoginResponse> login(LoginRequest request) {
         String invalidCredentialsMessage = "username or password is invalid";
-        return userRepository.getByName(request.username)
+        return userRepository.getByName(request.username())
                 .switchIfEmpty(Mono.error(
                         new IllegalAccessException(invalidCredentialsMessage)
                 ))
                 .filter(user ->
-                        BCryptHash.compareHash(request.password, user.passwordHash)
+                        BCryptHash.compareHash(request.password(), user.passwordHash)
                 )
                 .switchIfEmpty(Mono.error(
                         new IllegalAccessException(invalidCredentialsMessage)
