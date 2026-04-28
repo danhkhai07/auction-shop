@@ -10,8 +10,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
-
-import java.util.Map;
 import java.util.Set;
 
 @Component
@@ -27,19 +25,7 @@ public class DeleteHandler {
                     (String) request.attributes().getOrDefault("userID", ""),
                     (Set<Role>) request.attributes().getOrDefault("resolved_role", null)
                 )
-                .flatMap(b -> ServerResponse.status(201).bodyValue(new EmptyBodyRequest()))
-                .onErrorResume(IllegalStateException.class,
-                        e -> ServerResponse
-                                .badRequest()
-                                .bodyValue(
-                                    Map.of("error", e.getMessage())
-                                )
-                )
-                .onErrorResume(IllegalAccessException.class,
-                        e -> ServerResponse
-                                .status(401)
-                                .build()
-                );
+                .flatMap(b -> ServerResponse.status(201).bodyValue(new EmptyBodyRequest()));
     }
 
     public Mono<ServerResponse> deleteItem(ServerRequest request) {
@@ -48,19 +34,7 @@ public class DeleteHandler {
                         (String) request.attributes().getOrDefault("userID", ""),
                         (Set<Role>) request.attributes().getOrDefault("resolved_role", null)
                 )
-                .flatMap(b -> ServerResponse.status(201).bodyValue(new EmptyBodyRequest()))
-                .onErrorResume(IllegalStateException.class,
-                        e -> ServerResponse
-                                .badRequest()
-                                .bodyValue(
-                                        Map.of("error", e.getMessage())
-                                )
-                )
-                .onErrorResume(IllegalAccessException.class,
-                        e -> ServerResponse
-                                .status(401)
-                                .build()
-                );
+                .flatMap(b -> ServerResponse.status(201).bodyValue(new EmptyBodyRequest()));
     }
 
     public Mono<ServerResponse> deleteAuction(ServerRequest request) {
@@ -69,18 +43,6 @@ public class DeleteHandler {
                         (String) request.attributes().getOrDefault("userID", ""),
                         (Set<Role>) request.attributes().getOrDefault("resolved_role", null)
                 )
-                .flatMap(b -> ServerResponse.status(201).bodyValue(new EmptyBodyRequest()))
-                .onErrorResume(IllegalStateException.class,
-                        e -> ServerResponse
-                                .badRequest()
-                                .bodyValue(
-                                        Map.of("error", e.getMessage())
-                                )
-                )
-                .onErrorResume(IllegalAccessException.class,
-                        e -> ServerResponse
-                                .status(401)
-                                .build()
-                );
+                .flatMap(b -> ServerResponse.status(201).bodyValue(new EmptyBodyRequest()));
     }
 }

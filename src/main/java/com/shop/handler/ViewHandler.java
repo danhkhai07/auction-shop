@@ -22,40 +22,19 @@ public class ViewHandler {
 
     public Mono<ServerResponse> getUser(ServerRequest request) {
         String id = request.pathVariable("id");
-        return userManager.getUserByID(id)
-                .flatMap(response -> ServerResponse.status(200).bodyValue(response))
-                .onErrorResume(IllegalAccessException.class,
-                e -> ServerResponse.
-                        badRequest()
-                        .bodyValue(
-                                Map.of("error", e.getMessage())
-                        )
-                );
+        return userManager.getUserResponseByID(id)
+                .flatMap(response -> ServerResponse.status(200).bodyValue(response));
     }
 
     public Mono<ServerResponse> getItem(ServerRequest request) {
         String id = request.pathVariable("id");
-        return itemService.getItemByID(id)
-                .flatMap(response -> ServerResponse.status(200).bodyValue(response))
-                .onErrorResume(IllegalAccessException.class,
-                e -> ServerResponse.
-                        badRequest()
-                        .bodyValue(
-                                Map.of("error", e.getMessage())
-                        )
-                );
+        return itemService.getItemResponseByID(id)
+                .flatMap(response -> ServerResponse.status(200).bodyValue(response));
     }
 
     public Mono<ServerResponse> getAuction(ServerRequest request) {
         String id = request.pathVariable("id");
-        return auctionService.getAuctionByID(id)
-                .flatMap(response -> ServerResponse.status(200).bodyValue(response))
-                .onErrorResume(IllegalAccessException.class,
-                        e -> ServerResponse.
-                        badRequest()
-                        .bodyValue(
-                                Map.of("error", e.getMessage())
-                        )
-                );
+        return auctionService.getAuctionResponseByID(id)
+                .flatMap(response -> ServerResponse.status(200).bodyValue(response));
     }
 }
