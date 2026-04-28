@@ -2,7 +2,6 @@ package com.shop.handler;
 
 import com.shop.application.AuctionService;
 import com.shop.application.ItemService;
-import com.shop.application.UserManager;
 import com.shop.dto.request.UploadAuctionRequest;
 import com.shop.dto.request.UploadItemRequest;
 import lombok.RequiredArgsConstructor;
@@ -10,8 +9,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
-
-import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
