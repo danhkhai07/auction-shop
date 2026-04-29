@@ -13,18 +13,19 @@ public class Auction {
     private final BigDecimal startingPrice;
     private BigDecimal currentHighestPrice;
     private User currentHighestBidder;
+    private BigDecimal finalPrice;
     private final LocalDateTime startTime;
     private final LocalDateTime endTime;
     private AuctionStatus status;
     private final List<BidTransaction> bidHistory = new ArrayList<>();
 
     public Auction(String id, Item item, BigDecimal startingPrice, LocalDateTime startTime, LocalDateTime endTime) {
-        if (id == null) throw new IllegalArgumentException("ID phiên đấu giá không hợp lệ.");
-        if (item == null) throw new IllegalArgumentException("Sản phẩm đấu giá không được để trống.");
+        if (id == null) throw new IllegalArgumentException("Invalid auction ID.");
+        if (item == null) throw new IllegalArgumentException("Auction item cannot be null.");
         if (startingPrice == null || startingPrice.compareTo(BigDecimal.ZERO) < 0)
-            throw new IllegalArgumentException("Giá khởi điểm phải lớn hơn hoặc bằng 0.");
+            throw new IllegalArgumentException("Starting price must be greater than or equal to 0.");
         if (startTime == null || endTime == null || !startTime.isBefore(endTime))
-            throw new IllegalArgumentException("Thời gian bắt đầu và kết thúc không hợp lệ.");
+            throw new IllegalArgumentException("Invalid start and end times.");
 
         this.id = id;
         this.item = item;
@@ -32,44 +33,39 @@ public class Auction {
         this.currentHighestPrice = startingPrice;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.status = AuctionStatus.OPEN; //Trạng thái mặc định
+        this.status = AuctionStatus.OPEN;
     }
 
     public void startAuction() {
         if (!this.status.canTransitionTo(AuctionStatus.RUNNING)) {
-            throw new IllegalStateException("Không thể bắt đầu phiên đấu giá từ trạng thái hiện tại: " + this.status);
+            throw new IllegalStateException("Cannot start the auction from current status: " + this.status);
         }
         this.status = AuctionStatus.RUNNING;
     }
 
     public void placeBid(User bidder, BigDecimal bidAmount) {
-        //1. Kiểm tra trạng thái phiên đấu giá
-        if (this.status != AuctionStatus.RUNNING) {
-            throw new IllegalStateException("Chỉ có thể đặt giá khi phiên đấu giá đang diễn ra.");
+        // 1. Check bid amount first (Fast validation)
+        if (bidAmount == null || bidAmount.compareTo(currentHighestPrice) <= 0) {
+            throw new IllegalArgumentException("Bid amount must be higher than the current price (" + currentHighestPrice + ").");
         }
 
-        //2. Kiểm tra thời gian
+        // 2. Check status and time simultaneously
         LocalDateTime now = LocalDateTime.now();
-        if (now.isBefore(startTime) || now.isAfter(endTime)) {
-            throw new IllegalStateException("Phiên đấu giá đã hết hạn hoặc chưa bắt đầu.");
+        if (this.status != AuctionStatus.RUNNING || now.isBefore(startTime) || now.isAfter(endTime)) {
+            throw new IllegalStateException("Auction is not currently active or has already closed.");
         }
 
-        //3. Kiểm tra quyền
-        if (!bidder.hasPermission(Permission.PLACE_BID)) {
-            throw new SecurityException("Người dùng không có quyền đặt giá.");
+        // 3. Check user permissions
+        if (bidder == null || !bidder.hasPermission(Permission.PLACE_BID)) {
+            throw new SecurityException("Invalid user or insufficient permissions to place a bid.");
         }
 
-        //4. Kiểm tra xem chủ sản phẩm có tự đặt giá không
+        // 4. Check ownership (Seller cannot bid on their own item)
         if (item.isOwnedBy(bidder)) {
-            throw new IllegalArgumentException("Người bán không thể tự đặt giá cho sản phẩm của mình.");
+            throw new IllegalArgumentException("Sellers cannot bid on their own items.");
         }
 
-        //5. Kiểm tra giá đặt xem cao hơn giá hiện tại chưa
-        if (bidAmount.compareTo(currentHighestPrice) <= 0) {
-            throw new IllegalArgumentException("Số tiền đặt giá phải cao hơn mức giá cao nhất hiện tại (" + currentHighestPrice + ").");
-        }
-
-        // *Đặt giá*
+        // Execute bid
         String transactionId = UUID.randomUUID().toString();
         BidTransaction newBid = new BidTransaction(transactionId, bidder, bidAmount);
 
@@ -80,31 +76,37 @@ public class Auction {
 
     public void finishAuction() {
         if (!this.status.canTransitionTo(AuctionStatus.FINISHED)) {
-            throw new IllegalStateException("Không thể kết thúc phiên đấu giá từ trạng thái: " + this.status);
+            throw new IllegalStateException("Cannot finish the auction from status: " + this.status);
         }
+
         this.status = AuctionStatus.FINISHED;
+        this.finalPrice = this.currentHighestPrice;
     }
 
     public void cancelAuction(User user) {
-        if (!user.hasPermission(Permission.CANCEL_AUCTION)) {
-            throw new SecurityException("Bạn không có quyền hủy phiên đấu giá này.");
+        if (user == null || !user.hasPermission(Permission.CANCEL_AUCTION)) {
+            throw new SecurityException("You do not have permission to cancel this auction.");
         }
 
         if (!item.isOwnedBy(user) && !user.hasRole(Role.ADMIN)) {
-            throw new SecurityException("Chỉ chủ sản phẩm hoặc Admin mới có thể hủy phiên đấu giá.");
+            throw new SecurityException("Only the item owner or an admin can cancel this auction.");
         }
 
-        if (!this.status.canTransitionTo(AuctionStatus.CANCELED)) {
-            throw new IllegalStateException("Không thể hủy phiên đấu giá từ trạng thái: " + this.status);
+        if (!this.status.canTransitionTo(AuctionStatus.CANCELLED)) {
+            throw new IllegalStateException("Cannot cancel the auction from status: " + this.status);
         }
-        this.status = AuctionStatus.CANCELED;
+        this.status = AuctionStatus.CANCELLED;
+        this.finalPrice = BigDecimal.ZERO;
     }
+
+    ArrayList<Auction> auctions = new ArrayList<>();
 
     public String getId() { return id; }
     public Item getItem() { return item; }
     public BigDecimal getStartingPrice() { return startingPrice; }
     public BigDecimal getCurrentHighestPrice() { return currentHighestPrice; }
     public User getCurrentHighestBidder() { return currentHighestBidder; }
+    public BigDecimal getFinalPrice() { return finalPrice; }
     public LocalDateTime getStartTime() { return startTime; }
     public LocalDateTime getEndTime() { return endTime; }
     public AuctionStatus getStatus() { return status; }
