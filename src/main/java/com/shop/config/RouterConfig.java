@@ -61,8 +61,9 @@ public class RouterConfig {
                         )
                         .nest(RequestPredicates.accept(MediaType.APPLICATION_JSON),
                                 builder1 -> builder1
-                                        .filter(authFilter)
+//                                        .filter(authFilter)
                                         .POST("", uploadHandler::uploadItem)
+                                        .POST("/{id}", uploadHandler::updateItem)
                         )
                 )
                 .path("/auction", builder -> builder
@@ -76,6 +77,7 @@ public class RouterConfig {
                                 builder1 -> builder1
                                         .filter(authFilter)
                                         .POST("", uploadHandler::uploadAuction)
+                                        .POST("/{id}", uploadHandler::uploadAuction)
                         )
                 )
                 .build()

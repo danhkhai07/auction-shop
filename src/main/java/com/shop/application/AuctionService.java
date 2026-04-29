@@ -94,7 +94,7 @@ public class AuctionService {
         return itemService.getItemByID(request.itemID())
                 .switchIfEmpty(Mono.error(new IllegalStateException("item does not exist")))
                 .flatMap(item -> {
-                    if (posterID.equals(item.getSeller().id))
+                    if (!posterID.equals(item.getSeller().id))
                         return Mono.error(new IllegalAccessException("poster is not auction owner"));
                     Auction auction = new Auction(
                             id,
@@ -106,5 +106,26 @@ public class AuctionService {
                     return auctionRepository.newAuction(auction);
                 })
                 .thenReturn(new IDResponse(id));
+    }
+
+    public Mono<Void> updateAuction(String id, String posterID, UploadAuctionRequest request) {
+        return auctionRepository.existsByID(id)
+                .flatMap(exists -> {
+                    if (!exists) return Mono.error(new IllegalStateException("item does not exists"));
+                    return itemService.getItemByID(request.itemID());
+                })
+                .switchIfEmpty(Mono.error(new IllegalStateException("item does not exist")))
+                .flatMap(item -> {
+                    if (!posterID.equals(item.getSeller().id))
+                        return Mono.error(new IllegalAccessException("poster is not auction owner"));
+                    Auction auction = new Auction(
+                            id,
+                            item,
+                            request.startingPrice(),
+                            request.startTime(),
+                            request.endTime()
+                    );
+                    return auctionRepository.saveAuction(auction);
+                });
     }
 }

@@ -100,4 +100,23 @@ public class ItemService {
                 })
                 .thenReturn(new IDResponse(id));
     }
+
+    public Mono<Void> updateItem(String id, String posterID, UploadItemRequest request) {
+        if (!posterID.equals(request.sellerID()))
+            return Mono.error(new IllegalAccessError("poster is not item owner"));
+        return itemRepository.existsByID(id)
+                .flatMap(exists -> {
+                    if (!exists) return Mono.error(new IllegalStateException("item does not exists"));
+                    return userManager.getUserByID(request.sellerID());
+                })
+                .flatMap(owner -> {
+                    Item item = new Item(
+                            id,
+                            request.name(),
+                            request.description(),
+                            owner
+                    );
+                    return itemRepository.newItem(item);
+                });
+    }
 }
