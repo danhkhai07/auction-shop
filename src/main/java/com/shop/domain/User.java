@@ -3,6 +3,7 @@ package com.shop.domain;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class User {
@@ -11,21 +12,28 @@ public class User {
     private String passwordHash;
     private Set<Role> roles = new HashSet<>();
 
+    private List<Item> ownedItems = new ArrayList<>();
+    private List<Auction> ownedAuctions = new ArrayList<>();
+
     public User(String id, String username) {
         this.id = id;
         this.username = username;
     }
 
-    public String getId() {
-        return id;
+    // =================================================================================================================
+    //                  HÀM CHÍNH
+    // =================================================================================================================
+
+    public void addItem(Item item) {
+        if (item != null) {
+            this.ownedItems.add(item);
+        }
     }
 
-    public boolean hasRole(Role role) {
-        return roles != null && roles.contains(role);
-    }
-
-    public Set<Role> getRoles() {
-        return Collections.unmodifiableSet(roles);
+    public void addAuction(Auction auction) {
+        if (auction != null) {
+            this.ownedAuctions.add(auction);
+        }
     }
 
     public void addRole(Role role) {
@@ -48,5 +56,52 @@ public class User {
         }
         return perms;
     }
-    ArrayList<Item> listings = new ArrayList<>();
+
+    public boolean hasRole(Role role) {
+        return roles != null && roles.contains(role);
+    }
+
+    // =================================================================================================================
+    //                  HELPER
+    // =================================================================================================================
+
+    public boolean isAdmin() {
+        return hasRole(Role.ADMIN);
+    }
+
+    public boolean isRegularUser() {
+        return hasRole(Role.USER);
+    }
+
+    public boolean isGuest() {
+        return hasRole(Role.GUEST);
+    }
+
+    public boolean hasItem() {
+        return !ownedItems.isEmpty();
+    }
+
+    public int getItemCount() {
+        return ownedItems.size();
+    }
+
+    // =================================================================================================================
+    //                  GETTERS
+    // =================================================================================================================
+
+    public String getId() {
+        return id;
+    }
+
+    public List<Item> getOwnedItems() {
+        return Collections.unmodifiableList(ownedItems);
+    }
+
+    public List<Auction> getOwnedAuctions() {
+        return Collections.unmodifiableList(ownedAuctions);
+    }
+
+    public Set<Role> getRoles() {
+        return Collections.unmodifiableSet(roles);
+    }
 }
