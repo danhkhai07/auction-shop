@@ -36,6 +36,10 @@ public class Auction {
         this.status = AuctionStatus.OPEN;
     }
 
+    // =================================================================================================================
+    //                HÀM CHÍNH
+    // =================================================================================================================
+
     public void startAuction() {
         if (!this.status.canTransitionTo(AuctionStatus.RUNNING)) {
             throw new IllegalStateException("Cannot start the auction from current status: " + this.status);
@@ -44,28 +48,28 @@ public class Auction {
     }
 
     public void placeBid(User bidder, BigDecimal bidAmount) {
-        // 1. Check bid amount first (Fast validation)
+        //1. Kiểm tra trạng thái phiên đấu giá
         if (bidAmount == null || bidAmount.compareTo(currentHighestPrice) <= 0) {
             throw new IllegalArgumentException("Bid amount must be higher than the current price (" + currentHighestPrice + ").");
         }
 
-        // 2. Check status and time simultaneously
+        //2. Kiểm tra thời gian
         LocalDateTime now = LocalDateTime.now();
         if (this.status != AuctionStatus.RUNNING || now.isBefore(startTime) || now.isAfter(endTime)) {
             throw new IllegalStateException("Auction is not currently active or has already closed.");
         }
 
-        // 3. Check user permissions
+        //3. Kiểm tra quyền
         if (bidder == null || !bidder.hasPermission(Permission.PLACE_BID)) {
             throw new SecurityException("Invalid user or insufficient permissions to place a bid.");
         }
 
-        // 4. Check ownership (Seller cannot bid on their own item)
+        //4. Kiểm tra xem chủ sản phẩm có tự đặt giá không
         if (item.isOwnedBy(bidder)) {
             throw new IllegalArgumentException("Sellers cannot bid on their own items.");
         }
 
-        // Execute bid
+        // Đặt giá
         String transactionId = UUID.randomUUID().toString();
         BidTransaction newBid = new BidTransaction(transactionId, bidder, bidAmount);
 
@@ -78,7 +82,6 @@ public class Auction {
         if (!this.status.canTransitionTo(AuctionStatus.FINISHED)) {
             throw new IllegalStateException("Cannot finish the auction from status: " + this.status);
         }
-
         this.status = AuctionStatus.FINISHED;
         this.finalPrice = this.currentHighestPrice;
     }
@@ -99,17 +102,94 @@ public class Auction {
         this.finalPrice = BigDecimal.ZERO;
     }
 
-    ArrayList<Auction> auctions = new ArrayList<>();
+    // =================================================================================================================
+    //                HÀM HELPER
+    // =================================================================================================================
 
-    public String getId() { return id; }
-    public Item getItem() { return item; }
-    public BigDecimal getStartingPrice() { return startingPrice; }
-    public BigDecimal getCurrentHighestPrice() { return currentHighestPrice; }
-    public User getCurrentHighestBidder() { return currentHighestBidder; }
-    public BigDecimal getFinalPrice() { return finalPrice; }
-    public LocalDateTime getStartTime() { return startTime; }
-    public LocalDateTime getEndTime() { return endTime; }
-    public AuctionStatus getStatus() { return status; }
+    public boolean isCurrentlyActive() {
+        LocalDateTime now = LocalDateTime.now();
+        return this.status == AuctionStatus.RUNNING
+                && now.isAfter(startTime)
+                && now.isBefore(endTime);
+    }
+
+    public boolean isClosed() {
+        return this.status == AuctionStatus.FINISHED
+                || this.status == AuctionStatus.CANCELLED
+                || this.status == AuctionStatus.PAID;
+    }
+
+    public boolean isCancelled() {
+        return this.status == AuctionStatus.CANCELLED;
+    }
+
+    public boolean hasWinner() {
+        return this.status == AuctionStatus.FINISHED
+                && this.currentHighestBidder != null;
+    }
+
+    public boolean isExpired() {
+        return LocalDateTime.now().isAfter(this.endTime);
+    }
+
+
+    public List<BidTransaction> getBidsByUser(User user) {
+        if (user == null) return List.of();
+        return bidHistory.stream()
+                .filter(bid -> bid.getBidder().getId().equals(user.getId()))
+                .toList();
+    }
+
+    //xem chênh giữa giá hiện tại so với ban đầu
+    public BigDecimal getPriceIncrease() {
+        return currentHighestPrice.subtract(startingPrice);
+    }
+
+    //số giây còn lại của phiên đấu giá
+    public long getRemainingSeconds() {
+        if (isExpired()) return 0;
+        return ChronoUnit.SECONDS.between(LocalDateTime.now(), endTime);
+    }
+
+    // =================================================================================================================
+    //                  GETTERS
+    // =================================================================================================================
+
+    public String getId() {
+        return id;
+    }
+
+    public Item getItem() {
+        return item;
+    }
+
+    public BigDecimal getStartingPrice() {
+        return startingPrice;
+    }
+
+    public BigDecimal getCurrentHighestPrice() {
+        return currentHighestPrice;
+    }
+
+    public User getCurrentHighestBidder() {
+        return currentHighestBidder;
+    }
+
+    public BigDecimal getFinalPrice() {
+        return finalPrice;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public AuctionStatus getStatus() {
+        return status;
+    }
 
     public List<BidTransaction> getBidHistory() {
         return Collections.unmodifiableList(bidHistory);
