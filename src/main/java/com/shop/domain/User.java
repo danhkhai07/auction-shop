@@ -49,14 +49,6 @@ public class User {
         return false;
     }
 
-    public Set<Permission> getPermissions() {
-        Set<Permission> perms = new HashSet<>();
-        for (Role role : roles) {
-            perms.addAll(role.getPermissions());
-        }
-        return perms;
-    }
-
     public boolean hasRole(Role role) {
         return roles != null && roles.contains(role);
     }
@@ -93,6 +85,22 @@ public class User {
         return id;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public Set<Permission> getPermissions() {
+        Set<Permission> perms = new HashSet<>();
+        for (Role role : roles) {
+            perms.addAll(role.getPermissions());
+        }
+        return perms;
+    }
+
     public List<Item> getOwnedItems() {
         return Collections.unmodifiableList(ownedItems);
     }
@@ -104,4 +112,31 @@ public class User {
     public Set<Role> getRoles() {
         return Collections.unmodifiableSet(roles);
     }
+
+    // =================================================================================================================
+    //                  SETTERS
+    // =================================================================================================================
+
+    public void setUsername(String username) {
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("Username không được để trống");
+        }
+        this.username = username.trim();
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        if (passwordHash == null || passwordHash.isBlank()) {
+            throw new IllegalArgumentException("Password hash không được để trống");
+        }
+        this.passwordHash = passwordHash;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        if (roles != null) {
+            this.roles = new HashSet<>(roles);
+        } else {
+            this.roles = new HashSet<>();
+        }
+    }
 }
+
