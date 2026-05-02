@@ -17,7 +17,7 @@ import java.util.Set;
 @Repository
 public class PostgresUserRepo implements UserRepository {
     private static final String SELECT_USER_BY_ID =
-            "SELECT u.id, u.username, u.password_hash, ur.role_name " +
+            "SELECT u.id, u.username, u.password_hash, ur.role_name " + //lấy id,username,pass,role tu bảng user và userrole
             "FROM users u " +
             "LEFT JOIN user_roles ur ON ur.user_id = u.id " +
             "WHERE u.id = :id " +
