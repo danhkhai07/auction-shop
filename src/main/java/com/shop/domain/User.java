@@ -1,5 +1,6 @@
 package com.shop.domain;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -47,4 +48,5 @@ public class User {
         }
         return perms;
     }
+    ArrayList<Item> listings = new ArrayList<>();
 }
