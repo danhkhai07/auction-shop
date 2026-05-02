@@ -59,7 +59,7 @@ public class PostgresUserRepo implements UserRepository {
 
     @Override
     public Mono<Boolean> existsByID(String id) { // phương thư kiểm tra xem user có tồn tại ko
-        if (!StringUtils.hasText(id)) { // ktra xem id có bị r
+        if (!StringUtils.hasText(id)) { // ktra xem id có bị rỗng hay không
             return Mono.just(false);
         }
 
