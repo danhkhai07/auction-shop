@@ -112,7 +112,7 @@ public class AuctionService {
         return itemService.getItemByID(request.itemID())
                 .switchIfEmpty(Mono.error(new IllegalStateException("item does not exist")))
                 .flatMap(item -> {
-                    if (!posterID.equals(item.getSeller().id))
+                    if (!posterID.equals(item.getSeller().getId()))
                         return Mono.error(new IllegalAccessException("poster is not auction owner"));
                     Auction auction = new Auction(
                             id,
@@ -134,7 +134,7 @@ public class AuctionService {
                 })
                 .switchIfEmpty(Mono.error(new IllegalStateException("item does not exist")))
                 .flatMap(item -> {
-                    if (!posterID.equals(item.getSeller().id))
+                    if (!posterID.equals(item.getSeller().getId()))
                         return Mono.error(new IllegalAccessException("poster is not auction owner"));
                     Auction auction = new Auction(
                             id,

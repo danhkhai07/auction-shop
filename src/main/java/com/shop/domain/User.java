@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Set;
 
 public class User {
-    public final String id;
-    public String username;
-    public String passwordHash;
+    private final String id;
+    private String username;
+    private String passwordHash;
     private Set<Role> roles = new HashSet<>();
 
     private List<Item> ownedItems = new ArrayList<>();

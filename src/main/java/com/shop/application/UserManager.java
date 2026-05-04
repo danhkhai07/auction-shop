@@ -37,7 +37,7 @@ public class UserManager {
             stream = userRepository.getByID(id)
                     .filter(user -> {
                         IDCache.put(id, user);
-                        NameCache.put(user.username, user);
+                        NameCache.put(user.getUsername(), user);
                         return true;
                     });
         }
@@ -50,8 +50,8 @@ public class UserManager {
                 .switchIfEmpty(Mono.error(new IllegalAccessException("user not found")))
                 .map(user -> {
                     GetUserResponse response = new GetUserResponse(
-                            user.id,
-                            user.username,
+                            user.getId(),
+                            user.getUsername(),
                             user.getRoles()
                     );
                     return response;
@@ -67,7 +67,7 @@ public class UserManager {
         } else {
             stream = userRepository.getByName(name)
                     .filter(user -> {
-                        IDCache.put(user.id, user);
+                        IDCache.put(user.getId(), user);
                         NameCache.put(name, user);
                         return true;
                     });
@@ -77,8 +77,8 @@ public class UserManager {
                 .switchIfEmpty(Mono.error(new IllegalAccessException("user not found")))
                 .map(user -> {
                     GetUserResponse response = new GetUserResponse(
-                            user.id,
-                            user.username,
+                            user.getId(),
+                            user.getUsername(),
                             user.getRoles()
                     );
                     return response;
@@ -95,7 +95,7 @@ public class UserManager {
         Mono<String> stream; // Mono<id>
         if (IDCache.contains(id)) {
             stream = Mono.just(id);
-            NameCache.delete(((User) IDCache.get(id)).username);
+            NameCache.delete(((User) IDCache.get(id)).getUsername());
             IDCache.delete(id);
         } else {
             stream = userRepository.existsByID(id)

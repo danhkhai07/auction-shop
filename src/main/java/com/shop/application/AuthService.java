@@ -50,13 +50,13 @@ public class AuthService {
                         new IllegalAccessException(invalidCredentialsMessage)
                 ))
                 .filter(user ->
-                        BCryptHash.compareHash(request.password(), user.passwordHash)
+                        BCryptHash.compareHash(request.password(), user.getPasswordHash())
                 )
                 .switchIfEmpty(Mono.error(
                         new IllegalAccessException(invalidCredentialsMessage)
                 ))
                 .map(user ->
-                        new LoginResponse(jwtService.generateToken(user.id))
+                        new LoginResponse(jwtService.generateToken(user.getId()))
                 );
 
     }
