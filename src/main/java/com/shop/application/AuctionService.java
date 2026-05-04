@@ -10,6 +10,7 @@ import com.shop.infra.InMemoryCacheStore;
 import de.huxhorn.sulky.ulid.ULID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Set;
@@ -46,6 +47,23 @@ public class AuctionService {
     public Mono<GetAuctionResponse> getAuctionResponseByID(String id){
         return getAuctionByID(id)
                 .switchIfEmpty(Mono.error(new IllegalStateException("auction not found")))
+                .map(auction -> {
+                    GetAuctionResponse response = new GetAuctionResponse(
+                            auction.getId(),
+                            "Auction",
+                            auction.getStartingPrice(),
+                            auction.getStartTime(),
+                            auction.getEndTime(),
+                            auction.getStatus(),
+                            auction.getBidHistory()
+                    );
+                    return response;
+                });
+    }
+
+    public Flux<GetAuctionResponse> getActiveAuctions(){
+        return auctionRepository.getActives()
+                .switchIfEmpty(Mono.error(new IllegalStateException("no auction found")))
                 .map(auction -> {
                     GetAuctionResponse response = new GetAuctionResponse(
                             auction.getId(),

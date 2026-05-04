@@ -3,15 +3,12 @@ package com.shop.handler;
 import com.shop.application.AuctionService;
 import com.shop.application.ItemService;
 import com.shop.application.UserManager;
-import com.shop.dto.request.EmptyBodyRequest;
-import com.shop.dto.response.GetUserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -36,5 +33,11 @@ public class ViewHandler {
         String id = request.pathVariable("id");
         return auctionService.getAuctionResponseByID(id)
                 .flatMap(response -> ServerResponse.status(200).bodyValue(response));
+    }
+
+    public Mono<ServerResponse> getFeed(ServerRequest request) {
+        return auctionService.getActiveAuctions()
+                .collectList()
+                .flatMap(list -> ServerResponse.status(200).bodyValue(list));
     }
 }

@@ -1,6 +1,5 @@
 package com.shop.config;
 
-import com.shop.dto.request.UploadAuctionRequest;
 import com.shop.filter.AuthFilter;
 import com.shop.filter.RoleFilter;
 import com.shop.handler.*;
@@ -79,6 +78,9 @@ public class RouterConfig {
                                         .POST("", uploadHandler::uploadAuction)
                                         .POST("/{id}", uploadHandler::uploadAuction)
                         )
+                )
+                .path("/feed", builder -> builder
+                        .GET("", viewHandler::getFeed)
                 )
                 .build()
         ;
