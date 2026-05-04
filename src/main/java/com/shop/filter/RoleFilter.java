@@ -29,7 +29,7 @@ public class RoleFilter implements HandlerFilterFunction<ServerResponse, ServerR
             ServerRequest newRequest = ServerRequest.from(request)
                     .attribute("resolved_role", roles)
                     .build();
-            next.handle(newRequest);
+            return next.handle(newRequest);
         }
 
         String token = auth.substring(7);
@@ -40,6 +40,7 @@ public class RoleFilter implements HandlerFilterFunction<ServerResponse, ServerR
                         Set<Role> roles = user.getRoles();
                         ServerRequest newRequest = ServerRequest.from(request)
                                 .attribute("resolved_role", roles)
+                                .attribute("userID", userID)
                                 .build();
                         return next.handle(newRequest);
                     });

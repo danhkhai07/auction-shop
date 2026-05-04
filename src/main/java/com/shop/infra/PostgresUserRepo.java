@@ -68,6 +68,7 @@ public class PostgresUserRepo implements UserRepository {
                 .map((row, metadata) -> Boolean.TRUE.equals(row.get("user_exists", Boolean.class)))
                 .one()
                 .defaultIfEmpty(false);
+
     }
 
     @Override
@@ -87,6 +88,7 @@ public class PostgresUserRepo implements UserRepository {
                 .all()
                 .collectList()
                 .flatMap(this::mapUser);
+
     }
 
     @Override
@@ -106,6 +108,7 @@ public class PostgresUserRepo implements UserRepository {
                 .all()
                 .collectList()
                 .flatMap(this::mapUser);
+
     }
 
     @Override
@@ -127,6 +130,7 @@ public class PostgresUserRepo implements UserRepository {
         }
 
         return updateUser.then(replaceRoles(user.getId(), user.getRoles()));
+
     }
 
     @Override
@@ -141,6 +145,7 @@ public class PostgresUserRepo implements UserRepository {
                 .fetch()
                 .rowsUpdated()
                 .then();
+
     }
 
     @Override
@@ -165,6 +170,7 @@ public class PostgresUserRepo implements UserRepository {
                 .fetch()
                 .rowsUpdated()
                 .then(insertRoles(user.getId(), rolesToPersist));
+
     }
 
     @Override
@@ -246,5 +252,6 @@ public class PostgresUserRepo implements UserRepository {
         private String roleName() {
             return roleName;
         }
+
     }
 }

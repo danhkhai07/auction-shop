@@ -148,6 +148,13 @@ public class PostgresAuctionRepo implements AuctionRepository {
                 .rowsUpdated()
                 .then();
     }
+    @Override
+    public Mono<Boolean> existsByID(String id){
+        if (!StringUtils.hasText(id)){
+            return Mono.just(false);
+        }
+        return Mono.just(true);
+    }
 
     @Override
     @Transactional

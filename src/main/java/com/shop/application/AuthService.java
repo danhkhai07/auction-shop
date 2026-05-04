@@ -32,11 +32,11 @@ public class AuthService {
     }
 
     public Mono<RegisterResponse> register(RegisterRequest request) {
-        User user = new User(ulid.nextULID(), request.username);
-        String passwordHash = BCryptHash.hash(request.password);
-        return userRepository.getByName(request.username)
+        User user = new User(ulid.nextULID(), request.username());
+        String passwordHash = BCryptHash.hash(request.password());
+        return userRepository.getByName(request.username())
                 .flatMap(id ->
-                        Mono.<RegisterResponse>error(new IllegalStateException("username already exists")))
+                        Mono.<RegisterResponse>error(new IllegalAccessException("username already exists")))
                 .switchIfEmpty(
                         userRepository.newUser(user, passwordHash)
                                 .thenReturn(new RegisterResponse("User created"))
@@ -45,18 +45,18 @@ public class AuthService {
 
     public Mono<LoginResponse> login(LoginRequest request) {
         String invalidCredentialsMessage = "username or password is invalid";
-        return userRepository.getByName(request.username)
+        return userRepository.getByName(request.username())
                 .switchIfEmpty(Mono.error(
-                        new IllegalStateException(invalidCredentialsMessage)
+                        new IllegalAccessException(invalidCredentialsMessage)
                 ))
                 .filter(user ->
-                        BCryptHash.compareHash(request.password, user.passwordHash)
+                        BCryptHash.compareHash(request.password(), user.getPasswordHash())
                 )
                 .switchIfEmpty(Mono.error(
-                        new IllegalStateException(invalidCredentialsMessage)
+                        new IllegalAccessException(invalidCredentialsMessage)
                 ))
                 .map(user ->
-                        new LoginResponse(jwtService.generateToken(user.id))
+                        new LoginResponse(jwtService.generateToken(user.getId()))
                 );
 
     }

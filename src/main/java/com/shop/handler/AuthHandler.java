@@ -5,7 +5,6 @@ import com.shop.application.UserManager;
 import com.shop.dto.request.EmptyBodyRequest;
 import com.shop.dto.request.LoginRequest;
 import com.shop.dto.request.RegisterRequest;
-import com.shop.dto.response.MeResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -23,45 +22,33 @@ public class AuthHandler {
 
     public Mono<ServerResponse> register(ServerRequest request) {
         return request.bodyToMono(RegisterRequest.class)
-                .switchIfEmpty(Mono.error(new IllegalAccessException("missing body")))
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("missing body")))
                 .flatMap(req -> {
-                    if (!authService.isValidUsername(req.username)) {
-                        return Mono.error(new IllegalAccessException("invalid username"));
+                    if (!authService.isValidUsername(req.username())) {
+                        return Mono.error(new IllegalArgumentException("invalid username"));
                     }
-                    if (!authService.isValidPassword(req.password)) {
-                        return Mono.error(new IllegalAccessException("invalid password"));
+                    if (!authService.isValidPassword(req.password())) {
+                        return Mono.error(new IllegalArgumentException("invalid password"));
                     }
                     return authService.register(req);
                 })
-                .flatMap(response -> ServerResponse.status(201).bodyValue(response))
-                .onErrorResume(IllegalAccessException.class,
-                        e -> ServerResponse.
-                                badRequest()
-                                .bodyValue(
-                                        Map.of("error", e.getMessage())
-                                ));
+                .flatMap(response -> ServerResponse.status(201).bodyValue(response));
     }
 
     public Mono<ServerResponse> login(ServerRequest request) {
         String invalidCredentialsMessage = "username or password is invalid";
         return request.bodyToMono(LoginRequest.class)
-                .switchIfEmpty(Mono.error(new IllegalAccessException("missing body")))
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("missing body")))
                 .flatMap(req -> {
-                    if (!authService.isValidUsername(req.username)) {
-                        return Mono.error(new IllegalAccessException(invalidCredentialsMessage));
+                    if (!authService.isValidUsername(req.username())) {
+                        return Mono.error(new IllegalArgumentException(invalidCredentialsMessage));
                     }
-                    if (!authService.isValidPassword(req.password)) {
-                        return Mono.error(new IllegalAccessException(invalidCredentialsMessage));
+                    if (!authService.isValidPassword(req.password())) {
+                        return Mono.error(new IllegalArgumentException(invalidCredentialsMessage));
                     }
                     return authService.login(req);
                 })
-                .flatMap(response -> ServerResponse.status(201).bodyValue(response))
-                .onErrorResume(IllegalAccessException.class,
-                        e -> ServerResponse.
-                                badRequest()
-                                .bodyValue(
-                                        Map.of("error", e.getMessage())
-                                ));
+                .flatMap(response -> ServerResponse.status(201).bodyValue(response));
     }
 
     public Mono<ServerResponse> me(ServerRequest request) {
@@ -71,7 +58,6 @@ public class AuthHandler {
                                 String.valueOf(request.attribute("userID"))
                         )
                 )
-                .flatMap(user -> Mono.just(new MeResponse(user.id, user.username)))
                 .flatMap(response -> ServerResponse.status(200).bodyValue(response));
     }
 }

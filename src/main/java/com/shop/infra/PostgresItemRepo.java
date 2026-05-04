@@ -64,6 +64,7 @@ public class PostgresItemRepo implements ItemRepository {
                             seller);
                 })
                 .one();
+
     }
 
     @Override
@@ -92,6 +93,7 @@ public class PostgresItemRepo implements ItemRepository {
                             seller);
                 })
                 .one();
+
     }
 
     @Override
@@ -128,6 +130,7 @@ public class PostgresItemRepo implements ItemRepository {
                 .fetch()
                 .rowsUpdated()
                 .then();
+
     }
 
     @Override
@@ -148,5 +151,6 @@ public class PostgresItemRepo implements ItemRepository {
                 .fetch()
                 .rowsUpdated()
                 .then();
+
     }
 }
