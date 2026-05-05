@@ -1,77 +1,27 @@
 package com.shop.db;
 
-import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Value;
+import io.r2dbc.spi.ConnectionFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
+import org.springframework.r2dbc.connection.init.ResourceDatabasePopulator;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Arrays;
-import java.util.List;
-
+@Configuration
 public class DB {
-    private static final String SCHEMA_RESOURCE = "db/schema.sql";  //file chứa schema
+    private static final String SCHEMA_RESOURCE = "db/schema.sql"; // file chứa mã SQL
 
-    private final String url;
-    private final String username;
-    private final String password;
+    @Bean
+    ConnectionFactoryInitializer connectionFactoryInitializer(ConnectionFactory connectionFactory) {  //Spring Boot tự động tạo ra một ConnectionFactory (chứa thông tin kết nối tới database PostgreSQL dựa trên cấu hình trong application.yml) và truyền nó vào method này. Bạn không cần phải tự new ConnectionFactory().
+        ConnectionFactoryInitializer initializer = new ConnectionFactoryInitializer(); //tạo đối tượng initializer
+        initializer.setConnectionFactory(connectionFactory); //Gắn kết nối database (đã được Spring tiêm vào ở trên) cho cái initializer này, để nó biết cần phải chạy script SQL vào đâu.
 
-    public DB(
-            @Value("${app.db.url:jdbc:postgresql://localhost:5432/auction_shop}") String url,  //nếu không tìm thay cấu hình app.db.url thì sẽ dùng sau dấu hai chấm
-            @Value("${app.db.username:postgres}") String username,
-            @Value("${app.db.password:}") String password
-    ) {
-        this.url = url;
-        this.username = username;
-        this.password = password;
-    }
-
-    @PostConstruct  // ngay sau khi khởi tạo class thì tự động chạy phương thức này
-    public void initializeSchema() {
-        List<String> statements;
-        try {
-            statements = loadSchemaStatements();  // đọc file schema.sql
-        } catch (IOException e) {
-            throw new IllegalStateException("Failed to load database schema resource", e);
+        Resource schema = new ClassPathResource(SCHEMA_RESOURCE);  // tạo đối tượng để đọc file schema.sql
+        if (schema.exists()) { // kiểm tra xem schema có tồn tại ko
+            initializer.setDatabasePopulator(new ResourceDatabasePopulator(schema)); // nếu có thì ResourceDatabasePopulator(schema) sẽ đọc nó và đưa vào innitializer.
         }
 
-        if (statements.isEmpty()) {
-            return;
-        }
-
-        try (Connection connection = getConnection()) {
-            for (String statement : statements) {
-                try (Statement sql = connection.createStatement()) { //gửi lenh sql xuống database
-                    sql.execute(statement);  // database thực hiện câu lệnh sql
-                }
-            }
-        } catch (SQLException e) {
-            throw new IllegalStateException("Failed to initialize database schema", e);
-        }
-    }
-    //phương thức mở kết nối
-    public Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(url, username, password);
-    }
-
-    private List<String> loadSchemaStatements() throws IOException {
-        ClassPathResource resource = new ClassPathResource(SCHEMA_RESOURCE); //tìm file schema.sql
-        if (!resource.exists()) {
-            return List.of();
-        }
-
-        try (InputStream inputStream = resource.getInputStream()) {
-            String sql = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8); // đọc file
-            String withoutComments = sql.replaceAll("(?m)^\\s*--.*$", "");// xóa kí tự đặc biệt1--
-            return Arrays.stream(withoutComments.split(";"))
-                    .map(String::trim)
-                    .filter(statement -> !statement.isBlank())
-                    .toList();
-        }
+        return initializer;
     }
 }
