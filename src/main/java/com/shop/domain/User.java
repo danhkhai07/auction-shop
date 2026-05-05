@@ -15,9 +15,11 @@ public class User {
     private List<Item> ownedItems = new ArrayList<>();
     private List<Auction> ownedAuctions = new ArrayList<>();
 
-    public User(String id, String username) {
+    public User(String id, String username, String passwordHash) {
         this.id = id;
         this.username = username;
+        this.passwordHash = passwordHash;
+        this.roles.add(Role.USER);
     }
 
     // =================================================================================================================
