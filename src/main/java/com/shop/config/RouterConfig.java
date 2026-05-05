@@ -21,6 +21,7 @@ public class RouterConfig {
         ViewHandler viewHandler,
         DeleteHandler deleteHandler,
         UploadHandler uploadHandler,
+        AuctionHandler auctionHandler,
 
         AuthFilter authFilter,
         RoleFilter roleFilter
@@ -74,9 +75,18 @@ public class RouterConfig {
                         )
                         .nest(RequestPredicates.accept(MediaType.APPLICATION_JSON),
                                 builder1 -> builder1
-                                        .filter(authFilter)
+//                                        .filter(authFilter)
                                         .POST("", uploadHandler::uploadAuction)
-                                        .POST("/{id}", uploadHandler::uploadAuction)
+                                        .path("/{id}", builder2 -> builder2
+                                                .POST("", uploadHandler::updateAuction)
+                                                .POST("/bid", auctionHandler::placeBid)
+                                                .POST("/start", auctionHandler::startAuction)
+                                                .POST("/pause", auctionHandler::pauseAuction)
+                                                .POST("/unpause", auctionHandler::unpauseAuction)
+                                                .POST("/cancel", auctionHandler::cancelAuction)
+                                                .POST("/end", auctionHandler::finishAuction)
+                                                .POST("/extend/endtime", auctionHandler::extendEndtime)
+                                        )
                         )
                 )
                 .path("/feed", builder -> builder
