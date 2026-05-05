@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-    private final UserRepository userRepository;
+    private final UserManager userManager;
     private final JWTService jwtService;
     private final ULID ulid;
 
@@ -32,20 +32,20 @@ public class AuthService {
     }
 
     public Mono<RegisterResponse> register(RegisterRequest request) {
-        User user = new User(ulid.nextULID(), request.username());
         String passwordHash = BCryptHash.hash(request.password());
-        return userRepository.getByName(request.username())
+        User user = new User(ulid.nextULID(), request.username(), passwordHash);
+        return userManager.getUserByName(request.username())
                 .flatMap(id ->
                         Mono.<RegisterResponse>error(new IllegalAccessException("username already exists")))
                 .switchIfEmpty(
-                        userRepository.newUser(user, passwordHash)
+                        userManager.newUser(user)
                                 .thenReturn(new RegisterResponse("User created"))
                 );
     }
 
     public Mono<LoginResponse> login(LoginRequest request) {
         String invalidCredentialsMessage = "username or password is invalid";
-        return userRepository.getByName(request.username())
+        return userManager.getUserByName(request.username())
                 .switchIfEmpty(Mono.error(
                         new IllegalAccessException(invalidCredentialsMessage)
                 ))

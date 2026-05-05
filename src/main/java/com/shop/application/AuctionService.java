@@ -6,7 +6,6 @@ import com.shop.domain.Role;
 import com.shop.dto.request.UploadAuctionRequest;
 import com.shop.dto.response.GetAuctionResponse;
 import com.shop.dto.response.IDResponse;
-import com.shop.infra.InMemoryCacheStore;
 import de.huxhorn.sulky.ulid.ULID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,24 +20,17 @@ public class AuctionService {
     private final AuctionRepository auctionRepository;
     private final ItemService itemService;
     private final ULID ulid;
-    private final CacheManager IDCache = new CacheManager(
-            new InMemoryCacheStore<String, Auction>(),
-            3 * 60,
-            10 * 60
-    );
+    private final CacheManager cacheManager;
 
     public Mono<Auction> getAuctionByID(String id){
         Mono<Auction> stream;
-        if (IDCache.contains(id)) {
-            stream = Mono.just(IDCache.get(id))
+        if (cacheManager.contains(id)) {
+            stream = Mono.just(cacheManager.get(id))
                     .filter(obj -> obj instanceof Auction)
                     .cast(Auction.class);
         } else {
             stream = auctionRepository.getByID(id)
-                    .filter(auction -> {
-                        IDCache.put(id, auction);
-                        return true;
-                    });
+                    .doOnNext(auction -> cacheManager.put(id, auction));
         }
 
         return stream.switchIfEmpty(Mono.error(new IllegalStateException("auction not found")));
@@ -86,8 +78,8 @@ public class AuctionService {
         if (!deleterIsUser && !deleterIsAdmin) return Mono.error(new IllegalAccessException("unauthorized"));
 
         Mono<Auction> stream;
-        if (IDCache.contains(id)) {
-            stream = Mono.just((Auction) IDCache.get(id));
+        if (cacheManager.contains(id)) {
+            stream = Mono.just((Auction) cacheManager.get(id));
         } else {
             stream = auctionRepository.existsByID(id)
                     .filter(b -> b)
@@ -102,7 +94,7 @@ public class AuctionService {
                 .switchIfEmpty(Mono.error(new IllegalAccessException("unauthorized")))
                 .flatMap(b -> auctionRepository.deleteByID(id))
                 .filter(v -> {
-                    IDCache.delete(id);
+                    cacheManager.delete(id);
                     return true;
                 });
     }
