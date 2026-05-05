@@ -118,12 +118,8 @@ public class AuctionService {
                 .thenReturn(new IDResponse(id));
     }
 
-    public Mono<Void> updateAuction(String id, String posterID, UploadAuctionRequest request) {
-        return auctionRepository.existsByID(id)
-                .flatMap(exists -> {
-                    if (!exists) return Mono.error(new IllegalStateException("item does not exists"));
-                    return itemService.getItemByID(request.itemID());
-                })
+    public Mono<Void> updateAuctionDetails(String id, String posterID, UploadAuctionRequest request) {
+        return itemService.getItemByID(request.itemID())
                 .switchIfEmpty(Mono.error(new IllegalStateException("item does not exist")))
                 .flatMap(item -> {
                     if (!posterID.equals(item.getSeller().getId()))
@@ -135,7 +131,19 @@ public class AuctionService {
                             request.startTime(),
                             request.endTime()
                     );
+                    if (cacheManager.contains(id)) {
+                        cacheManager.put(id, auction);
+                    }
                     return auctionRepository.saveAuction(auction);
+                })
+                .switchIfEmpty(Mono.error(new IllegalStateException("auction does not exists")));
+    }
+
+    public Mono<Void> updateAuctionStatus(Auction auction) {
+        return auctionRepository.saveAuction(auction)
+                .switchIfEmpty(Mono.error(new IllegalStateException("auction does not exists")))
+                .doOnNext(v -> {
+                    cacheManager.put(auction.getId(), auction);
                 });
     }
 }

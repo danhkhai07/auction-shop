@@ -96,11 +96,7 @@ public class ItemService {
     public Mono<Void> updateItem(String id, String posterID, UploadItemRequest request) {
         if (!posterID.equals(request.sellerID()))
             return Mono.error(new IllegalAccessError("poster is not item owner"));
-        return itemRepository.existsByID(id)
-                .flatMap(exists -> {
-                    if (!exists) return Mono.error(new IllegalStateException("item does not exists"));
-                    return userManager.getUserByID(request.sellerID());
-                })
+        return userManager.getUserByID(request.sellerID())
                 .flatMap(owner -> {
                     Item item = new Item(
                             id,
@@ -108,7 +104,11 @@ public class ItemService {
                             request.description(),
                             owner
                     );
-                    return itemRepository.newItem(item);
-                });
+                    if (cacheManager.contains(id)) {
+                        cacheManager.put(id, item);
+                    }
+                    return itemRepository.saveItem(item);
+                })
+                .switchIfEmpty(Mono.error(new IllegalStateException("item does not exists")));
     }
 }

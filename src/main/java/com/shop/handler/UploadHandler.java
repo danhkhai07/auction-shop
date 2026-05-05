@@ -53,7 +53,7 @@ public class UploadHandler {
     public Mono<ServerResponse> updateAuction(ServerRequest request) {
         return request.bodyToMono(UploadAuctionRequest.class)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("missing body")))
-                .flatMap(req -> auctionService.updateAuction(
+                .flatMap(req -> auctionService.updateAuctionDetails(
                                 request.pathVariable("id"),
                                 (String) request.attributes().get("userID"),
                                 req
