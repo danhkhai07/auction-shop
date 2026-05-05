@@ -18,38 +18,38 @@ import java.util.Set;
 public class PostgresUserRepo implements UserRepository {
     private static final String SELECT_USER_BY_ID =
             "SELECT u.id, u.username, u.password_hash, ur.role_name " + //lấy id,username,pass,role tu bảng user và userrole
-            "FROM users u " +
-            "LEFT JOIN user_roles ur ON ur.user_id = u.id " +
-            "WHERE u.id = :id " +
-            "ORDER BY ur.role_name";
+                    "FROM users u " +
+                    "LEFT JOIN user_roles ur ON ur.user_id = u.id " +
+                    "WHERE u.id = :id " +
+                    "ORDER BY ur.role_name";
 
     private static final String SELECT_USER_BY_NAME =
             "SELECT u.id, u.username, u.password_hash, ur.role_name " +
-            "FROM users u " +
-            "LEFT JOIN user_roles ur ON ur.user_id = u.id " +
-            "WHERE u.username = :username " +
-            "ORDER BY ur.role_name";
+                    "FROM users u " +
+                    "LEFT JOIN user_roles ur ON ur.user_id = u.id " +
+                    "WHERE u.username = :username " +
+                    "ORDER BY ur.role_name";
 
     private static final String UPDATE_USER_SQL =
             "UPDATE users " +
-            "SET username = :username, " +
-            "    updated_at = CURRENT_TIMESTAMP " +
-            "WHERE id = :id";
+                    "SET username = :username, " +
+                    "    updated_at = CURRENT_TIMESTAMP " +
+                    "WHERE id = :id";
 
     private static final String INSERT_USER_SQL =
             "INSERT INTO users (id, username, password_hash) " +
-            "VALUES (:id, :username, :passwordHash)";
+                    "VALUES (:id, :username, :passwordHash)";
 
     private static final String UPDATE_PASSWORD_SQL =
             "UPDATE users " +
-            "SET password_hash = :passwordHash, " +
-            "    updated_at = CURRENT_TIMESTAMP " +
-            "WHERE id = :id";
+                    "SET password_hash = :passwordHash, " +
+                    "    updated_at = CURRENT_TIMESTAMP " +
+                    "WHERE id = :id";
 
     private static final String INSERT_ROLE_SQL =
             "INSERT INTO user_roles (user_id, role_name) " +
-            "VALUES (:userId, :roleName) " +
-            "ON CONFLICT (user_id, role_name) DO NOTHING";
+                    "VALUES (:userId, :roleName) " +
+                    "ON CONFLICT (user_id, role_name) DO NOTHING";
 
     private final DatabaseClient databaseClient;
 
@@ -68,7 +68,6 @@ public class PostgresUserRepo implements UserRepository {
                 .map((row, metadata) -> Boolean.TRUE.equals(row.get("user_exists", Boolean.class)))
                 .one()
                 .defaultIfEmpty(false);
-
     }
 
     @Override
@@ -88,7 +87,6 @@ public class PostgresUserRepo implements UserRepository {
                 .all()
                 .collectList()
                 .flatMap(this::mapUser);
-
     }
 
     @Override
@@ -108,19 +106,18 @@ public class PostgresUserRepo implements UserRepository {
                 .all()
                 .collectList()
                 .flatMap(this::mapUser);
-
     }
 
     @Override
     @Transactional
     public Mono<Void> saveUser(User user) {
-        if (user == null || !StringUtils.hasText(user.getId()) || !StringUtils.hasText(user.username)) {
+        if (user == null || !StringUtils.hasText(user.getId()) || !StringUtils.hasText(user.getUsername())) {
             return Mono.error(new IllegalArgumentException("user is invalid"));
         }
 
         Mono<Void> updateUser = databaseClient.sql(UPDATE_USER_SQL)
                 .bind("id", user.getId())
-                .bind("username", user.username)
+                .bind("username", user.getUsername())
                 .fetch()
                 .rowsUpdated()
                 .then();
@@ -130,7 +127,6 @@ public class PostgresUserRepo implements UserRepository {
         }
 
         return updateUser.then(replaceRoles(user.getId(), user.getRoles()));
-
     }
 
     @Override
@@ -145,13 +141,12 @@ public class PostgresUserRepo implements UserRepository {
                 .fetch()
                 .rowsUpdated()
                 .then();
-
     }
 
     @Override
     @Transactional
     public Mono<Void> newUser(User user, String password) {
-        if (user == null || !StringUtils.hasText(user.getId()) || !StringUtils.hasText(user.username)) {
+        if (user == null || !StringUtils.hasText(user.getId()) || !StringUtils.hasText(user.getUsername())) {
             return Mono.error(new IllegalArgumentException("user is invalid"));
         }
         if (!StringUtils.hasText(password)) {
@@ -165,12 +160,11 @@ public class PostgresUserRepo implements UserRepository {
 
         return databaseClient.sql(INSERT_USER_SQL)
                 .bind("id", user.getId())
-                .bind("username", user.username)
+                .bind("username", user.getUsername())
                 .bind("passwordHash", password)
                 .fetch()
                 .rowsUpdated()
                 .then(insertRoles(user.getId(), rolesToPersist));
-
     }
 
     @Override
@@ -195,7 +189,7 @@ public class PostgresUserRepo implements UserRepository {
 
         UserRow firstRow = rows.get(0);
         User user = new User(firstRow.id(), firstRow.username());
-        user.passwordHash = firstRow.passwordHash();
+        user.setPasswordHash(firstRow.passwordHash());
 
         for (UserRow row : rows) {
             if (row.roleName() != null) {
@@ -252,6 +246,5 @@ public class PostgresUserRepo implements UserRepository {
         private String roleName() {
             return roleName;
         }
-
     }
 }
