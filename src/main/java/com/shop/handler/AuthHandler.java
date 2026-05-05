@@ -15,7 +15,7 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-public class AuthHandler {
+public class    AuthHandler {
 
     private final AuthService authService;
     private final UserManager userManager;
@@ -53,11 +53,8 @@ public class AuthHandler {
 
     public Mono<ServerResponse> me(ServerRequest request) {
         return request.bodyToMono(EmptyBodyRequest.class)
-                .flatMap(req ->
-                        userManager.getUserByID(
-                                String.valueOf(request.attribute("userID"))
-                        )
-                )
+                .flatMap(req -> userManager.getUserByID(
+                        String.valueOf(request.attribute("userID"))))
                 .flatMap(response -> ServerResponse.status(200).bodyValue(response));
     }
 }
