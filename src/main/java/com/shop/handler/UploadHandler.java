@@ -19,6 +19,8 @@ public class UploadHandler {
     public Mono<ServerResponse> uploadItem(ServerRequest request) {
         return request.bodyToMono(UploadItemRequest.class)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("missing body")))
+                .filter(req -> req.hasEmptyFields())
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("missing fields")))
                 .flatMap(req -> itemService.newItem(
                         (String) request.attributes().get("userID"),
                         req
