@@ -13,6 +13,6 @@ public interface UserRepository {
 
     Mono<Void> saveUser(User user);
     Mono<Void> deleteByID(String id);
-    Mono<Void> newUser(User user, String password);
+    Mono<Void> newUser(User user);
     Mono<Void> changePassword(String id, String password);
 }

@@ -3,6 +3,7 @@ package com.shop.domain;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,7 +17,7 @@ public class Auction {
     private User currentHighestBidder;
     private BigDecimal finalPrice;
     private final LocalDateTime startTime;
-    private final LocalDateTime endTime;
+    private LocalDateTime endTime;
     private AuctionStatus status;
     private final List<BidTransaction> bidHistory = new ArrayList<>();
 
@@ -79,6 +80,24 @@ public class Auction {
         this.currentHighestBidder = bidder;
     }
 
+    public void pauseAuction() {
+        if (!this.status.canTransitionTo(AuctionStatus.PAUSED)) {
+            throw new IllegalStateException("Cannot finish the auction from status: " + this.status);
+        }
+        this.status = AuctionStatus.PAUSED;
+    }
+
+    public void unpauseAuction() {
+        if (this.status != AuctionStatus.PAUSED) {
+            throw new IllegalStateException("Cannot unpause an auction that is not paused.");
+        }
+        if (isExpired()) {
+            this.status = AuctionStatus.FINISHED;
+            return;
+        }
+        this.status = AuctionStatus.RUNNING;
+    }
+
     public void finishAuction() {
         if (!this.status.canTransitionTo(AuctionStatus.FINISHED)) {
             throw new IllegalStateException("Cannot finish the auction from status: " + this.status);
@@ -101,6 +120,13 @@ public class Auction {
         }
         this.status = AuctionStatus.CANCELLED;
         this.finalPrice = BigDecimal.ZERO;
+    }
+
+    public void extendEndtime(LocalDateTime newEndtime) {
+        if (newEndtime == null || newEndtime.isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("New end time must be in the future.");
+        }
+        this.endTime = newEndtime;
     }
 
     // =================================================================================================================

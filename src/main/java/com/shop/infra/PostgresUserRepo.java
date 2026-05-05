@@ -34,7 +34,7 @@ public class PostgresUserRepo implements UserRepository {
     }
 
     @Override
-    public Mono<Void> newUser(User user, String password) {
+    public Mono<Void> newUser(User user) {
         return Mono.empty();
     }
 

@@ -6,7 +6,6 @@ import com.shop.domain.Role;
 import com.shop.dto.request.UploadItemRequest;
 import com.shop.dto.response.GetItemResponse;
 import com.shop.dto.response.IDResponse;
-import com.shop.infra.InMemoryCacheStore;
 import de.huxhorn.sulky.ulid.ULID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,25 +18,18 @@ import java.util.Set;
 public class ItemService {
     private final ItemRepository itemRepository;
     private final UserManager userManager;
-    private final CacheManager IDCache = new CacheManager(
-            new InMemoryCacheStore<String, Item>(),
-            3 * 60,
-            10 * 60
-    );
+    private final CacheManager cacheManager;
     private final ULID ulid;
 
     public Mono<Item> getItemByID(String id) {
         Mono<Item> stream;
-        if (IDCache.contains(id)) {
-            stream = Mono.just(IDCache.get(id))
+        if (cacheManager.contains(id)) {
+            stream = Mono.just(cacheManager.get(id))
                     .filter(obj -> obj instanceof Item)
                     .cast(Item.class);
         } else {
             stream = itemRepository.getByID(id)
-                    .filter(item -> {
-                        IDCache.put(id, item);
-                        return true;
-                    });
+                    .doOnNext(item -> cacheManager.put(id, item));
         }
 
         return stream.switchIfEmpty(Mono.error(new IllegalAccessException("item not found")));
@@ -65,12 +57,12 @@ public class ItemService {
         if (!deleterIsUser && !deleterIsAdmin) return Mono.error(new IllegalAccessException("unauthorized"));
 
         Mono<Item> stream;
-        if (IDCache.contains(id)) {
-            stream = Mono.just((Item) IDCache.get(id));
+        if (cacheManager.contains(id)) {
+            stream = Mono.just(cacheManager.get(id))
+                    .filter(obj -> obj instanceof Item)
+                    .cast(Item.class);
         } else {
-            stream = itemRepository.existsByID(id)
-                    .filter(b -> b)
-                    .flatMap(b -> itemRepository.getByID(id));
+            stream = itemRepository.getByID(id);
         }
 
         return stream
@@ -79,7 +71,7 @@ public class ItemService {
                 .switchIfEmpty(Mono.error(new IllegalAccessException("unauthorized")))
                 .flatMap(b -> itemRepository.deleteByID(id))
                 .filter(v -> {
-                    IDCache.delete(id);
+                    cacheManager.delete(id);
                     return true;
                 });
     }
@@ -104,11 +96,7 @@ public class ItemService {
     public Mono<Void> updateItem(String id, String posterID, UploadItemRequest request) {
         if (!posterID.equals(request.sellerID()))
             return Mono.error(new IllegalAccessError("poster is not item owner"));
-        return itemRepository.existsByID(id)
-                .flatMap(exists -> {
-                    if (!exists) return Mono.error(new IllegalStateException("item does not exists"));
-                    return userManager.getUserByID(request.sellerID());
-                })
+        return userManager.getUserByID(request.sellerID())
                 .flatMap(owner -> {
                     Item item = new Item(
                             id,
@@ -116,7 +104,11 @@ public class ItemService {
                             request.description(),
                             owner
                     );
-                    return itemRepository.newItem(item);
-                });
+                    if (cacheManager.contains(id)) {
+                        cacheManager.put(id, item);
+                    }
+                    return itemRepository.saveItem(item);
+                })
+                .switchIfEmpty(Mono.error(new IllegalStateException("item does not exists")));
     }
 }
