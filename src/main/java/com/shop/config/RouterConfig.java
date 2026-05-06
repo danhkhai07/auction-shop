@@ -11,6 +11,8 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+import static org.springframework.web.reactive.function.server.RequestPredicates.contentType;
+
 @Configuration
 public class RouterConfig {
 
@@ -29,80 +31,38 @@ public class RouterConfig {
         return RouterFunctions.route()
                 .GET("/", indexHandler::index)
                 .path("/auth", builder -> builder
-                        .POST("/register", authHandler::register)
-                        .POST("/login", authHandler::login)
-                        .nest(RequestPredicates.accept(MediaType.APPLICATION_JSON),
-                            builder1 -> builder1
-                            .GET("/me", authHandler::me)
-                            .filter(authFilter)
-                        )
+                        .POST("/register", contentType(MediaType.APPLICATION_JSON), authHandler::register)
+                        .POST("/login", contentType(MediaType.APPLICATION_JSON), authHandler::login)
+                        .GET("/me", authHandler::me).filter(authFilter)
                 )
                 .path("/user", builder -> builder
                         .GET("/{id}", viewHandler::getUser)
-                        .nest(RequestPredicates.contentType(MediaType.APPLICATION_JSON),
-                                builder1 -> builder1
-                                        .filter(roleFilter)
-                                        .POST("/delete/{id}", deleteHandler::deleteUser)
-                        )
-//                        .nest(RequestPredicates.accept(MediaType.APPLICATION_JSON),
-//                                builder1 -> builder1
-//                                        .filter(authFilter)
-//                                        .POST("", ::)
-//                        )
+                        .POST("/delete/{id}", contentType(MediaType.APPLICATION_JSON), deleteHandler::deleteUser).filter(roleFilter)
                 )
                 .path("/item", builder -> builder
-                        .nest(RequestPredicates.contentType(MediaType.APPLICATION_JSON),
-                                builder1 -> builder1
-                                        .filter((request, next) -> {
-                                            String path = request.path();
-                                            String method = request.methodName();
-                                            if (method.equals("POST") && path.contains("/delete/")) {
-                                                return roleFilter.filter(request, next);
-                                            }
-                                            if (method.equals("POST") && (path.equals("/item") || path.matches("/item/[^/]+"))) {
-                                                return authFilter.filter(request, next);
-                                            }
-                                            return next.handle(request);
-                                        })
-                                        .GET("/{id}", viewHandler::getItem)
-                                        .POST("/delete/{id}", deleteHandler::deleteItem)
-                                        .POST("", uploadHandler::uploadItem)
-                                        .POST("/{id}", uploadHandler::updateItem)
-                        )
+                        .GET("/{id}", viewHandler::getItem)
+                        .POST("/delete/{id}", contentType(MediaType.APPLICATION_JSON), deleteHandler::deleteItem).filter(roleFilter)
+                        .POST("", contentType(MediaType.APPLICATION_JSON), uploadHandler::uploadItem).filter(authFilter)
+                        .POST("/{id}", contentType(MediaType.APPLICATION_JSON), uploadHandler::updateItem).filter(authFilter)
                 )
                 .path("/auction", builder -> builder
                         .GET("/{id}", viewHandler::getAuction)
-                        .nest(RequestPredicates.contentType(MediaType.APPLICATION_JSON),
-                                builder1 -> builder1
-                                        .filter((request, next) -> {
-                                            String path = request.path();
-                                            String method = request.methodName();
-                                            if (method.equals("POST") && path.contains("/delete/")) {
-                                                return roleFilter.filter(request, next);
-                                            }
-                                            if (method.equals("POST")) {
-                                                return authFilter.filter(request, next);
-                                            }
-                                            return next.handle(request);
-                                        })
-                                        .POST("/delete/{id}", deleteHandler::deleteAuction)
-                                        .POST("", uploadHandler::uploadAuction)
-                                        .path("/{id}", builder2 -> builder2
-                                                .POST("", uploadHandler::updateAuction)
-                                                .POST("/bid", auctionHandler::placeBid)
-                                                .POST("/start", auctionHandler::startAuction)
-                                                .POST("/pause", auctionHandler::pauseAuction)
-                                                .POST("/unpause", auctionHandler::unpauseAuction)
-                                                .POST("/cancel", auctionHandler::cancelAuction)
-                                                .POST("/end", auctionHandler::finishAuction)
-                                                .POST("/extend/endtime", auctionHandler::extendEndtime)
-                                        )
+                        .POST("/delete/{id}", contentType(MediaType.APPLICATION_JSON), deleteHandler::deleteAuction).filter(roleFilter)
+                        .POST("", contentType(MediaType.APPLICATION_JSON), uploadHandler::uploadAuction).filter(authFilter)
+                        .path("/{id}", builder2 -> builder2
+                                .POST("", contentType(MediaType.APPLICATION_JSON), uploadHandler::updateAuction).filter(authFilter)
+                                .POST("/bid", contentType(MediaType.APPLICATION_JSON), auctionHandler::placeBid).filter(authFilter)
+                                .POST("/start", contentType(MediaType.APPLICATION_JSON), auctionHandler::startAuction).filter(authFilter)
+                                .POST("/pause", contentType(MediaType.APPLICATION_JSON), auctionHandler::pauseAuction).filter(authFilter)
+                                .POST("/unpause", contentType(MediaType.APPLICATION_JSON), auctionHandler::unpauseAuction).filter(authFilter)
+                                .POST("/cancel", contentType(MediaType.APPLICATION_JSON), auctionHandler::cancelAuction).filter(authFilter)
+                                .POST("/end", contentType(MediaType.APPLICATION_JSON), auctionHandler::finishAuction).filter(authFilter)
+                                .POST("/extend/endtime", contentType(MediaType.APPLICATION_JSON), auctionHandler::extendEndtime).filter(authFilter)
                         )
                 )
                 .path("/feed", builder -> builder
                         .GET("", viewHandler::getFeed)
                 )
-                .build()
-        ;
+                .build();
     }
 }

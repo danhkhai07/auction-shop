@@ -24,10 +24,8 @@ public class AuthFilter implements HandlerFilterFunction<ServerResponse, ServerR
         String token = auth.substring(7);
         try {
             String userID = jwtService.extractUserId(token);
-            ServerRequest newRequest = ServerRequest.from(request)
-                    .attribute("userID", userID)
-                    .build();
-            return next.handle(newRequest);
+            request.attributes().put("userID", userID);
+            return next.handle(request);
         } catch (Exception e) {
             return ServerResponse.status(401).build();
         }

@@ -26,10 +26,8 @@ public class RoleFilter implements HandlerFilterFunction<ServerResponse, ServerR
 
         if (auth == null || !auth.startsWith("Bearer ")) {
             Set<Role> roles = new HashSet<>(Set.of(Role.GUEST));
-            ServerRequest newRequest = ServerRequest.from(request)
-                    .attribute("resolved_role", roles)
-                    .build();
-            return next.handle(newRequest);
+            request.attributes().put("resolved_role", roles);
+            return next.handle(request);
         }
 
         String token = auth.substring(7);
@@ -39,18 +37,14 @@ public class RoleFilter implements HandlerFilterFunction<ServerResponse, ServerR
                     .switchIfEmpty(Mono.error(new IllegalStateException("user does not exist")))
                     .flatMap(user -> {
                         Set<Role> roles = user.getRoles();
-                        ServerRequest newRequest = ServerRequest.from(request)
-                                .attribute("resolved_role", roles)
-                                .attribute("userID", userID)
-                                .build();
-                        return next.handle(newRequest);
+                        request.attributes().put("resolved_role", roles);
+                        request.attributes().put("userID", userID);
+                        return next.handle(request);
                     });
         } catch (Exception e) {
             Set<Role> roles = new HashSet<>(Set.of(Role.GUEST));
-            ServerRequest newRequest = ServerRequest.from(request)
-                    .attribute("resolved_role", roles)
-                    .build();
-            return next.handle(newRequest);
+            request.attributes().put("resolved_role", roles);
+            return next.handle(request);
         }
     }
 }
