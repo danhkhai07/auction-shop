@@ -38,10 +38,10 @@ public class RouterConfig {
                         )
                 )
                 .path("/user", builder -> builder
-                        .nest(RequestPredicates.accept(MediaType.APPLICATION_JSON),
+                        .GET("/{id}", viewHandler::getUser)
+                        .nest(RequestPredicates.contentType(MediaType.APPLICATION_JSON),
                                 builder1 -> builder1
                                         .filter(roleFilter)
-                                        .GET("/{id}", viewHandler::getUser)
                                         .POST("/delete/{id}", deleteHandler::deleteUser)
                         )
 //                        .nest(RequestPredicates.accept(MediaType.APPLICATION_JSON),
@@ -53,27 +53,28 @@ public class RouterConfig {
                 .path("/item", builder -> builder
                         .nest(RequestPredicates.contentType(MediaType.APPLICATION_JSON),
                                 builder1 -> builder1
-                                        .filter(roleFilter)
                                         .GET("/{id}", viewHandler::getItem)
                                         .POST("/delete/{id}", deleteHandler::deleteItem)
-                        )
-                        .nest(RequestPredicates.contentType(MediaType.APPLICATION_JSON),
-                                builder1 -> builder1
-                                        .filter(authFilter)
                                         .POST("", uploadHandler::uploadItem)
                                         .POST("/{id}", uploadHandler::updateItem)
+                                        .filter((request, next) -> {
+                                            String path = request.path();
+                                            String method = request.methodName();
+                                            if (method.equals("POST") && path.contains("/delete/")) {
+                                                return roleFilter.filter(request, next);
+                                            }
+                                            if (method.equals("POST") && (path.equals("/item") || path.matches("/item/[^/]+"))) {
+                                                return authFilter.filter(request, next);
+                                            }
+                                            return next.handle(request);
+                                        })
                         )
                 )
                 .path("/auction", builder -> builder
                         .GET("/{id}", viewHandler::getAuction)
                         .nest(RequestPredicates.contentType(MediaType.APPLICATION_JSON),
                                 builder1 -> builder1
-                                        .filter(roleFilter)
                                         .POST("/delete/{id}", deleteHandler::deleteAuction)
-                        )
-                        .nest(RequestPredicates.contentType(MediaType.APPLICATION_JSON),
-                                builder1 -> builder1
-                                        .filter(authFilter)
                                         .POST("", uploadHandler::uploadAuction)
                                         .path("/{id}", builder2 -> builder2
                                                 .POST("", uploadHandler::updateAuction)
@@ -85,6 +86,17 @@ public class RouterConfig {
                                                 .POST("/end", auctionHandler::finishAuction)
                                                 .POST("/extend/endtime", auctionHandler::extendEndtime)
                                         )
+                                        .filter((request, next) -> {
+                                            String path = request.path();
+                                            String method = request.methodName();
+                                            if (method.equals("POST") && path.contains("/delete/")) {
+                                                return roleFilter.filter(request, next);
+                                            }
+                                            if (method.equals("POST")) {
+                                                return authFilter.filter(request, next);
+                                            }
+                                            return next.handle(request);
+                                        })
                         )
                 )
                 .path("/feed", builder -> builder
