@@ -72,53 +72,14 @@ ALTER TABLE auctions
 ALTER TABLE auctions
     ADD COLUMN IF NOT EXISTS end_time TIMESTAMPTZ;
 
-DO $$
-BEGIN
-    UPDATE auctions
-    SET status = CASE status
-        WHEN 'DRAFT' THEN 'OPEN'
-        WHEN 'ACTIVE' THEN 'RUNNING'
-        WHEN 'ENDED' THEN 'FINISHED'
-        ELSE status
-    END
-    WHERE status IN ('DRAFT', 'ACTIVE', 'ENDED');
-
-    IF EXISTS (
-        SELECT 1
-        FROM information_schema.columns
-        WHERE table_name = 'auctions' AND column_name = 'start_price'
-    ) THEN
-        UPDATE auctions
-        SET starting_price = COALESCE(starting_price, start_price);
-    END IF;
-
-    IF EXISTS (
-        SELECT 1
-        FROM information_schema.columns
-        WHERE table_name = 'auctions' AND column_name = 'current_price'
-    ) THEN
-        UPDATE auctions
-        SET current_highest_price = COALESCE(current_highest_price, current_price);
-    END IF;
-
-    IF EXISTS (
-        SELECT 1
-        FROM information_schema.columns
-        WHERE table_name = 'auctions' AND column_name = 'starts_at'
-    ) THEN
-        UPDATE auctions
-        SET start_time = COALESCE(start_time, starts_at);
-    END IF;
-
-    IF EXISTS (
-        SELECT 1
-        FROM information_schema.columns
-        WHERE table_name = 'auctions' AND column_name = 'ends_at'
-    ) THEN
-        UPDATE auctions
-        SET end_time = COALESCE(end_time, ends_at);
-    END IF;
-END $$;
+UPDATE auctions
+SET status = CASE status
+    WHEN 'DRAFT' THEN 'OPEN'
+    WHEN 'ACTIVE' THEN 'RUNNING'
+    WHEN 'ENDED' THEN 'FINISHED'
+    ELSE status
+END
+WHERE status IN ('DRAFT', 'ACTIVE', 'ENDED');
 
 ALTER TABLE auctions
     DROP CONSTRAINT IF EXISTS chk_auctions_status;
