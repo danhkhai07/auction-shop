@@ -34,13 +34,8 @@ public class AuthService {
     public Mono<RegisterResponse> register(RegisterRequest request) {
         String passwordHash = BCryptHash.hash(request.password());
         User user = new User(ulid.nextULID(), request.username(), passwordHash);
-        return userManager.getUserByName(request.username())
-                .flatMap(id ->
-                        Mono.<RegisterResponse>error(new IllegalAccessException("username already exists")))
-                .switchIfEmpty(
-                        userManager.newUser(user)
-                                .thenReturn(new RegisterResponse("User created"))
-                );
+        return userManager.newUser(user)
+                .thenReturn(new RegisterResponse("User created"));
     }
 
     public Mono<LoginResponse> login(LoginRequest request) {
