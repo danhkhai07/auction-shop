@@ -50,9 +50,7 @@ public class RoleFilter implements HandlerFilterFunction<ServerResponse, ServerR
             ServerRequest newRequest = ServerRequest.from(request)
                     .attribute("resolved_role", roles)
                     .build();
-            next.handle(newRequest);
+            return next.handle(newRequest);
         }
-
-        return next.handle(request);
     }
 }

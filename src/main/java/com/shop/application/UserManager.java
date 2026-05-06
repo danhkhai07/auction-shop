@@ -43,7 +43,7 @@ public class UserManager {
                     .filter(obj -> obj instanceof User)
                     .cast(User.class);
         } else {
-            stream = userRepository.getByID(key)
+            stream = userRepository.getByName(name)
                     .doOnNext(user -> cacheManager.put(key, user));
         }
 
