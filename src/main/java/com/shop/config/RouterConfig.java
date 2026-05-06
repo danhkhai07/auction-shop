@@ -53,10 +53,6 @@ public class RouterConfig {
                 .path("/item", builder -> builder
                         .nest(RequestPredicates.contentType(MediaType.APPLICATION_JSON),
                                 builder1 -> builder1
-                                        .GET("/{id}", viewHandler::getItem)
-                                        .POST("/delete/{id}", deleteHandler::deleteItem)
-                                        .POST("", uploadHandler::uploadItem)
-                                        .POST("/{id}", uploadHandler::updateItem)
                                         .filter((request, next) -> {
                                             String path = request.path();
                                             String method = request.methodName();
@@ -68,12 +64,27 @@ public class RouterConfig {
                                             }
                                             return next.handle(request);
                                         })
+                                        .GET("/{id}", viewHandler::getItem)
+                                        .POST("/delete/{id}", deleteHandler::deleteItem)
+                                        .POST("", uploadHandler::uploadItem)
+                                        .POST("/{id}", uploadHandler::updateItem)
                         )
                 )
                 .path("/auction", builder -> builder
                         .GET("/{id}", viewHandler::getAuction)
                         .nest(RequestPredicates.contentType(MediaType.APPLICATION_JSON),
                                 builder1 -> builder1
+                                        .filter((request, next) -> {
+                                            String path = request.path();
+                                            String method = request.methodName();
+                                            if (method.equals("POST") && path.contains("/delete/")) {
+                                                return roleFilter.filter(request, next);
+                                            }
+                                            if (method.equals("POST")) {
+                                                return authFilter.filter(request, next);
+                                            }
+                                            return next.handle(request);
+                                        })
                                         .POST("/delete/{id}", deleteHandler::deleteAuction)
                                         .POST("", uploadHandler::uploadAuction)
                                         .path("/{id}", builder2 -> builder2
@@ -86,17 +97,6 @@ public class RouterConfig {
                                                 .POST("/end", auctionHandler::finishAuction)
                                                 .POST("/extend/endtime", auctionHandler::extendEndtime)
                                         )
-                                        .filter((request, next) -> {
-                                            String path = request.path();
-                                            String method = request.methodName();
-                                            if (method.equals("POST") && path.contains("/delete/")) {
-                                                return roleFilter.filter(request, next);
-                                            }
-                                            if (method.equals("POST")) {
-                                                return authFilter.filter(request, next);
-                                            }
-                                            return next.handle(request);
-                                        })
                         )
                 )
                 .path("/feed", builder -> builder
