@@ -54,7 +54,8 @@ public class PostgresItemRepo implements ItemRepository {
                     // tao doi tuong user dong vai tro la seller
                     User seller = new User(
                             row.get("seller_id", String.class),
-                            row.get("seller_name", String.class));
+                            row.get("seller_name", String.class),
+                            "");
 
                     // tra ve doi tuong item
                     return new Item(
@@ -84,7 +85,8 @@ public class PostgresItemRepo implements ItemRepository {
                 .map((row, metadata) -> {
                     User seller = new User(
                             row.get("seller_id", String.class),
-                            row.get("seller_name", String.class));
+                            row.get("seller_name", String.class),
+                            "");
 
                     return new Item(
                             row.get("item_id", String.class),

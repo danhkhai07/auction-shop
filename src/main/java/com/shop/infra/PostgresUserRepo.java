@@ -145,11 +145,11 @@ public class PostgresUserRepo implements UserRepository {
 
     @Override
     @Transactional
-    public Mono<Void> newUser(User user, String password) {
+    public Mono<Void> newUser(User user) {
         if (user == null || !StringUtils.hasText(user.getId()) || !StringUtils.hasText(user.getUsername())) {
             return Mono.error(new IllegalArgumentException("user is invalid"));
         }
-        if (!StringUtils.hasText(password)) {
+        if (!StringUtils.hasText(user.getPasswordHash())) {
             return Mono.error(new IllegalArgumentException("password hash is invalid"));
         }
 
@@ -161,7 +161,7 @@ public class PostgresUserRepo implements UserRepository {
         return databaseClient.sql(INSERT_USER_SQL)
                 .bind("id", user.getId())
                 .bind("username", user.getUsername())
-                .bind("passwordHash", password)
+                .bind("passwordHash", user.getPasswordHash())
                 .fetch()
                 .rowsUpdated()
                 .then(insertRoles(user.getId(), rolesToPersist));
@@ -188,7 +188,7 @@ public class PostgresUserRepo implements UserRepository {
         }
 
         UserRow firstRow = rows.get(0);
-        User user = new User(firstRow.id(), firstRow.username());
+        User user = new User(firstRow.id(), firstRow.username(), "");
         user.setPasswordHash(firstRow.passwordHash());
 
         for (UserRow row : rows) {

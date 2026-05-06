@@ -221,7 +221,7 @@ public class PostgresAuctionRepo implements AuctionRepository {
     }
 
     private Auction mapRowToAuction(Row row, RowMetadata metadata) {
-        User seller = new User(row.get("s_id", String.class), row.get("s_username", String.class));
+        User seller = new User(row.get("s_id", String.class), row.get("s_username", String.class), "");
         Item item = new Item(
                 row.get("i_id", String.class),
                 row.get("i_name", String.class),
@@ -239,7 +239,7 @@ public class PostgresAuctionRepo implements AuctionRepository {
 
         String bId = row.get("b_id", String.class);
         if (bId != null) {
-            User bidder = new User(bId, row.get("b_username", String.class));
+            User bidder = new User(bId, row.get("b_username", String.class), "");
             setPrivateField(auction, "currentHighestBidder", bidder);
         }
 
@@ -262,7 +262,7 @@ public class PostgresAuctionRepo implements AuctionRepository {
     }
 
     private BidTransaction mapRowToBid(Row row, RowMetadata metadata) {
-        User bidder = new User(row.get("u_id", String.class), row.get("u_username", String.class));
+        User bidder = new User(row.get("u_id", String.class), row.get("u_username", String.class), "");
         BidTransaction bid = new BidTransaction(
                 row.get("id", String.class),
                 bidder,
