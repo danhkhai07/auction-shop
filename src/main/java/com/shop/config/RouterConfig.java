@@ -44,11 +44,11 @@ public class RouterConfig {
                                         .GET("/{id}", viewHandler::getUser)
                                         .POST("/delete/{id}", deleteHandler::deleteUser)
                         )
-                        .nest(RequestPredicates.accept(MediaType.APPLICATION_JSON),
-                                builder1 -> builder1
-                                        .filter(authFilter)
-                                        .POST("", authHandler::me)
-                        )
+//                        .nest(RequestPredicates.accept(MediaType.APPLICATION_JSON),
+//                                builder1 -> builder1
+//                                        .filter(authFilter)
+//                                        .POST("", ::)
+//                        )
                 )
                 .path("/item", builder -> builder
                         .nest(RequestPredicates.accept(MediaType.APPLICATION_JSON),
