@@ -78,7 +78,7 @@ public class ItemService {
     public Mono<IDResponse> newItem(String posterID, UploadItemRequest request) {
         String id = ulid.nextULID();
         if (!posterID.equals(request.sellerID()))
-            return Mono.error(new IllegalAccessError("poster is not item owner"));
+            return Mono.error(new IllegalAccessException("poster is not item owner"));
         return userManager.getUserByID(request.sellerID())
                 .flatMap(owner -> {
                     Item item = new Item(
@@ -94,7 +94,7 @@ public class ItemService {
 
     public Mono<Void> updateItem(String id, String posterID, UploadItemRequest request) {
         if (!posterID.equals(request.sellerID()))
-            return Mono.error(new IllegalAccessError("poster is not item owner"));
+            return Mono.error(new IllegalAccessException("poster is not item owner"));
         return userManager.getUserByID(request.sellerID())
                 .flatMap(owner -> {
                     Item item = new Item(
