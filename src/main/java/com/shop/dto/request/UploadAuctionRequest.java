@@ -1,5 +1,6 @@
 package com.shop.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.shop.domain.AuctionStatus;
 import com.shop.domain.BidTransaction;
 import com.shop.domain.Item;
@@ -9,12 +10,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record UploadAuctionRequest(
-    String itemID,
-    BigDecimal startingPrice,
-    LocalDateTime startTime,
-    LocalDateTime endTime
+    @JsonProperty("itemID") String itemID,
+    @JsonProperty("startingPrice") BigDecimal startingPrice,
+    @JsonProperty("startTime") LocalDateTime startTime,
+    @JsonProperty("endTime") LocalDateTime endTime
 ) {
     public boolean hasEmptyFields() {
-        return (startingPrice == null || startTime == null || endTime == null);
+        return (itemID == null || startingPrice == null || startTime == null || endTime == null);
     }
 }

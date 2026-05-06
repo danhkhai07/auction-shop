@@ -1,14 +1,15 @@
 package com.shop.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.shop.domain.Role;
 
 import java.util.List;
 import java.util.Set;
 
 public record GetUserResponse(
-    String id,
-    String username,
-    Set<Role> roles,
-    List<String> itemList,
-    List<String> auctionList
+    @JsonProperty("id") String id,
+    @JsonProperty("username") String username,
+    @JsonProperty("roles") Set<Role> roles,
+    @JsonProperty("itemList") List<String> itemList,
+    @JsonProperty("auctionList") List<String> auctionList
 ){}

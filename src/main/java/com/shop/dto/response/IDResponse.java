@@ -1,5 +1,7 @@
 package com.shop.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public record IDResponse(
-    String id
+    @JsonProperty("id") String id
 ){}
