@@ -53,7 +53,7 @@ public class RouterConfig {
                         .POST("", contentType(MediaType.APPLICATION_JSON), uploadHandler::uploadAuction).filter(authFilter)
                         .path("/{id}", builder2 -> builder2
                                 .POST("", contentType(MediaType.APPLICATION_JSON), uploadHandler::updateAuction).filter(authFilter)
-                                .POST("/bid", auctionHandler::placeBid).filter(authFilter)
+                                .POST("/bid", contentType(MediaType.APPLICATION_JSON), auctionHandler::placeBid).filter(authFilter)
                                 .POST("/start", auctionHandler::startAuction).filter(authFilter)
                                 .POST("/pause",  auctionHandler::pauseAuction).filter(authFilter)
                                 .POST("/unpause",  auctionHandler::unpauseAuction).filter(authFilter)
