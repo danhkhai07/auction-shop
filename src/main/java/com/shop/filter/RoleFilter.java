@@ -36,6 +36,7 @@ public class RoleFilter implements HandlerFilterFunction<ServerResponse, ServerR
         try {
             String userID = jwtService.extractUserId(token);
             return userManager.getUserByID(userID)
+                    .switchIfEmpty(Mono.error(new IllegalStateException("user does not exist")))
                     .flatMap(user -> {
                         Set<Role> roles = user.getRoles();
                         ServerRequest newRequest = ServerRequest.from(request)

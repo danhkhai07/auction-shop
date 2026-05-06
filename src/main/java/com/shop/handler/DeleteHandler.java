@@ -2,9 +2,11 @@ package com.shop.handler;
 
 import com.shop.application.AuctionService;
 import com.shop.application.ItemService;
+import com.shop.application.UserCleanupService;
 import com.shop.application.UserManager;
 import com.shop.domain.Role;
 import com.shop.dto.request.EmptyBodyRequest;
+import com.shop.filter.RoleFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -18,31 +20,39 @@ public class DeleteHandler {
     private final ItemService itemService;
     private final AuctionService auctionService;
     private final UserManager userManager;
+    private final UserCleanupService userCleanupService;
 
     public Mono<ServerResponse> deleteUser(ServerRequest request) {
-        return userManager.deleteUser(
-                    request.pathVariable("id"),
-                    (String) request.attributes().getOrDefault("userID", ""),
-                    (Set<Role>) request.attributes().getOrDefault("resolved_role", null)
-                )
-                .flatMap(b -> ServerResponse.status(201).bodyValue(new EmptyBodyRequest()));
+        String id = request.pathVariable("id");
+        String requesterId = request.attribute("userID")
+                .map(Object::toString)
+                .orElseThrow(() -> new IllegalStateException("Missing userID"));
+        Set<Role> roles = (Set<Role>) request.attribute("resolved_role")
+                .orElseThrow(() -> new IllegalStateException("Missing roles"));
+        return userManager.deleteUser(id, requesterId, roles)
+                .flatMap(v -> userCleanupService.cleanupUserData(id, requesterId, roles))
+                .then(ServerResponse.status(204).build());
     }
 
     public Mono<ServerResponse> deleteItem(ServerRequest request) {
-        return itemService.deleteItem(
-                        request.pathVariable("id"),
-                        (String) request.attributes().getOrDefault("userID", ""),
-                        (Set<Role>) request.attributes().getOrDefault("resolved_role", null)
-                )
-                .flatMap(b -> ServerResponse.status(201).bodyValue(new EmptyBodyRequest()));
+        String id = request.pathVariable("id");
+        String requesterId = request.attribute("userID")
+                .map(Object::toString)
+                .orElseThrow(() -> new IllegalStateException("Missing userID"));
+        Set<Role> roles = (Set<Role>) request.attribute("resolved_role")
+                .orElseThrow(() -> new IllegalStateException("Missing roles"));
+        return itemService.deleteItem(id, requesterId, roles)
+                .then(ServerResponse.status(204).build());
     }
 
     public Mono<ServerResponse> deleteAuction(ServerRequest request) {
-        return auctionService.deleteAuction(
-                        request.pathVariable("id"),
-                        (String) request.attributes().getOrDefault("userID", ""),
-                        (Set<Role>) request.attributes().getOrDefault("resolved_role", null)
-                )
-                .flatMap(b -> ServerResponse.status(201).bodyValue(new EmptyBodyRequest()));
+        String id = request.pathVariable("id");
+        String requesterId = request.attribute("userID")
+                .map(Object::toString)
+                .orElseThrow(() -> new IllegalStateException("Missing userID"));
+        Set<Role> roles = (Set<Role>) request.attribute("resolved_role")
+                .orElseThrow(() -> new IllegalStateException("Missing roles"));
+        return auctionService.deleteAuction(id, requesterId, roles)
+                .then(ServerResponse.status(204).build());
     }
 }
