@@ -27,9 +27,7 @@ public class RouterConfig {
         RoleFilter roleFilter
     ) {
         return RouterFunctions.route()
-                // Index
                 .GET("/", indexHandler::index)
-                // Auth
                 .path("/auth", builder -> builder
                         .POST("/register", authHandler::register)
                         .POST("/login", authHandler::login)
@@ -61,7 +59,7 @@ public class RouterConfig {
                         )
                         .nest(RequestPredicates.accept(MediaType.APPLICATION_JSON),
                                 builder1 -> builder1
-//                                        .filter(authFilter)
+                                        .filter(authFilter)
                                         .POST("", uploadHandler::uploadItem)
                                         .POST("/{id}", uploadHandler::updateItem)
                         )
@@ -75,7 +73,7 @@ public class RouterConfig {
                         )
                         .nest(RequestPredicates.accept(MediaType.APPLICATION_JSON),
                                 builder1 -> builder1
-//                                        .filter(authFilter)
+                                        .filter(authFilter)
                                         .POST("", uploadHandler::uploadAuction)
                                         .path("/{id}", builder2 -> builder2
                                                 .POST("", uploadHandler::updateAuction)

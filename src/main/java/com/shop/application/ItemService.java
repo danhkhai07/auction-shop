@@ -70,9 +70,8 @@ public class ItemService {
                 .filter(item -> (item.getSeller().getId().equals(deleterID) || deleterIsAdmin))
                 .switchIfEmpty(Mono.error(new IllegalAccessException("unauthorized")))
                 .flatMap(b -> itemRepository.deleteByID(id))
-                .filter(v -> {
-                    cacheManager.delete(id);
-                    return true;
+                .doOnNext(v -> {
+                        cacheManager.delete(id);
                 });
     }
 

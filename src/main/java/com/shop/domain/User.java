@@ -111,6 +111,14 @@ public class User {
         return Collections.unmodifiableList(ownedAuctions);
     }
 
+    public List<String> getOwnedItemIds() {
+        return ownedItems.stream().map(Item::getId).toList();
+    }
+
+    public List<String> getOwnedAuctionIds() {
+        return ownedAuctions.stream().map(Auction::getId).toList();
+    }
+
     public Set<Role> getRoles() {
         return Collections.unmodifiableSet(roles);
     }
