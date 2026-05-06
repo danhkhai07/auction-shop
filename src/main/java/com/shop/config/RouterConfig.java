@@ -40,17 +40,17 @@ public class RouterConfig {
                 )
                 .path("/user", builder -> builder
                         .GET("/{id}", viewHandler::getUser)
-                        .POST("/delete/{id}", contentType(MediaType.APPLICATION_JSON), deleteHandler::deleteUser).filter(roleFilter)
+                        .POST("/delete/{id}", deleteHandler::deleteUser).filter(roleFilter)
                 )
                 .path("/item", builder -> builder
                         .GET("/{id}", viewHandler::getItem)
-                        .POST("/delete/{id}", contentType(MediaType.APPLICATION_JSON), deleteHandler::deleteItem).filter(roleFilter)
+                        .POST("/delete/{id}", deleteHandler::deleteItem).filter(roleFilter)
                         .POST("", contentType(MediaType.APPLICATION_JSON), uploadHandler::uploadItem).filter(authFilter)
                         .POST("/{id}", contentType(MediaType.APPLICATION_JSON), uploadHandler::updateItem).filter(authFilter)
                 )
                 .path("/auction", builder -> builder
                         .GET("/{id}", viewHandler::getAuction)
-                        .POST("/delete/{id}", contentType(MediaType.APPLICATION_JSON), deleteHandler::deleteAuction).filter(roleFilter)
+                        .POST("/delete/{id}", deleteHandler::deleteAuction).filter(roleFilter)
                         .POST("", contentType(MediaType.APPLICATION_JSON), uploadHandler::uploadAuction).filter(authFilter)
                         .path("/{id}", builder2 -> builder2
                                 .POST("", contentType(MediaType.APPLICATION_JSON), uploadHandler::updateAuction).filter(authFilter)

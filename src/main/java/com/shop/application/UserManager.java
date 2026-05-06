@@ -6,6 +6,7 @@ import com.shop.domain.User;
 import com.shop.dto.response.GetUserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -82,7 +83,16 @@ public class UserManager {
 
     public Mono<Void> newUser(User user){
         return userRepository.newUser(user)
-                .switchIfEmpty(Mono.error(new IllegalStateException("user already exists")))
+                .onErrorResume(DuplicateKeyException ->
+                        Mono.error(new IllegalStateException("user already exists")))
+                .doOnNext(v -> {
+                    cacheManager.put(user.getId(), user);
+                    cacheManager.put(addNameCachePrefix(user.getUsername()), user);
+                });
+    }
+
+    public Mono<Void> updateUser(User user){
+        return userRepository.saveUser(user)
                 .doOnNext(v -> {
                     cacheManager.put(user.getId(), user);
                     cacheManager.put(addNameCachePrefix(user.getUsername()), user);
