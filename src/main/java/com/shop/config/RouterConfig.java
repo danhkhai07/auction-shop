@@ -35,6 +35,9 @@ public class RouterConfig {
                         .POST("/login", contentType(MediaType.APPLICATION_JSON), authHandler::login)
                         .GET("/me", authHandler::me).filter(authFilter)
                 )
+                .path("/auth", builder -> builder
+                        .GET("/me", authHandler::me).filter(authFilter)
+                )
                 .path("/user", builder -> builder
                         .GET("/{id}", viewHandler::getUser)
                         .POST("/delete/{id}", contentType(MediaType.APPLICATION_JSON), deleteHandler::deleteUser).filter(roleFilter)
