@@ -52,13 +52,13 @@ public class RouterConfig {
 //                        )
                 )
                 .path("/item", builder -> builder
-                        .nest(RequestPredicates.accept(MediaType.APPLICATION_JSON),
+                        .nest(RequestPredicates.contentType(MediaType.APPLICATION_JSON),
                                 builder1 -> builder1
                                         .filter(roleFilter)
                                         .GET("/{id}", viewHandler::getItem)
                                         .POST("/delete/{id}", deleteHandler::deleteItem)
                         )
-                        .nest(RequestPredicates.accept(MediaType.APPLICATION_JSON),
+                        .nest(RequestPredicates.contentType(MediaType.APPLICATION_JSON),
                                 builder1 -> builder1
                                         .filter(authFilter)
                                         .POST("", uploadHandler::uploadItem)
@@ -66,13 +66,13 @@ public class RouterConfig {
                         )
                 )
                 .path("/auction", builder -> builder
-                        .nest(RequestPredicates.accept(MediaType.APPLICATION_JSON),
+                        .GET("/{id}", viewHandler::getAuction)
+                        .nest(RequestPredicates.contentType(MediaType.APPLICATION_JSON),
                                 builder1 -> builder1
                                         .filter(roleFilter)
-                                        .GET("/{id}", viewHandler::getAuction)
                                         .POST("/delete/{id}", deleteHandler::deleteAuction)
                         )
-                        .nest(RequestPredicates.accept(MediaType.APPLICATION_JSON),
+                        .nest(RequestPredicates.contentType(MediaType.APPLICATION_JSON),
                                 builder1 -> builder1
                                         .filter(authFilter)
                                         .POST("", uploadHandler::uploadAuction)
