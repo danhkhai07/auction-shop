@@ -98,4 +98,12 @@ public class UserManager {
                     cacheManager.put(addNameCachePrefix(user.getUsername()), user);
                 });
     }
+
+    public Mono<Void> elevateUser(String id){
+        return this.getUserByID(id)
+                .flatMap(user -> {
+                    user.addRole(Role.ADMIN);
+                    return this.updateUser(user);
+                });
+    }
 }

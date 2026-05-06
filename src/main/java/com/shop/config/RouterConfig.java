@@ -25,6 +25,7 @@ public class RouterConfig {
         DeleteHandler deleteHandler,
         UploadHandler uploadHandler,
         AuctionHandler auctionHandler,
+        ElevateUserHandler elevateUserHandler,
 
         AuthFilter authFilter,
         RoleFilter roleFilter
@@ -41,6 +42,7 @@ public class RouterConfig {
                 .path("/user", builder -> builder
                         .GET("/{id}", viewHandler::getUser)
                         .POST("/delete/{id}", deleteHandler::deleteUser).filter(roleFilter)
+                        .POST("/elevate/{id}", elevateUserHandler::elevateUser).filter(authFilter)
                 )
                 .path("/item", builder -> builder
                         .GET("/{id}", viewHandler::getItem)
