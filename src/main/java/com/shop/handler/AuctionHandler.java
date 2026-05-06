@@ -58,7 +58,6 @@ public class AuctionHandler {
         return userManager.getUserByID(request.attributes().get("userID").toString())
                 .flatMap(user ->
                         auctionService.getAuctionByID(auctionID)
-                                .switchIfEmpty(Mono.error(new IllegalStateException("auction does not exist")))
                                 .filter(auction -> auction.getItem().getSeller().getId().equals(user.getId()))
                                 .switchIfEmpty(Mono.error(new IllegalStateException("unauthorized")))
                                 .flatMap(auction -> {
