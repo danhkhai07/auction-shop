@@ -23,9 +23,7 @@ public class UploadHandler {
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("missing fields")))
                 .flatMap(req -> itemService.newItem(
                         (String) request.attributes().get("userID"),
-                        req
-                    )
-                )
+                        req))
                 .flatMap(response -> ServerResponse.status(201).bodyValue(response));
     }
 
@@ -36,9 +34,7 @@ public class UploadHandler {
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("missing fields")))
                 .flatMap(req -> auctionService.newAuction(
                         (String) request.attributes().get("userID"),
-                        req
-                    )
-                )
+                        req))
                 .flatMap(response -> ServerResponse.status(201).bodyValue(response));
     }
 
@@ -48,9 +44,7 @@ public class UploadHandler {
                 .flatMap(req -> itemService.updateItem(
                         request.pathVariable("id"),
                         (String) request.attributes().get("userID"),
-                        req
-                    )
-                )
+                        req))
                 .flatMap(v -> ServerResponse.status(201).build());
     }
 
@@ -58,11 +52,9 @@ public class UploadHandler {
         return request.bodyToMono(UploadAuctionRequest.class)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("missing body")))
                 .flatMap(req -> auctionService.updateAuctionDetails(
-                                request.pathVariable("id"),
-                                (String) request.attributes().get("userID"),
-                                req
-                        )
-                )
+                        request.pathVariable("id"),
+                        (String) request.attributes().get("userID"),
+                        req))
                 .flatMap(v -> ServerResponse.status(201).build());
     }
 }

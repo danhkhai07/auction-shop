@@ -16,6 +16,7 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 @Configuration
 public class RouterConfig {
 
+
     @Bean
     RouterFunction<ServerResponse> routes(
         IndexHandler indexHandler,
@@ -33,7 +34,6 @@ public class RouterConfig {
                 .path("/auth", builder -> builder
                         .POST("/register", contentType(MediaType.APPLICATION_JSON), authHandler::register)
                         .POST("/login", contentType(MediaType.APPLICATION_JSON), authHandler::login)
-                        .GET("/me", authHandler::me).filter(authFilter)
                 )
                 .path("/auth", builder -> builder
                         .GET("/me", authHandler::me).filter(authFilter)
@@ -55,11 +55,11 @@ public class RouterConfig {
                         .path("/{id}", builder2 -> builder2
                                 .POST("", contentType(MediaType.APPLICATION_JSON), uploadHandler::updateAuction).filter(authFilter)
                                 .POST("/bid", contentType(MediaType.APPLICATION_JSON), auctionHandler::placeBid).filter(authFilter)
-                                .POST("/start", contentType(MediaType.APPLICATION_JSON), auctionHandler::startAuction).filter(authFilter)
-                                .POST("/pause", contentType(MediaType.APPLICATION_JSON), auctionHandler::pauseAuction).filter(authFilter)
-                                .POST("/unpause", contentType(MediaType.APPLICATION_JSON), auctionHandler::unpauseAuction).filter(authFilter)
-                                .POST("/cancel", contentType(MediaType.APPLICATION_JSON), auctionHandler::cancelAuction).filter(authFilter)
-                                .POST("/end", contentType(MediaType.APPLICATION_JSON), auctionHandler::finishAuction).filter(authFilter)
+                                .POST("/start", auctionHandler::startAuction).filter(authFilter)
+                                .POST("/pause", auctionHandler::pauseAuction).filter(authFilter)
+                                .POST("/unpause", auctionHandler::unpauseAuction).filter(authFilter)
+                                .POST("/cancel", auctionHandler::cancelAuction).filter(authFilter)
+                                .POST("/end", auctionHandler::finishAuction).filter(authFilter)
                                 .POST("/extend/endtime", contentType(MediaType.APPLICATION_JSON), auctionHandler::extendEndtime).filter(authFilter)
                         )
                 )

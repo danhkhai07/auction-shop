@@ -16,7 +16,7 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-public class AuthHandler {
+public class    AuthHandler {
 
     private final AuthService authService;
     private final UserManager userManager;
