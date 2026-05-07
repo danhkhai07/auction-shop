@@ -58,7 +58,7 @@ public class Auction {
 
         //2. Kiểm tra thời gian
         LocalDateTime now = LocalDateTime.now();
-        if (this.status != AuctionStatus.RUNNING || now.isBefore(startTime) || now.isAfter(endTime)) {
+        if (!isCurrentlyActive() || isClosed()) {
             throw new IllegalStateException("Auction is not currently active or has already closed.");
         }
 
@@ -105,6 +105,7 @@ public class Auction {
         }
         this.status = AuctionStatus.FINISHED;
         this.finalPrice = this.currentHighestPrice;
+        this.endTime = LocalDateTime.now();
     }
 
     public void cancelAuction(User user) {
