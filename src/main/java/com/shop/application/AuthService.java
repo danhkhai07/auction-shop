@@ -35,7 +35,7 @@ public class AuthService {
         String passwordHash = BCryptHash.hash(request.password());
         User user = new User(ulid.nextULID(), request.username(), passwordHash);
         return userManager.newUser(user)
-                .thenReturn(new RegisterResponse("User created"));
+                .thenReturn(new RegisterResponse("user created"));
     }
 
     public Mono<LoginResponse> login(LoginRequest request) {

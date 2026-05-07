@@ -20,6 +20,6 @@ public class ElevateUserHandler {
                 .filter(requester -> requester.hasRole(Role.ADMIN))
                 .switchIfEmpty(Mono.error(new IllegalAccessException("unauthorized")))
                 .flatMap(requester -> userManager.elevateUser(userID))
-                .flatMap(v -> ServerResponse.status(201).build());
+                .then(ServerResponse.status(201).build());
     }
 }

@@ -74,7 +74,7 @@ public class CacheManager<K, V> {
         return cleanUpInterval;
     }
 
-    //
+    //Dam bao an toan cho Scheduler
     private void cleanExpiredEntriesSafely() {
         try {
             cacheStore.cleanExpiredEntries();
@@ -83,7 +83,7 @@ public class CacheManager<K, V> {
         }
     }
 
-    // Tao mot scheduler chi dung 1 luong nen de don dep cache theo chu ky.
+    @PostConstruct// Tao mot scheduler chi dung 1 luong nen de don dep cache theo chu ky.
     private void startCleanupTask() {
         synchronized (schedulerLock) {
             if (isCleanupTaskRunning()) {
@@ -99,12 +99,6 @@ public class CacheManager<K, V> {
             );
         }
     }
-
-    //Tao Post Contruct
-    @PostConstruct
-    public void initCleanupTask(){
-        startCleanupTask();
-    }
     // Dung luong cleanup khi khong con can manager nay nua.
     @PreDestroy
     private void stopCleanupTask() {
@@ -118,12 +112,12 @@ public class CacheManager<K, V> {
         }
     }
 
-    // Kiem tra cleanup task da duoc khoi dong va chua bi dung hay chua.
+    // Kiem tra cleanup task da duoc khoi dong va bi dung hay chua.
     public boolean isCleanupTaskRunning() {
         ScheduledExecutorService currentExecutor = cleanupExecutor;
         return currentExecutor != null && !currentExecutor.isShutdown();
     }
-
+    //Tao Factory quan ly viec tao Thread rieng cho viec don dep cache
     private static class CleanupThreadFactory implements ThreadFactory {
         @Override
         public Thread newThread(Runnable runnable) {

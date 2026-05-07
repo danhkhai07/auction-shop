@@ -16,7 +16,7 @@ public class Auction {
     private BigDecimal currentHighestPrice;
     private User currentHighestBidder;
     private BigDecimal finalPrice;
-    private final LocalDateTime startTime;
+    private LocalDateTime startTime;
     private LocalDateTime endTime;
     private AuctionStatus status;
     private final List<BidTransaction> bidHistory = new ArrayList<>();
@@ -47,6 +47,7 @@ public class Auction {
             throw new IllegalStateException("Cannot start the auction from current status: " + this.status);
         }
         this.status = AuctionStatus.RUNNING;
+        this.startTime = LocalDateTime.now();
     }
 
     public void placeBid(User bidder, BigDecimal bidAmount) {
@@ -57,7 +58,7 @@ public class Auction {
 
         //2. Kiểm tra thời gian
         LocalDateTime now = LocalDateTime.now();
-        if (this.status != AuctionStatus.RUNNING || now.isBefore(startTime) || now.isAfter(endTime)) {
+        if (!isCurrentlyActive() || isClosed()) {
             throw new IllegalStateException("Auction is not currently active or has already closed.");
         }
 
@@ -104,6 +105,7 @@ public class Auction {
         }
         this.status = AuctionStatus.FINISHED;
         this.finalPrice = this.currentHighestPrice;
+        this.endTime = LocalDateTime.now();
     }
 
     public void cancelAuction(User user) {
