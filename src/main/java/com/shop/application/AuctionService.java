@@ -135,12 +135,10 @@ public class AuctionService {
                     }
                     return auctionRepository.saveAuction(auction);
                 })
-                .switchIfEmpty(Mono.error(new IllegalStateException("auction does not exists")));
     }
 
     public Mono<Void> updateAuctionStatus(Auction auction) {
         return auctionRepository.saveAuction(auction)
-                .switchIfEmpty(Mono.error(new IllegalStateException("auction does not exists")))
                 .doOnNext(v -> {
                     cacheManager.put(auction.getId(), auction);
                 });
