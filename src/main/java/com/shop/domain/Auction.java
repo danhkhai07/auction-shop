@@ -16,7 +16,7 @@ public class Auction {
     private BigDecimal currentHighestPrice;
     private User currentHighestBidder;
     private BigDecimal finalPrice;
-    private final LocalDateTime startTime;
+    private LocalDateTime startTime;
     private LocalDateTime endTime;
     private AuctionStatus status;
     private final List<BidTransaction> bidHistory = new ArrayList<>();
@@ -47,6 +47,7 @@ public class Auction {
             throw new IllegalStateException("Cannot start the auction from current status: " + this.status);
         }
         this.status = AuctionStatus.RUNNING;
+        this.startTime = LocalDateTime.now();
     }
 
     public void placeBid(User bidder, BigDecimal bidAmount) {
