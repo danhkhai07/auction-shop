@@ -134,7 +134,7 @@ public class AuctionService {
                         cacheManager.put(id, auction);
                     }
                     return auctionRepository.saveAuction(auction);
-                })
+                });
     }
 
     public Mono<Void> updateAuctionStatus(Auction auction) {
