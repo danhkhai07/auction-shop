@@ -21,7 +21,9 @@ public class AuctionHandler {
     public Mono<ServerResponse> placeBid(ServerRequest request) {
         String auctionID = request.pathVariable("id");
 
-        Mono<BidRequest> bidRequestMono = request.bodyToMono(BidRequest.class);
+        Mono<BidRequest> bidRequestMono = request.bodyToMono(BidRequest.class)
+                .filter(req -> !req.hasEmptyFields())
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("missing fields")));
         Mono<User> bidderMono = userManager.getUserByID(request.attributes().get("userID").toString());
 
         return Mono.zip(bidRequestMono, bidderMono)
@@ -115,7 +117,9 @@ public class AuctionHandler {
     public Mono<ServerResponse> extendEndtime(ServerRequest request) {
         String auctionID = request.pathVariable("id");
 
-        Mono<ExtendAuctionTime> extendTimeRequestMono = request.bodyToMono(ExtendAuctionTime.class);
+        Mono<ExtendAuctionTime> extendTimeRequestMono = request.bodyToMono(ExtendAuctionTime.class)
+                .filter(req -> !req.hasEmptyFields())
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("missing fields")));
         Mono<User> userMono = userManager.getUserByID(request.attributes().get("userID").toString());
 
         return Mono.zip(extendTimeRequestMono, userMono)
