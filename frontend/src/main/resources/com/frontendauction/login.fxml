@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" style="-fx-background-color: linear-gradient(to bottom right, #e6effd, #adcce9);" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.frontendauction.controller.LoginController">
+   <children>
+      <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0">
+         <children>
+            <Label layoutX="208.0" layoutY="65.0" text="AUCTION SHOP" textFill="#0ea0f0">
+               <font>
+                  <Font size="26.0" />
+               </font>
+            </Label>
+            <Label layoutX="253.0" layoutY="103.0" text="Login to continue" />
+            <TextField fx:id="usernameField" layoutX="233.0" layoutY="149.0" promptText="Type your Username" />
+            <Label layoutX="161.0" layoutY="153.0" text="Username" />
+            <Label layoutX="161.0" layoutY="204.0" text="Password" />
+            <Label fx:id="errorLabel" alignment="CENTER" layoutX="85.0" layoutY="241.0" prefHeight="18.0" prefWidth="426.0" textFill="#ff1818" visible="false" />
+            <Button fx:id="loginButton" defaultButton="true" layoutX="257.0" layoutY="259.0" mnemonicParsing="false" onAction="#handleLogin" prefHeight="31.0" prefWidth="82.0" text="Login">
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </Button>
+            <PasswordField fx:id="passwordField" layoutX="234.0" layoutY="200.0" promptText="Type your Password" />
+            <Button fx:id="signupButton" layoutX="257.0" layoutY="309.0" mnemonicParsing="false" onAction="#handleSignup" prefHeight="31.0" prefWidth="82.0" text="Sign Up">
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </Button>
+         </children>
+      </AnchorPane>
+   </children>
+</VBox>

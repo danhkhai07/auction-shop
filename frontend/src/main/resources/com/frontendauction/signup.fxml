@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" style="-fx-background-color: linear-gradient(to bottom right, #e6effd, #adcce9);" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.frontendauction.controller.SignupController">
+   <children>
+      <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0">
+         <children>
+            <Label layoutX="133.0" layoutY="45.0" text="CREATE YOUR ACCOUNT">
+               <font>
+                  <Font size="30.0" />
+               </font>
+            </Label>
+            <TextField fx:id="usernameField" layoutX="133.0" layoutY="118.0" prefHeight="46.0" prefWidth="334.0" promptText="USERNAME*" />
+            <PasswordField fx:id="passwordField" layoutX="133.0" layoutY="185.0" prefHeight="46.0" prefWidth="334.0" promptText="PASSWORD*" />
+            <PasswordField fx:id="confirmpassField" layoutX="131.0" layoutY="250.0" prefHeight="46.0" prefWidth="334.0" promptText="CONFIRM PASSWORD*" />
+            <Button fx:id="signupButton" alignment="CENTER" layoutX="264.0" layoutY="334.0" mnemonicParsing="false" onAction="#handleSignup" text="Sign Up">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Button>
+            <Label fx:id="errorLabel" alignment="CENTER" layoutX="189.0" layoutY="306.0" prefHeight="18.0" prefWidth="218.0" textFill="#fc0000" visible="false" />
+            <Button fx:id="backButton" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#handleBacktoLogin" text="Back to Login" />
+         </children>
+      </AnchorPane>
+   </children>
+</VBox>
