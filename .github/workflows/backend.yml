@@ -55,7 +55,7 @@ jobs:
       - name: Deploy
         run: |
           ssh -T -i ~/.ssh/deploy_key ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            cd /root/auction-shop/backend
+            cd /root/app
             docker compose pull
             docker compose up -d
           EOF
