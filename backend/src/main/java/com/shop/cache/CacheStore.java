@@ -6,7 +6,6 @@ public interface CacheStore<K, V> {
     void delete(K key);
     boolean contains(K key);
 
-    // bruh
     // Xoa cac entry da het han va tra ve so luong entry da duoc don dep.
     int cleanExpiredEntries();
 }
