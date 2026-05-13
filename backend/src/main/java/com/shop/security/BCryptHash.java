@@ -9,6 +9,7 @@ public class BCryptHash {
         return encoder.encode(text);
     }
 
+    // testing CI CD
     public static boolean compareHash(String text, String hash) {
         return encoder.matches(text, hash);
     }
