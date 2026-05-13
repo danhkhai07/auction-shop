@@ -6,6 +6,8 @@ spring:
     url: ${APP_DB_URL:r2dbc:postgresql://localhost:5432/auctionshopdb}
     username: ${APP_DB_USERNAME:myuser}
     password: ${APP_DB_PASSWORD:gratefultobealive}
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
 
 security:
   jwt:
