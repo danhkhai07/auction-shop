@@ -1,32 +1,37 @@
 version: '3.8'
-
 services:
   db:
     image: postgres:15-alpine
     container_name: auction-db
     environment:
-      POSTGRES_DB: auction_shop
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: your_password_here
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      # Automatically initialize the database schema
       - ./src/main/resources/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   app:
-    build: .
+    image: danhkhai07/auction-shop-backend:latest
     container_name: auction-app
     ports:
-      - "1234:1234"
+      - "${APP_PORT}:${APP_PORT}"
     environment:
-      - APP_DB_URL=r2dbc:postgresql://db:5432/auction_shop
-      - APP_DB_USERNAME=postgres
-      - APP_DB_PASSWORD=your_password_here
-      - SECURITY_JWT_SECRET=cmFwaWRseWJyb2tlbG93YXdhcmVzaW1wbGVzdGZhbGxza2lsbHRvbW9ycm93b25ldHI=
+      - APP_DB_URL=r2dbc:postgresql://db:5432/${POSTGRES_DB}
+      - APP_DB_USERNAME=${POSTGRES_USER}
+      - APP_DB_PASSWORD=${POSTGRES_PASSWORD}
+      - SECURITY_JWT_SECRET=${JWT_SECRET}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    restart: always
 
 volumes:
   postgres_data:
