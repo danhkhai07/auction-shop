@@ -2,7 +2,6 @@ package com.shop.handler;
 
 import com.shop.application.AuthService;
 import com.shop.application.UserManager;
-import com.shop.dto.request.EmptyBodyRequest;
 import com.shop.dto.request.LoginRequest;
 import com.shop.dto.request.RegisterRequest;
 import com.shop.dto.response.GetUserResponse;
@@ -11,8 +10,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
-
-import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
