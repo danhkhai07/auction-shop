@@ -80,22 +80,17 @@ public class AuctionService {
         if (cacheManager.contains(id)) {
             stream = Mono.just((Auction) cacheManager.get(id));
         } else {
-            stream = auctionRepository.existsByID(id)
-                    .filter(b -> b)
-                    .flatMap(b -> auctionRepository.getByID(id));
+            stream = auctionRepository.getByID(id);
         }
 
         return stream
-                .switchIfEmpty(Mono.error(new IllegalStateException("item does not exist")))
+                .switchIfEmpty(Mono.error(new IllegalStateException("auction does not exist")))
                 .filter(auction -> (
                         auction.getItem().getSeller().getId().equals(deleterID) || deleterIsAdmin)
                 )
                 .switchIfEmpty(Mono.error(new IllegalAccessException("unauthorized")))
                 .flatMap(b -> auctionRepository.deleteByID(id))
-                .filter(v -> {
-                    cacheManager.delete(id);
-                    return true;
-                });
+                .then(Mono.fromRunnable(() -> cacheManager.delete(id)));
     }
 
     public Mono<IDResponse> newAuction(String posterID, UploadAuctionRequest request) {
@@ -139,8 +134,6 @@ public class AuctionService {
 
     public Mono<Void> updateAuctionStatus(Auction auction) {
         return auctionRepository.saveAuction(auction)
-                .doOnNext(v -> {
-                    cacheManager.put(auction.getId(), auction);
-                });
+                .then(Mono.fromRunnable(() -> cacheManager.put(auction.getId(), auction)));
     }
 }
