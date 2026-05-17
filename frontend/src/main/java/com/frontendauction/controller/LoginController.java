@@ -126,11 +126,28 @@ public class LoginController {
 
         if (result.success()) {
             hideError();
-            System.out.println("Login success. Token = " + result.token());
+            // Lưu token để sử dụng cho các API call sau
+            com.frontendauction.service.TokenStore.setToken(result.token());
+            System.out.println("Login success. Token saved.");
+            navigateToDashboard();
             return;
         }
 
         showError(result.errorMessage());
+    }
+
+    private void navigateToDashboard() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    Objects.requireNonNull(getClass().getResource("/com/frontendauction/dashboard.fxml")));
+            Stage stage = (Stage) loginButton.getScene().getWindow();
+            Scene scene = new Scene(loader.load());
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("Failed to load dashboard: " + e.getMessage());
+        }
     }
 
     private String resolveErrorMessage(Throwable exception) {

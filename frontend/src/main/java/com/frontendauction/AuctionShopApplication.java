@@ -20,7 +20,7 @@ public class AuctionShopApplication extends Application {
         AuthService authService = createAuthService();
         FXMLLoader loader = new FXMLLoader(
                 Objects.requireNonNull(
-                        AuctionShopApplication.class.getResource("/com/frontendauction/login.fxml"),
+                        AuctionShopApplication.class.getResource("/com/frontendauction/live-auction.fxml"),
                         "login.fxml not found"
                 )
         );

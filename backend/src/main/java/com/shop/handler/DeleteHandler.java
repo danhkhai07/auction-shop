@@ -5,8 +5,6 @@ import com.shop.application.ItemService;
 import com.shop.application.UserCleanupService;
 import com.shop.application.UserManager;
 import com.shop.domain.Role;
-import com.shop.dto.request.EmptyBodyRequest;
-import com.shop.filter.RoleFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;

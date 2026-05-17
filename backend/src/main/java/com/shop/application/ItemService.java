@@ -70,9 +70,7 @@ public class ItemService {
                 .filter(item -> (item.getSeller().getId().equals(deleterID) || deleterIsAdmin))
                 .switchIfEmpty(Mono.error(new IllegalAccessException("unauthorized")))
                 .flatMap(b -> itemRepository.deleteByID(id))
-                .doOnNext(v -> {
-                        cacheManager.delete(id);
-                });
+                .then(Mono.fromRunnable(() -> cacheManager.delete(id)));
     }
 
     public Mono<IDResponse> newItem(String posterID, UploadItemRequest request) {

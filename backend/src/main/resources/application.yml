@@ -3,12 +3,14 @@ server:
 
 spring:
   r2dbc:
-    url: ${APP_DB_URL:r2dbc:postgresql://localhost:5432/auctionshopdb}
-    username: ${APP_DB_USERNAME:myuser}
-    password: ${APP_DB_PASSWORD:gratefultobealive}
+    url: r2dbc:postgresql://localhost:${POSTGRES_PORT}/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
 
 security:
   jwt:
     issuer: auction-shop
     expiration-ms: 86400000
-    secret: cmFwaWRseWJyb2tlbG93YXdhcmVzaW1wbGVzdGZhbGxza2lsbHRvbW9ycm93b25ldHI=
+    secret: ${JWT_SECRET}
