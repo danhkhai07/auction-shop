@@ -10,6 +10,6 @@ public record GetUserResponse(
     @JsonProperty("id") String id,
     @JsonProperty("username") String username,
     @JsonProperty("roles") Set<Role> roles,
-    @JsonProperty("itemList") List<String> itemList,
-    @JsonProperty("auctionList") List<String> auctionList
+    @JsonProperty("itemList") List<GetItemResponse> itemList,
+    @JsonProperty("auctionList") List<GetAuctionResponse> auctionList
 ){}

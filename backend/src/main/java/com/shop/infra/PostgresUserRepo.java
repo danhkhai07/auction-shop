@@ -1,15 +1,25 @@
 package com.shop.infra;
 
 import com.shop.application.UserRepository;
+import com.shop.domain.Auction;
+import com.shop.domain.AuctionStatus;
+import com.shop.domain.BidTransaction;
+import com.shop.domain.Item;
 import com.shop.domain.Role;
 import com.shop.domain.User;
+import io.r2dbc.spi.Row;
+import io.r2dbc.spi.RowMetadata;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -50,6 +60,29 @@ public class PostgresUserRepo implements UserRepository {
             "INSERT INTO user_roles (user_id, role_name) " +
                     "VALUES (:userId, :roleName) " +
                     "ON CONFLICT (user_id, role_name) DO NOTHING";
+
+    private static final String SELECT_ITEMS_BY_USER_ID =
+            "SELECT i.id AS item_id, i.name, i.description " +
+                    "FROM items i " +
+                    "WHERE i.seller_id = :userId " +
+                    "ORDER BY i.numeric_id";
+
+    private static final String SELECT_AUCTIONS_BY_USER_ID =
+            "SELECT a.id as a_id, a.starting_price, a.current_highest_price, a.final_price, a.start_time, a.end_time, a.status, " +
+                    "i.id as i_id, i.name as i_name, i.description as i_description, " +
+                    "b.id as b_id, b.username as b_username " +
+                    "FROM auctions a " +
+                    "JOIN items i ON a.item_id = i.id " +
+                    "LEFT JOIN users b ON a.current_highest_bidder_id = b.id " +
+                    "WHERE i.seller_id = :userId " +
+                    "ORDER BY a.start_time DESC";
+
+    private static final String SELECT_BIDS_BY_AUCTION_ID =
+            "SELECT b.id, b.bid_amount, b.timestamp, u.id as u_id, u.username as u_username " +
+                    "FROM bids b " +
+                    "JOIN users u ON b.bidder_id = u.id " +
+                    "WHERE b.auction_id = :auctionId " +
+                    "ORDER BY b.timestamp ASC";
 
     private final DatabaseClient databaseClient;
 
@@ -197,7 +230,118 @@ public class PostgresUserRepo implements UserRepository {
             }
         }
 
-        return Mono.just(user);
+        return loadOwnedItems(user)
+                .then(loadOwnedAuctions(user))
+                .thenReturn(user);
+    }
+
+    private Mono<Void> loadOwnedItems(User user) {
+        return databaseClient.sql(SELECT_ITEMS_BY_USER_ID)
+                .bind("userId", user.getId())
+                .map((row, metadata) -> new Item(
+                        row.get("item_id", String.class),
+                        row.get("name", String.class),
+                        row.get("description", String.class),
+                        user
+                ))
+                .all()
+                .doOnNext(user::addItem)
+                .then();
+    }
+
+    private Mono<Void> loadOwnedAuctions(User user) {
+        return databaseClient.sql(SELECT_AUCTIONS_BY_USER_ID)
+                .bind("userId", user.getId())
+                .map((row, metadata) -> mapAuction(row, metadata, user))
+                .all()
+                .flatMap(this::loadBidsForAuction)
+                .doOnNext(user::addAuction)
+                .then();
+    }
+
+    private Auction mapAuction(Row row, RowMetadata metadata, User seller) {
+        Item item = new Item(
+                row.get("i_id", String.class),
+                row.get("i_name", String.class),
+                row.get("i_description", String.class),
+                seller
+        );
+
+        Auction auction = new Auction(
+                row.get("a_id", String.class),
+                item,
+                row.get("starting_price", BigDecimal.class),
+                row.get("start_time", LocalDateTime.class),
+                row.get("end_time", LocalDateTime.class)
+        );
+
+        String bidderId = row.get("b_id", String.class);
+        if (bidderId != null) {
+            User bidder = new User(bidderId, row.get("b_username", String.class), "");
+            setPrivateField(auction, "currentHighestBidder", bidder);
+        }
+
+        BigDecimal currentHighestPrice = row.get("current_highest_price", BigDecimal.class);
+        if (currentHighestPrice != null) {
+            setPrivateField(auction, "currentHighestPrice", currentHighestPrice);
+        }
+
+        BigDecimal finalPrice = row.get("final_price", BigDecimal.class);
+        if (finalPrice != null) {
+            setPrivateField(auction, "finalPrice", finalPrice);
+        }
+
+        String status = row.get("status", String.class);
+        if (status != null) {
+            setPrivateField(auction, "status", AuctionStatus.valueOf(status));
+        }
+
+        return auction;
+    }
+
+    private Mono<Auction> loadBidsForAuction(Auction auction) {
+        return databaseClient.sql(SELECT_BIDS_BY_AUCTION_ID)
+                .bind("auctionId", auction.getId())
+                .map(this::mapBid)
+                .all()
+                .collectList()
+                .doOnNext(bids -> {
+                    Field field = ReflectionUtils.findField(Auction.class, "bidHistory");
+                    if (field != null) {
+                        ReflectionUtils.makeAccessible(field);
+                        @SuppressWarnings("unchecked")
+                        List<BidTransaction> history = (List<BidTransaction>) ReflectionUtils.getField(field, auction);
+                        if (history != null) {
+                            history.clear();
+                            history.addAll(bids);
+                        }
+                    }
+                })
+                .thenReturn(auction);
+    }
+
+    private BidTransaction mapBid(Row row, RowMetadata metadata) {
+        User bidder = new User(row.get("u_id", String.class), row.get("u_username", String.class), "");
+        BidTransaction bid = new BidTransaction(
+                row.get("id", String.class),
+                bidder,
+                row.get("bid_amount", BigDecimal.class)
+        );
+
+        LocalDateTime timestamp = row.get("timestamp", LocalDateTime.class);
+        if (timestamp != null) {
+            setPrivateField(bid, "timestamp", timestamp);
+        }
+
+        return bid;
+    }
+
+    private void setPrivateField(Object target, String fieldName, Object value) {
+        Field field = ReflectionUtils.findField(target.getClass(), fieldName);
+        if (field != null) {
+            ReflectionUtils.makeAccessible(field);
+            ReflectionUtils.setField(field, target, value);
+        }
     }
 
     private Mono<Void> replaceRoles(String userId, Set<Role> roles) {

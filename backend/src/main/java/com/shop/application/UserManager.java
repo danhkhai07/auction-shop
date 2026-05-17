@@ -1,15 +1,19 @@
 package com.shop.application;
 
 import com.shop.cache.CacheManager;
+import com.shop.domain.Auction;
+import com.shop.domain.Item;
 import com.shop.domain.Role;
 import com.shop.domain.User;
+import com.shop.dto.response.GetAuctionResponse;
+import com.shop.dto.response.GetItemResponse;
 import com.shop.dto.response.GetUserResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -54,16 +58,39 @@ public class UserManager {
     public Mono<GetUserResponse> getUserResponseByID(String id){
         return getUserByID(id)
                 .switchIfEmpty(Mono.error(new IllegalAccessException("user not found")))
-                .map(user -> {
-                    GetUserResponse response = new GetUserResponse(
-                            user.getId(),
-                            user.getUsername(),
-                            user.getRoles(),
-                            user.getOwnedItemIds(),
-                            user.getOwnedAuctionIds()
-                    );
-                    return response;
-                });
+                .map(user -> new GetUserResponse(
+                        user.getId(),
+                        user.getUsername(),
+                        user.getRoles(),
+                        user.getOwnedItems().stream().map(this::toItemResponse).toList(),
+                        user.getOwnedAuctions().stream().map(this::toAuctionResponse).toList()
+                ));
+    }
+
+    private GetItemResponse toItemResponse(Item item) {
+        return new GetItemResponse(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.getSeller().getId()
+        );
+    }
+
+    private GetAuctionResponse toAuctionResponse(Auction auction) {
+        User currentHighestBidder = auction.getCurrentHighestBidder();
+
+        return new GetAuctionResponse(
+                auction.getId(),
+                auction.getItem().getName(),
+                auction.getStartingPrice(),
+                auction.getCurrentHighestPrice(),
+                currentHighestBidder != null ? currentHighestBidder.getId() : null,
+                auction.getFinalPrice(),
+                auction.getStartTime(),
+                auction.getEndTime(),
+                auction.getStatus(),
+                auction.getBidHistory()
+        );
     }
 
     public Mono<Void> deleteUser(String id, String deleterID, Set<Role> deleterRoles){

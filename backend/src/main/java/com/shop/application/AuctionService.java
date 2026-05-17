@@ -3,6 +3,7 @@ package com.shop.application;
 import com.shop.cache.CacheManager;
 import com.shop.domain.Auction;
 import com.shop.domain.Role;
+import com.shop.domain.User;
 import com.shop.dto.request.UploadAuctionRequest;
 import com.shop.dto.response.GetAuctionResponse;
 import com.shop.dto.response.IDResponse;
@@ -19,6 +20,7 @@ import java.util.Set;
 public class AuctionService {
     private final AuctionRepository auctionRepository;
     private final ItemService itemService;
+    private final UserManager userManager;
     private final ULID ulid;
     private final CacheManager cacheManager;
 
@@ -38,35 +40,28 @@ public class AuctionService {
 
     public Mono<GetAuctionResponse> getAuctionResponseByID(String id){
         return getAuctionByID(id)
-                .map(auction -> {
-                    GetAuctionResponse response = new GetAuctionResponse(
-                            auction.getId(),
-                            "Auction",
-                            auction.getStartingPrice(),
-                            auction.getStartTime(),
-                            auction.getEndTime(),
-                            auction.getStatus(),
-                            auction.getBidHistory()
-                    );
-                    return response;
-                });
+                .map(this::toResponse);
     }
 
     public Flux<GetAuctionResponse> getActiveAuctions(){
         return auctionRepository.getActives()
                 .switchIfEmpty(Mono.error(new IllegalStateException("no auction found")))
-                .map(auction -> {
-                    GetAuctionResponse response = new GetAuctionResponse(
-                            auction.getId(),
-                            "Auction",
-                            auction.getStartingPrice(),
-                            auction.getStartTime(),
-                            auction.getEndTime(),
-                            auction.getStatus(),
-                            auction.getBidHistory()
-                    );
-                    return response;
-                });
+                .map(this::toResponse);
+    }
+
+    private GetAuctionResponse toResponse(Auction auction) {
+        return new GetAuctionResponse(
+                auction.getId(),
+                auction.getItem().getName(),
+                auction.getStartingPrice(),
+                auction.getCurrentHighestPrice(),
+                auction.getCurrentHighestBidder().getId(),
+                auction.getFinalPrice(),
+                auction.getStartTime(),
+                auction.getEndTime(),
+                auction.getStatus(),
+                auction.getBidHistory()
+        );
     }
 
     public Mono<Void> deleteAuction(String id, String deleterID, Set<Role> deleterRoles){
@@ -107,7 +102,13 @@ public class AuctionService {
                             request.startTime(),
                             request.endTime()
                     );
-                    return auctionRepository.newAuction(auction);
+                    return userManager.getUserByID(item.getSeller().getId())
+                            .flatMap(owner -> auctionRepository.newAuction(auction)
+                                    .then(Mono.fromRunnable(() -> {
+                                        cacheManager.put(auction.getId(), auction);
+                                        owner.addAuction(auction);
+                                    }))
+                                    .then(userManager.updateUser(owner)));
                 })
                 .thenReturn(new IDResponse(id));
     }
