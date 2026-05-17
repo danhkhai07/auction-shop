@@ -8,6 +8,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -40,6 +41,7 @@ public class AuctionShopApplication extends Application {
         stage.setTitle("Auction Shop");
         stage.setScene(scene);
         stage.setResizable(false);
+        stage.initStyle(StageStyle.UNDECORATED);
         stage.show();
     }
 
