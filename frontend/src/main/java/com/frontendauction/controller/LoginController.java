@@ -7,6 +7,8 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;//Nap file FXML thanh giao dien JavaFx
 import javafx.scene.Scene;//Tao Scene moi cho cua so
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;//Dieu khien cua so hien tai
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -27,6 +29,10 @@ public class LoginController {
         this.authService = authService;
     }
 
+    @FXML
+    private StackPane loginContainer;
+    @FXML
+    private AnchorPane loginForm;
     @FXML
     private TextField usernameField;
     @FXML
@@ -59,10 +65,34 @@ public class LoginController {
         stage.show();
     }
 
+    @FXML
     public void initialize() {
+        loginContainer.widthProperty().addListener((observable, oldValue, newValue) -> scaleFormProportionally());
+        loginContainer.heightProperty().addListener((observable, oldValue, newValue) -> scaleFormProportionally());
         hideError();
     }
 
+    private void scaleFormProportionally() {
+        double containerWidth = loginContainer.getWidth();
+        double containerHeight = loginContainer.getHeight();
+
+        if (containerWidth == 0 || containerHeight == 0) {
+            return;
+        }
+
+        double scaleX = containerWidth / 600.0;
+        double scaleY = containerHeight / 400.0;
+
+        // Chọn tỷ lệ nhỏ hơn để đảm bảo Form đăng nhập luôn vừa vặn, không bị tràn/bị cắt mất góc
+        double finalScale = Math.min(scaleX, scaleY);
+
+        if (finalScale < 1.0) {
+            finalScale = 1.0;
+        }
+
+        loginForm.setScaleX(finalScale);
+        loginForm.setScaleY(finalScale);
+    }
     private void showError(String message) {
         errorLabel.setText(message);
         errorLabel.setVisible(true);

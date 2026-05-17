@@ -43,8 +43,8 @@ public class TitleBarController {
         if (stage.isFullScreen()) {
             stage.setFullScreen(false);
         } else {
-            stage.setFullScreen(true);
             stage.setFullScreenExitHint(""); // Tắt dòng thông báo "Press ESC"
+            stage.setFullScreen(true);
         }
     }
 
