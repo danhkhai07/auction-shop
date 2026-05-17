@@ -50,7 +50,7 @@ public class AuctionShopApplication extends Application {
     }
 
     private AuthService createAuthService() {
-        String appMode = System.getProperty("app.mode", "http")
+        String appMode = System.getProperty("app.mode", "mock")
                 .trim()
                 .toLowerCase(Locale.ROOT);
 
