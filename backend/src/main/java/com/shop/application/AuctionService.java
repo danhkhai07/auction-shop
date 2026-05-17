@@ -50,18 +50,7 @@ public class AuctionService {
     }
 
     private GetAuctionResponse toResponse(Auction auction) {
-        return new GetAuctionResponse(
-                auction.getId(),
-                auction.getItem().getName(),
-                auction.getStartingPrice(),
-                auction.getCurrentHighestPrice(),
-                auction.getCurrentHighestBidder().getId(),
-                auction.getFinalPrice(),
-                auction.getStartTime(),
-                auction.getEndTime(),
-                auction.getStatus(),
-                auction.getBidHistory()
-        );
+        return new GetAuctionResponse(auction);
     }
 
     public Mono<Void> deleteAuction(String id, String deleterID, Set<Role> deleterRoles){

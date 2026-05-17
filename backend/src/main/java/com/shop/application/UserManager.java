@@ -5,6 +5,7 @@ import com.shop.domain.Auction;
 import com.shop.domain.Item;
 import com.shop.domain.Role;
 import com.shop.domain.User;
+import com.shop.dto.response.BidTransactionResponse;
 import com.shop.dto.response.GetAuctionResponse;
 import com.shop.dto.response.GetItemResponse;
 import com.shop.dto.response.GetUserResponse;
@@ -15,6 +16,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -62,8 +64,8 @@ public class UserManager {
                         user.getId(),
                         user.getUsername(),
                         user.getRoles(),
-                        user.getOwnedItems().stream().map(this::toItemResponse).toList(),
-                        user.getOwnedAuctions().stream().map(this::toAuctionResponse).toList()
+                        user.getOwnedItemIds(),
+                        user.getOwnedAuctionIds()
                 ));
     }
 
@@ -77,20 +79,7 @@ public class UserManager {
     }
 
     private GetAuctionResponse toAuctionResponse(Auction auction) {
-        User currentHighestBidder = auction.getCurrentHighestBidder();
-
-        return new GetAuctionResponse(
-                auction.getId(),
-                auction.getItem().getName(),
-                auction.getStartingPrice(),
-                auction.getCurrentHighestPrice(),
-                currentHighestBidder != null ? currentHighestBidder.getId() : null,
-                auction.getFinalPrice(),
-                auction.getStartTime(),
-                auction.getEndTime(),
-                auction.getStatus(),
-                auction.getBidHistory()
-        );
+        return new GetAuctionResponse(auction);
     }
 
     public Mono<Void> deleteUser(String id, String deleterID, Set<Role> deleterRoles){
