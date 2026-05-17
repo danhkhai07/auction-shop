@@ -60,22 +60,11 @@ public class UserManager {
     public Mono<GetUserResponse> getUserResponseByID(String id){
         return getUserByID(id)
                 .switchIfEmpty(Mono.error(new IllegalAccessException("user not found")))
-                .map(user -> new GetUserResponse(
-                        user.getId(),
-                        user.getUsername(),
-                        user.getRoles(),
-                        user.getOwnedItemIds(),
-                        user.getOwnedAuctionIds()
-                ));
+                .map(user -> new GetUserResponse(user));
     }
 
     private GetItemResponse toItemResponse(Item item) {
-        return new GetItemResponse(
-                item.getId(),
-                item.getName(),
-                item.getDescription(),
-                item.getSeller().getId()
-        );
+        return new GetItemResponse(item);
     }
 
     private GetAuctionResponse toAuctionResponse(Auction auction) {
