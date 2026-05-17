@@ -41,5 +41,14 @@ public class DashboardController {
         stage.setScene(scene);
         stage.show();
     }
-}
 
+    @FXML
+    public void goToProfile(Event event) throws IOException {
+        FXMLLoader loader = new FXMLLoader(
+                Objects.requireNonNull(getClass().getResource("/com/frontendauction/profile.fxml")));
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        Scene scene = new Scene(loader.load());
+        stage.setScene(scene);
+        stage.show();
+    }
+}
