@@ -26,15 +26,15 @@ public record GetAuctionResponse(
                 auction.getItem().getName(),
                 auction.getStartingPrice(),
                 auction.getCurrentHighestPrice(),
-                auction.getCurrentHighestBidder().getId(),
+                (auction.getCurrentHighestBidder() == null ? null
+                        : auction.getCurrentHighestBidder().getId()),
                 auction.getFinalPrice(),
                 auction.getStartTime(),
                 auction.getEndTime(),
                 auction.getStatus(),
-                (auction.getBidHistory() != null ? auction.getBidHistory().stream()
-                            .map(BidTransactionResponse::new)
-                            .collect(Collectors.toList())
-                        : List.of())
+                auction.getBidHistory().stream()
+                        .map(BidTransactionResponse::new)
+                        .collect(Collectors.toList())
         );
     }
 }
