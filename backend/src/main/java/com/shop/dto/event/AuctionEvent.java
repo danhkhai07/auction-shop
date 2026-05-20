@@ -2,7 +2,6 @@ package com.shop.dto.event;
 
 import com.shop.domain.Auction;
 import com.shop.domain.AuctionStatus;
-import com.shop.domain.User;
 import com.shop.dto.response.GetShortUserResponse;
 
 import java.math.BigDecimal;
@@ -20,7 +19,7 @@ public record AuctionEvent(
         this(type,
             auction.getStatus(),
             auction.getCurrentHighestPrice(),
-            new GetShortUserResponse(auction.getCurrentHighestBidder()),
+            auction.getCurrentHighestBidder() == null ? null : new GetShortUserResponse(auction.getCurrentHighestBidder()),
             auction.getFinalPrice(),
             auction.getEndTime()
         );

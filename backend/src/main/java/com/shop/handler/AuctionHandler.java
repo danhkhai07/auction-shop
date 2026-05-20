@@ -59,9 +59,9 @@ public class AuctionHandler {
                                     auction.cancelAuction(user);
                                     return auctionService.updateAuctionStatus(auction)
                                             .doOnSuccess(v -> {
-                                                stream.closeStream(auctionID);
                                                 stream.publish(auctionID,
                                                         new AuctionEvent("AUCTION_CANCELLED", auction));
+                                                stream.closeStream(auctionID);
                                             });
                                 })
                 )
@@ -139,9 +139,9 @@ public class AuctionHandler {
                             auction.finishAuction();
                             return auctionService.updateAuctionStatus(auction)
                                     .doOnSuccess(v -> {
-                                        stream.closeStream(auctionID);
                                         stream.publish(auctionID,
                                                 new AuctionEvent("AUCTION_FINISHED", auction));
+                                        stream.closeStream(auctionID);
                                     });
                         })
                 )

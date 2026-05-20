@@ -42,6 +42,9 @@ public class AuctionEventStream {
     }
 
     public void publish(String auctionID, AuctionEvent event) {
-        sinks.get(auctionID).tryEmitNext(event);
+        Sinks.Many<AuctionEvent> sink = sinks.get(auctionID);
+        if (sink != null) {
+            sink.tryEmitNext(event);
+        }
     }
 }
