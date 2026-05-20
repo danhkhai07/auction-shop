@@ -15,6 +15,10 @@ public class AuctionEventStream {
     private Map<String, Sinks.Many<AuctionEvent>> sinks
             = new ConcurrentHashMap<>();
 
+    public void newStream(String auctionID) {
+        sinks.put(auctionID, Sinks.many().multicast().onBackpressureBuffer());
+    }
+
     public Flux<AuctionEvent> getStream(String auctionID) {
         if (!sinks.containsKey(auctionID)) {
             return Flux.empty();
@@ -22,8 +26,8 @@ public class AuctionEventStream {
         return sinks.get(auctionID).asFlux();
     }
 
-    public void newStream(String auctionID) {
-        sinks.put(auctionID, Sinks.many().multicast().onBackpressureBuffer());
+    public void closeStream(String auctionID) {
+        sinks.remove(auctionID);
     }
 
     public void publish(String auctionID, AuctionEvent event) {
