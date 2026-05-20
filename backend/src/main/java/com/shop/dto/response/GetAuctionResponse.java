@@ -31,9 +31,10 @@ public record GetAuctionResponse(
                 auction.getStartTime(),
                 auction.getEndTime(),
                 auction.getStatus(),
-                auction.getBidHistory().stream()
-                        .map(bid -> new BidTransactionResponse(bid))
-                        .collect(Collectors.toList())
+                (auction.getBidHistory() != null ? auction.getBidHistory().stream()
+                            .map(BidTransactionResponse::new)
+                            .collect(Collectors.toList())
+                        : List.of())
         );
     }
 }
