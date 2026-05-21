@@ -38,15 +38,16 @@ public class ItemService {
     public Mono<GetItemResponse> getItemResponseByID(String id) {
         return getItemByID(id)
                 .switchIfEmpty(Mono.error(new IllegalAccessException("item not found")))
-                .map(item -> {
-                    GetItemResponse response = new GetItemResponse(
-                            item.getId(),
-                            item.getName(),
-                            item.getDescription(),
-                            item.getSeller().getId()
-                    );
-                    return response;
-                });
+                .map(this::toResponse);
+    }
+
+    private GetItemResponse toResponse(Item item) {
+        return new GetItemResponse(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.getSeller().getId()
+        );
     }
 
     public Mono<Void> deleteItem(String id, String deleterID, Set<Role> deleterRoles){
@@ -85,7 +86,12 @@ public class ItemService {
                             request.description(),
                             owner
                     );
-                    return itemRepository.newItem(item);
+                    return itemRepository.newItem(item)
+                            .then(Mono.fromRunnable(() -> {
+                                cacheManager.put(item.getId(), item);
+                                owner.addItem(item);
+                            }))
+                            .then(userManager.updateUser(owner));
                 })
                 .thenReturn(new IDResponse(id));
     }

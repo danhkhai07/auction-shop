@@ -4,7 +4,6 @@ import com.shop.application.AuthService;
 import com.shop.application.UserManager;
 import com.shop.dto.request.LoginRequest;
 import com.shop.dto.request.RegisterRequest;
-import com.shop.dto.response.GetUserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -54,14 +53,7 @@ public class    AuthHandler {
                         .map(Object::toString)
                         .orElseThrow(() -> new IllegalArgumentException("missing user id"))
                 )
-                .flatMap(userManager::getUserByID)
-                .map(user -> new GetUserResponse(
-                        user.getId(),
-                        user.getUsername(),
-                        user.getRoles(),
-                        user.getOwnedItemIds(),
-                        user.getOwnedAuctionIds()
-                ))
+                .flatMap(userManager::getUserResponseByID)
                 .flatMap(response -> ServerResponse.status(200).bodyValue(response));
     }
 }
