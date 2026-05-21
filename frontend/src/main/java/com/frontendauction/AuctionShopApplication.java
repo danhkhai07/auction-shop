@@ -38,18 +38,16 @@ public class AuctionShopApplication extends Application {
         });
 
         javafx.geometry.Rectangle2D visualBounds = javafx.stage.Screen.getPrimary().getVisualBounds();
-
-        double width = Math.min(1280.0, visualBounds.getWidth());
-        double height = Math.min(720.0, visualBounds.getHeight());
-        
-        Scene scene = new Scene(loader.load(), width, height);
+        Scene scene = AppWindow.createScene(loader.load());
         stage.setTitle("Auction Shop");
         stage.setScene(scene);
         stage.setResizable(true);
 
         stage.initStyle(StageStyle.UNDECORATED);
-        stage.setX(visualBounds.getMinX() + (visualBounds.getWidth() - width) / 2);
-        stage.setY(visualBounds.getMinY() + (visualBounds.getHeight() - height) / 2);
+        stage.setWidth(AppWindow.WIDTH);
+        stage.setHeight(AppWindow.HEIGHT);
+        stage.setX(visualBounds.getMinX() + Math.max(0.0, (visualBounds.getWidth() - AppWindow.WIDTH) / 2));
+        stage.setY(visualBounds.getMinY() + Math.max(0.0, (visualBounds.getHeight() - AppWindow.HEIGHT) / 2));
         
         stage.show();
     }

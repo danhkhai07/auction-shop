@@ -1,5 +1,6 @@
 package com.frontendauction.controller;
 
+import com.frontendauction.AppWindow;
 import com.frontendauction.model.ProductManagementModel;
 import com.frontendauction.service.ProductManagementService;
 import javafx.application.Platform;
@@ -227,7 +228,7 @@ public class ProductManagementController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/frontendauction/dashboard.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
+            AppWindow.applyScene(stage, root);
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();

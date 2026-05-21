@@ -1,5 +1,6 @@
 package com.frontendauction.controller;
 
+import com.frontendauction.AppWindow;
 import com.frontendauction.model.BidResult;
 import com.frontendauction.model.LiveAuctionModel;
 import com.frontendauction.service.LiveAuctionService;
@@ -15,12 +16,16 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
@@ -50,7 +55,7 @@ public class LiveAuctionController {
 
     private final LiveAuctionService auctionService = new LiveAuctionService();
 
-    // TODO: nhận auctionId từ dashboard khi navigate sang màn hình này
+    // TODO: nhan auctionId tu dashboard khi navigate sang man hinh nay
     private String currentAuctionId = "1";
 
     private long timeLeftSeconds = 0;
@@ -58,23 +63,15 @@ public class LiveAuctionController {
 
     @FXML
     public void initialize() {
-        // Cập nhật kích thước FXML tự động full với màn hình thực tế
-        if (rootPane != null) {
-            javafx.geometry.Rectangle2D bounds = javafx.stage.Screen.getPrimary().getVisualBounds();
-            rootPane.setPrefWidth(bounds.getWidth());
-            rootPane.setPrefHeight(bounds.getHeight());
-        }
-
-        if(txtMaxAutoBid != null && chkAutoBid != null) {
+        if (txtMaxAutoBid != null && chkAutoBid != null) {
             txtMaxAutoBid.disableProperty().bind(chkAutoBid.selectedProperty().not());
         }
 
-        if(btnPlaceBid != null) {
+        if (btnPlaceBid != null) {
             btnPlaceBid.setOnAction(event -> handlePlaceBid());
         }
 
-        // Cài đặt biểu đồ
-        if(priceChart != null) {
+        if (priceChart != null) {
             priceChart.setAnimated(false);
             priceChart.setLegendVisible(false);
         }
@@ -92,9 +89,8 @@ public class LiveAuctionController {
             if (auction != null) {
                 Platform.runLater(() -> updateAuctionUI(auction));
             } else {
-                Platform.runLater(() -> {
-                    System.out.println("Warning: Backend is not connected or auction not found.");
-                });
+                Platform.runLater(() ->
+                        System.out.println("Warning: Backend is not connected or auction not found."));
             }
         });
     }
@@ -111,16 +107,12 @@ public class LiveAuctionController {
                     auction.getStartingPrice() != null ? auction.getStartingPrice() : 0.0));
         }
 
-        // Giá hiện tại
         if (lblCurrentPrice != null && auction.getCurrentPrice() != null) {
             lblCurrentPrice.setText(String.format("%,.0f VNĐ", auction.getCurrentPrice()));
         }
 
-        // Thời gian còn lại
         timeLeftSeconds = auction.getRemainingSeconds();
         startCountdown();
-
-        // Bid history
         updateBidHistoryUI(auction.getBidHistory());
     }
 
@@ -130,14 +122,15 @@ public class LiveAuctionController {
             lvBidHistory.setItems(observableBids);
         }
 
-        // Cập nhật biểu đồ giá
         if (priceChart != null && bids != null && !bids.isEmpty()) {
             XYChart.Series<String, Number> series = new XYChart.Series<>();
             for (LiveAuctionModel.BidEntry bid : bids) {
                 String label = bid.getTimestamp() != null ? bid.getTimestamp() : "";
                 if (label.contains("T")) {
                     label = label.substring(label.indexOf("T") + 1);
-                    if (label.contains(".")) label = label.substring(0, label.indexOf("."));
+                    if (label.contains(".")) {
+                        label = label.substring(0, label.indexOf("."));
+                    }
                 }
                 series.getData().add(new XYChart.Data<>(label, bid.getBidAmount()));
             }
@@ -147,8 +140,10 @@ public class LiveAuctionController {
     }
 
     private void handlePlaceBid() {
-        if (txtBidAmount == null) return;
-        
+        if (txtBidAmount == null) {
+            return;
+        }
+
         String amountText = txtBidAmount.getText().trim();
         if (amountText.isEmpty()) {
             showError("Please enter an amount!");
@@ -162,52 +157,54 @@ public class LiveAuctionController {
 
         try {
             Double amount = Double.parseDouble(amountText);
-
             txtBidAmount.clear();
-            
-            // Tạm khóa nút để tránh spam click
+
             if (btnPlaceBid != null) {
                 btnPlaceBid.setDisable(true);
                 btnPlaceBid.setText("Sending...");
             }
 
             LiveAuctionModel.BidRequest request = new LiveAuctionModel.BidRequest(amount);
-
-            // Gửi dữ liệu qua API
-            auctionService.placeBid(currentAuctionId, request).thenAccept(result -> {
-                Platform.runLater(() -> {
-                    if (btnPlaceBid != null) {
-                        btnPlaceBid.setDisable(false);
-                        btnPlaceBid.setText("Place Bid");
-                    }
-                    
-                    if (result.success()) {
-                        showSuccess("Bid placed successfully!");
-                        loadAuctionData();
-                    } else {
-                        showError(result.errorMessage());
-                    }
-                });
-            });
+            auctionService.placeBid(currentAuctionId, request).thenAccept(result ->
+                    Platform.runLater(() -> handleBidResult(result)));
 
         } catch (NumberFormatException e) {
             showError("Invalid amount. Please enter a valid number.");
         }
     }
 
+    private void handleBidResult(BidResult result) {
+        if (btnPlaceBid != null) {
+            btnPlaceBid.setDisable(false);
+            btnPlaceBid.setText("Place Bid");
+        }
+
+        if (result.success()) {
+            showSuccess("Bid placed successfully!");
+            loadAuctionData();
+            return;
+        }
+
+        showError(result.errorMessage());
+    }
+
     private void startCountdown() {
         if (countdownTimeline != null) {
             countdownTimeline.stop();
         }
-        
+
         countdownTimeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
             if (timeLeftSeconds > 0) {
                 timeLeftSeconds--;
                 updateTimeLabel();
             } else {
-                if(lblTimeLeft != null) lblTimeLeft.setText("00:00:00 (Ended)");
+                if (lblTimeLeft != null) {
+                    lblTimeLeft.setText("00:00:00 (Ended)");
+                }
                 countdownTimeline.stop();
-                if(btnPlaceBid != null) btnPlaceBid.setDisable(true);
+                if (btnPlaceBid != null) {
+                    btnPlaceBid.setDisable(true);
+                }
             }
         }));
         countdownTimeline.setCycleCount(Animation.INDEFINITE);
@@ -216,8 +213,10 @@ public class LiveAuctionController {
     }
 
     private void updateTimeLabel() {
-        if(lblTimeLeft == null) return;
-        
+        if (lblTimeLeft == null) {
+            return;
+        }
+
         long hours = timeLeftSeconds / 3600;
         long minutes = (timeLeftSeconds % 3600) / 60;
         long seconds = timeLeftSeconds % 60;
@@ -246,7 +245,7 @@ public class LiveAuctionController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/frontendauction/dashboard.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
+            AppWindow.applyScene(stage, root);
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();

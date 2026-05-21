@@ -1,5 +1,6 @@
 package com.frontendauction.controller;
 
+import com.frontendauction.AppWindow;
 import com.frontendauction.service.AuthService;
 import com.frontendauction.service.HttpAuthService;
 import com.frontendauction.model.LoginResult;
@@ -7,6 +8,7 @@ import com.frontendauction.service.TokenStore;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;//Nap file FXML thanh giao dien JavaFx
+import javafx.scene.Parent;
 import javafx.scene.Scene;//Tao Scene moi cho cua so
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
@@ -61,8 +63,8 @@ public class LoginController {
             }
         });
         Stage stage = (Stage) loginButton.getScene().getWindow();//Lay cua so hien tai tu Login Button
-        Scene scene = new Scene(loader.load(), 600, 400);
-        stage.setScene(scene);//Chuyen qua Scene Signup
+        Parent root = loader.load();
+        AppWindow.applyScene(stage, root);//Chuyen qua Scene Signup
         stage.show();
     }
 
@@ -178,8 +180,8 @@ public class LoginController {
         FXMLLoader loader = new FXMLLoader(
                 Objects.requireNonNull(getClass().getResource("/com/frontendauction/dashboard.fxml")));
         Stage stage = (Stage) loginButton.getScene().getWindow();
-        Scene scene = new Scene(loader.load());
-        stage.setScene(scene);
+        Parent root = loader.load();
+        AppWindow.applyScene(stage, root);
         stage.show();
     }
 
