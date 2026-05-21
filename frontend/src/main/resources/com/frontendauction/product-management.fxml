@@ -1,57 +1,83 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
-<AnchorPane prefHeight="1080.0" prefWidth="1920.0" style="-fx-background-color: #f4f6f8;"
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="720.0" prefWidth="1280.0"
+            styleClass="premium-background" stylesheets="@css/global.css"
             xmlns="http://javafx.com/javafx/26"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.shop.controller.ProductManagementController">
+            fx:controller="com.frontendauction.controller.ProductManagementController">
     <children>
         <SplitPane dividerPositions="0.55"
-                   style="-fx-background-color: transparent; -fx-padding: 30;"
+                   styleClass="split-pane-custom"
                    AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                    AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <items>
+
                 <AnchorPane minHeight="0.0" minWidth="0.0">
                     <children>
-                        <VBox style="-fx-background-color: white;
-                                    -fx-background-radius: 14;
-                                    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 14, 0, 0, 5);"
+                        <VBox styleClass="premium-card"
                               AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                              AnchorPane.rightAnchor="16.0" AnchorPane.topAnchor="0.0">
+                              AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="0.0">
                             <padding>
-                                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+                                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
                             </padding>
                             <children>
-                                <Label alignment="CENTER" prefHeight="50.0"
-                                       prefWidth="900.0"
-                                       text="Danh sách sản phẩm của bạn">
-                                    <font>
-                                        <Font name="System Bold" size="42.0"/>
-                                    </font>
-                                    <VBox.margin>
-                                        <Insets bottom="18.0" left="10.0" top="10.0"/>
-                                    </VBox.margin>
-                                </Label>
+
+                                <HBox alignment="CENTER_LEFT">
+                                    <VBox.margin><Insets bottom="10.0"/></VBox.margin>
+                                    <children>
+                                        <Button fx:id="btnBack" mnemonicParsing="false" onAction="#handleBackToDashboard" styleClass="btn-text-only" text="&lt; Quay lại Dashboard" />
+                                    </children>
+                                </HBox>
+
+                                <HBox alignment="CENTER" spacing="5.0" styleClass="section-header-box">
+                                    <children>
+                                        <Label style="-fx-letter-spacing: 1px;"
+                                               text="DANH SÁCH SẢN PHẨM CỦA BẠN"
+                                               textFill="#3d52b0">
+                                            <font><Font name="System Bold" size="16.0"/></font>
+                                        </Label>
+                                    </children>
+                                    <VBox.margin><Insets bottom="10.0"/></VBox.margin>
+                                </HBox>
+
+                                <Separator styleClass="separator-custom">
+                                    <VBox.margin><Insets bottom="10.0"/></VBox.margin>
+                                </Separator>
+
                                 <TableView fx:id="tvProducts"
-                                           style="-fx-font-size: 20px;"
+                                           styleClass="table-view-custom"
                                            VBox.vgrow="ALWAYS">
                                     <columns>
-                                        <TableColumn id="colId"
-                                                     prefWidth="100.0"
+                                        <TableColumn fx:id="colId"
+                                                     prefWidth="60.0"
                                                      style="-fx-alignment: CENTER;"
                                                      text="ID"/>
-                                        <TableColumn id="colName"
-                                                     prefWidth="360.0"
-                                                     text="Tên sản phẩm"/>
-                                        <TableColumn id="colPrice"
+                                        <TableColumn fx:id="colName"
                                                      prefWidth="220.0"
+                                                     text="Tên sản phẩm"/>
+                                        <TableColumn fx:id="colPrice"
+                                                     prefWidth="140.0"
                                                      style="-fx-alignment: CENTER-RIGHT;"
                                                      text="Giá khởi điểm"/>
-                                        <TableColumn id="colDescription"
-                                                     prefWidth="320.0"
+                                        <TableColumn fx:id="colDescription"
+                                                     prefWidth="200.0"
                                                      text="Mô tả"/>
                                     </columns>
                                     <columnResizePolicy>
@@ -63,124 +89,100 @@
                         </VBox>
                     </children>
                 </AnchorPane>
+
                 <AnchorPane minHeight="0.0" minWidth="0.0">
                     <children>
-                        <VBox alignment="TOP_CENTER" spacing="36.0"
-                              style="-fx-background-color: white;
-                                     -fx-background-radius: 14;
-                                     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 14, 0, 0, 5);"
-                              AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="16.0"
+                        <VBox alignment="TOP_CENTER" spacing="15.0"
+                              styleClass="premium-card"
+                              AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0"
                               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <padding>
+                                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+                            </padding>
                             <children>
-                                <Label text="Chi tiết sản phẩm" textFill="#2c3e50">
-                                    <font>
-                                        <Font name="System Bold" size="38.0"/>
-                                    </font>
-                                </Label>
-                                <GridPane hgap="20.0" vgap="28.0">
+
+                                <HBox alignment="CENTER" spacing="5.0" styleClass="section-header-box">
+                                    <children>
+                                        <Label style="-fx-letter-spacing: 1px;"
+                                               text="CHI TIẾT SẢN PHẨM"
+                                               textFill="#3d52b0">
+                                            <font><Font name="System Bold" size="16.0"/></font>
+                                        </Label>
+                                    </children>
+                                </HBox>
+
+                                <Separator styleClass="separator-custom"/>
+
+                                <GridPane hgap="15.0" vgap="15.0">
                                     <columnConstraints>
                                         <ColumnConstraints hgrow="SOMETIMES"
-                                                           maxWidth="220.0"
+                                                           maxWidth="150.0"
                                                            minWidth="10.0"
-                                                           prefWidth="190.0"/>
+                                                           prefWidth="130.0"/>
                                         <ColumnConstraints hgrow="ALWAYS"
                                                            minWidth="10.0"
-                                                           prefWidth="420.0"/>
+                                                           prefWidth="250.0"/>
                                     </columnConstraints>
                                     <rowConstraints>
-                                        <RowConstraints minHeight="10.0" prefHeight="65.0" vgrow="SOMETIMES"/>
-                                        <RowConstraints minHeight="10.0" prefHeight="65.0" vgrow="SOMETIMES"/>
-                                        <RowConstraints minHeight="10.0" prefHeight="65.0" vgrow="SOMETIMES"/>
-                                        <RowConstraints minHeight="10.0" prefHeight="160.0" vgrow="SOMETIMES"/>
+                                        <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES"/>
+                                        <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES"/>
+                                        <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES"/>
+                                        <RowConstraints minHeight="10.0" prefHeight="100.0" vgrow="SOMETIMES"/>
                                     </rowConstraints>
                                     <children>
-                                        <Label text="Mã ID:" textFill="#7f8c8d">
-                                            <font>
-                                                <Font name="System Bold" size="22.0"/>
-                                            </font>
+
+                                        <Label text="Mã ID:" styleClass="form-label"/>
+                                        <Label text="Tên sản phẩm:" styleClass="form-label" GridPane.rowIndex="1"/>
+                                        <Label text="Giá khởi điểm:" styleClass="form-label" GridPane.rowIndex="2"/>
+                                        <Label text="Mô tả:" styleClass="form-label" GridPane.rowIndex="3" GridPane.valignment="TOP">
+                                            <GridPane.margin><Insets top="10.0"/></GridPane.margin>
                                         </Label>
-                                        <Label text="Tên sản phẩm:" textFill="#7f8c8d"
-                                               GridPane.rowIndex="1">
-                                            <font>
-                                                <Font name="System Bold" size="22.0"/>
-                                            </font>
-                                        </Label>
-                                        <Label text="Giá khởi điểm:" textFill="#7f8c8d"
-                                               GridPane.rowIndex="2">
-                                            <font>
-                                                <Font name="System Bold" size="22.0"/>
-                                            </font>
-                                        </Label>
-                                        <Label text="Mô tả:" textFill="#7f8c8d"
-                                               GridPane.rowIndex="3" GridPane.valignment="TOP">
-                                            <font>
-                                                <Font name="System Bold" size="22.0"/>
-                                            </font>
-                                            <GridPane.margin>
-                                                <Insets top="14.0"/>
-                                            </GridPane.margin>
-                                        </Label>
+
                                         <TextField fx:id="txtId" disable="true"
                                                    promptText="(Tạo tự động)"
-                                                   style="-fx-background-radius: 8; -fx-pref-height: 58; -fx-font-size: 20px;"
+                                                   styleClass="input-field" prefHeight="40.0"
                                                    GridPane.columnIndex="1"/>
                                         <TextField fx:id="txtName"
-                                                   style="-fx-background-radius: 8; -fx-pref-height: 58; -fx-font-size: 20px;"
+                                                   promptText="Nhập tên sản phẩm..."
+                                                   styleClass="input-field" prefHeight="40.0"
                                                    GridPane.columnIndex="1" GridPane.rowIndex="1"/>
                                         <TextField fx:id="txtPrice"
-                                                   style="-fx-background-radius: 8; -fx-pref-height: 58; -fx-font-size: 20px;"
+                                                   promptText="Nhập giá khởi điểm..."
+                                                   styleClass="input-field" prefHeight="40.0"
                                                    GridPane.columnIndex="1" GridPane.rowIndex="2"/>
                                         <TextArea fx:id="txtDescription"
-                                                  prefHeight="150.0" prefWidth="420.0"
+                                                  prefHeight="100.0"
                                                   promptText="Nhập thông tin chi tiết về tình trạng sản phẩm..."
-                                                  style="-fx-background-radius: 8; -fx-font-size: 20px;"
+                                                  styleClass="input-area"
                                                   wrapText="true"
                                                   GridPane.columnIndex="1" GridPane.rowIndex="3"/>
 
                                     </children>
                                 </GridPane>
-                                <HBox alignment="CENTER" spacing="20.0">
+
+                                <HBox alignment="CENTER" spacing="15.0">
+                                    <VBox.margin><Insets top="10.0"/></VBox.margin>
                                     <children>
                                         <Button fx:id="btnAdd" mnemonicParsing="false"
-                                                prefHeight="62.0" prefWidth="160.0"
-                                                style="-fx-background-color: #2ecc71;
-                                                       -fx-text-fill: white;
-                                                       -fx-font-weight: bold;
-                                                       -fx-background-radius: 8;
-                                                       -fx-font-size: 20px;
-                                                       -fx-cursor: hand;"
+                                                prefHeight="45.0" prefWidth="120.0"
+                                                styleClass="btn-success"
                                                 text="Thêm Mới"/>
                                         <Button fx:id="btnUpdate" mnemonicParsing="false"
-                                                prefHeight="62.0" prefWidth="160.0"
-                                                style="-fx-background-color: #f39c12;
-                                                       -fx-text-fill: white;
-                                                       -fx-font-weight: bold;
-                                                       -fx-background-radius: 8;
-                                                       -fx-font-size: 20px;
-                                                       -fx-cursor: hand;"
+                                                prefHeight="45.0" prefWidth="120.0"
+                                                styleClass="btn-warning"
                                                 text="Cập Nhật"/>
                                         <Button fx:id="btnDelete" mnemonicParsing="false"
-                                                prefHeight="62.0" prefWidth="160.0"
-                                                style="-fx-background-color: #e74c3c;
-                                                       -fx-text-fill: white;
-                                                       -fx-font-weight: bold;
-                                                       -fx-background-radius: 8;
-                                                       -fx-font-size: 20px;
-                                                       -fx-cursor: hand;"
+                                                prefHeight="45.0" prefWidth="120.0"
+                                                styleClass="btn-danger"
                                                 text="Xóa"/>
                                     </children>
-                                    <VBox.margin>
-                                        <Insets top="20.0"/>
-                                    </VBox.margin>
                                 </HBox>
 
                             </children>
-                            <padding>
-                                <Insets bottom="50.0" left="40.0" right="40.0" top="50.0"/>
-                            </padding>
                         </VBox>
                     </children>
                 </AnchorPane>
+
             </items>
         </SplitPane>
     </children>
