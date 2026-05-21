@@ -51,10 +51,9 @@ public class RouterConfig {
                         .POST("/{id}", contentType(MediaType.APPLICATION_JSON), uploadHandler::updateItem).filter(authFilter)
                 )
                 .path("/auction", builder -> builder
-                        .GET("/{id}", viewHandler::getAuction)
                         .POST("/delete/{id}", deleteHandler::deleteAuction).filter(roleFilter)
                         .POST("", contentType(MediaType.APPLICATION_JSON), uploadHandler::uploadAuction).filter(authFilter)
-                        .path("/{id}", builder2 -> builder2
+                        .path("/{id}", secured -> secured
                                 .POST("", contentType(MediaType.APPLICATION_JSON), uploadHandler::updateAuction).filter(authFilter)
                                 .POST("/bid", contentType(MediaType.APPLICATION_JSON), auctionHandler::placeBid).filter(authFilter)
                                 .POST("/start", auctionHandler::startAuction).filter(authFilter)
@@ -64,6 +63,10 @@ public class RouterConfig {
                                 .POST("/end", auctionHandler::finishAuction).filter(authFilter)
                                 .POST("/extend/endtime", contentType(MediaType.APPLICATION_JSON), auctionHandler::extendEndtime).filter(authFilter)
                         )
+                )
+                .path("/auction", builder -> builder
+                        .GET("/{id}", viewHandler::getAuction)
+                        .GET("/{id}/events", auctionHandler::stream)
                 )
                 .path("/feed", builder -> builder
                         .GET("", viewHandler::getFeed)
