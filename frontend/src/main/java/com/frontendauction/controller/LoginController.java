@@ -157,10 +157,24 @@ public class LoginController {
         if (result.success()) {
             hideError();
             System.out.println("Login success. Token = " + result.token());
+            try {
+                navigateToDashboard();
+            } catch (IOException exception) {
+                showError("Cannot open dashboard screen");
+            }
             return;
         }
 
         showError(result.errorMessage());
+    }
+
+    private void navigateToDashboard() throws IOException {
+        FXMLLoader loader = new FXMLLoader(
+                Objects.requireNonNull(getClass().getResource("/com/frontendauction/dashboard.fxml")));
+        Stage stage = (Stage) loginButton.getScene().getWindow();
+        Scene scene = new Scene(loader.load());
+        stage.setScene(scene);
+        stage.show();
     }
 
     private String resolveErrorMessage(Throwable exception) {
