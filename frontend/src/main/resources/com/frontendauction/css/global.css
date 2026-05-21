@@ -1,0 +1,300 @@
+/* Background chính của ứng dụng */
+.main-background {
+    -fx-background-color: linear-gradient(to bottom right, #f0f4ff, #e8eeff);
+}
+
+/* Các Panel/Thẻ thông tin chính (màu trắng, viền nhẹ, bo góc, có bóng đổ mờ) */
+.card {
+    -fx-background-color: white;
+    -fx-background-radius: 18;
+    -fx-border-color: #dde4f5;
+    -fx-border-width: 1;
+    -fx-border-radius: 18;
+    -fx-effect: dropshadow(gaussian, rgba(99,120,220,0.10), 20, 0, 0, 4);
+}
+
+/* Đường gạch ngang phân cách (Separator) */
+.separator-custom {
+    -fx-background-color: #eaedfa;
+}
+
+/* ScrollPane hiển thị mô tả hoặc danh sách */
+.scroll-pane-custom {
+    -fx-background-color: #f4f6ff;
+    -fx-background: #f4f6ff;
+    -fx-border-color: #e3e8f7;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+/* Bóng đổ cho Hình ảnh sản phẩm */
+.image-dropshadow {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 14, 0, 0, 3);
+}
+
+/* ======== NÚT BẤM (BUTTONS) ======== */
+
+/* Nút quay lại hoặc các nút text đơn giản */
+.btn-text-only {
+    -fx-background-color: transparent;
+    -fx-text-fill: #3d52b0;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.btn-text-only:hover {
+    -fx-text-fill: #1a237e;
+    -fx-underline: true;
+}
+
+/* Nút hành động chính (Ví dụ: Đặt giá, Đăng nhập, Thêm sản phẩm) */
+.btn-primary {
+    -fx-background-color: linear-gradient(to right, #2563eb, #3b82f6);
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(37,99,235,0.35), 14, 0.1, 0, 4);
+}
+
+.btn-primary:hover {
+    -fx-background-color: linear-gradient(to right, #1d4ed8, #2563eb);
+    -fx-effect: dropshadow(gaussian, rgba(37,99,235,0.45), 18, 0.2, 0, 6);
+}
+
+/* ======== Ô NHẬP LIỆU (TEXT FIELDS) ======== */
+
+/* Text field kích thước chuẩn */
+.input-field {
+    -fx-background-color: #f4f6ff;
+    -fx-background-radius: 8;
+    -fx-border-color: #c5cdf0;
+    -fx-border-radius: 8;
+    -fx-padding: 0 10 0 10;
+    -fx-font-size: 14px;
+}
+
+.input-field:focused {
+    -fx-border-color: #3b82f6;
+    -fx-border-width: 1.5;
+}
+
+/* Text field kích thước lớn (Nhập tiền) */
+.input-field-large {
+    -fx-background-color: #f4f6ff;
+    -fx-background-radius: 12;
+    -fx-border-color: #c5cdf0;
+    -fx-border-radius: 12;
+    -fx-border-width: 1.5;
+    -fx-text-fill: #1a237e;
+    -fx-prompt-text-fill: #a0aacc;
+    -fx-padding: 0 20 0 20;
+    -fx-font-size: 15px;
+}
+
+.input-field-large:focused {
+    -fx-border-color: #2563eb;
+    -fx-border-width: 2;
+}
+
+/* ======== CÁC THÀNH PHẦN KHÁC (COMPONENTS) ======== */
+
+/* Hộp thời gian màu đỏ */
+.time-box {
+    -fx-background-color: #fff5f5;
+    -fx-background-radius: 30;
+    -fx-border-color: #fecaca;
+    -fx-border-radius: 30;
+    -fx-padding: 8 22 8 22;
+}
+
+/* Tiêu đề các mục (Lịch sử đấu giá, ...) */
+.section-header-box {
+    -fx-background-color: #f0f4ff;
+    -fx-background-radius: 10;
+    -fx-border-color: #dde4f5;
+    -fx-border-radius: 10;
+    -fx-padding: 9 14 9 14;
+}
+
+/* Thanh Bottom Bar */
+.bottom-bar {
+    -fx-background-color: white;
+    -fx-border-color: #dde4f5 transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+    -fx-effect: dropshadow(gaussian, rgba(99,120,220,0.07), 10, 0, 0, -2);
+}
+
+/* ListView trong suốt */
+.list-view-transparent {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-control-inner-background: transparent;
+    -fx-font-size: 14px;
+    -fx-text-fill: #3d52b0;
+}
+
+/* ======== TABLE VÀ FORM VÀ CÁC THÀNH PHẦN KHÁC TỪ PRODUCT MANAGEMENT ======== */
+
+/* SplitPane */
+.split-pane-custom {
+    -fx-background-color: transparent;
+    -fx-padding: 20;
+}
+
+/* TableView */
+.table-view-custom {
+    -fx-font-size: 14px;
+    -fx-background-color: transparent;
+    -fx-border-color: #dde4f5;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+/* Form Label */
+.form-label {
+    -fx-text-fill: #7986a8;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+/* TextArea (Input Area) */
+.input-area {
+    -fx-background-color: #f4f6ff;
+    -fx-background: #f4f6ff;
+    -fx-background-radius: 8;
+    -fx-border-color: #c5cdf0;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-text-fill: #1a237e;
+    -fx-prompt-text-fill: #a0aacc;
+    -fx-font-size: 14px;
+    -fx-padding: 8 12 8 12;
+}
+
+.input-area:focused {
+    -fx-border-color: #3b82f6;
+    -fx-border-width: 1.5;
+}
+
+/* ======== NÚT CHỨC NĂNG (Thêm, Sửa, Xóa) ======== */
+
+/* Nút Thêm (Màu xanh lá) */
+.btn-success {
+    -fx-background-color: linear-gradient(to right, #16a34a, #22c55e);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(22,163,74,0.35), 10, 0.1, 0, 3);
+}
+
+.btn-success:hover {
+    -fx-background-color: linear-gradient(to right, #15803d, #16a34a);
+    -fx-effect: dropshadow(gaussian, rgba(22,163,74,0.45), 14, 0.2, 0, 5);
+}
+
+/* Nút Cập nhật (Màu cam) */
+.btn-warning {
+    -fx-background-color: linear-gradient(to right, #d97706, #f59e0b);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(217,119,6,0.35), 10, 0.1, 0, 3);
+}
+
+.btn-warning:hover {
+    -fx-background-color: linear-gradient(to right, #b45309, #d97706);
+    -fx-effect: dropshadow(gaussian, rgba(217,119,6,0.45), 14, 0.2, 0, 5);
+}
+
+/* Nút Xóa (Màu đỏ) */
+.btn-danger {
+    -fx-background-color: linear-gradient(to right, #dc2626, #ef4444);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(220,38,38,0.35), 10, 0.1, 0, 3);
+}
+
+.btn-danger:hover {
+    -fx-background-color: linear-gradient(to right, #b91c1c, #dc2626);
+    -fx-effect: dropshadow(gaussian, rgba(220,38,38,0.45), 14, 0.2, 0, 5);
+}
+
+/* ======== PREMIUM UI (LIVE AUCTION) ======== */
+
+/* Nền sang trọng */
+.premium-background {
+    -fx-background-color: linear-gradient(to bottom right, #f4f7fe, #e1e7f5);
+}
+
+/* Thẻ nổi khối 3D nhẹ nhàng, chuyên nghiệp */
+.premium-card {
+    -fx-background-color: white;
+    -fx-background-radius: 16;
+    -fx-border-color: #eaedf4;
+    -fx-border-width: 1;
+    -fx-border-radius: 16;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 20, 0, 0, 6);
+}
+
+/* Chữ màu sắc nét */
+.text-primary-dark {
+    -fx-text-fill: #1e293b; /* Slate 800 - Rất chuyên nghiệp */
+}
+
+.text-price-highlight {
+    -fx-text-fill: #2563eb; /* Blue 600 */
+}
+
+/* Hộp thời gian khẩn cấp (Sạch sẽ) */
+.time-box-urgent {
+    -fx-background-color: #fef2f2;
+    -fx-background-radius: 8;
+    -fx-border-color: #fecaca;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-padding: 8 20 8 20;
+}
+
+/* Nút đặt giá chuyên nghiệp */
+.btn-premium {
+    -fx-background-color: #2563eb;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(37, 99, 235, 0.2), 10, 0, 0, 4);
+}
+
+.btn-premium:hover {
+    -fx-background-color: #1d4ed8;
+    -fx-effect: dropshadow(gaussian, rgba(37, 99, 235, 0.3), 15, 0, 0, 6);
+}
+
+/* Biểu đồ cao cấp */
+.premium-chart {
+    -fx-background-color: transparent;
+}
+.premium-chart .chart-plot-background {
+    -fx-background-color: transparent;
+}
+.premium-chart .chart-vertical-grid-lines {
+    -fx-stroke: rgba(0, 0, 0, 0.03);
+}
+.premium-chart .chart-horizontal-grid-lines {
+    -fx-stroke: rgba(0, 0, 0, 0.05);
+}
+.premium-chart .default-color0.chart-series-line {
+    -fx-stroke: #6366f1;
+    -fx-stroke-width: 3px;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.4), 10, 0, 0, 5);
+}

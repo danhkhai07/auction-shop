@@ -3,6 +3,7 @@ package com.frontendauction.controller;
 import com.frontendauction.service.AuthService;
 import com.frontendauction.service.HttpAuthService;
 import com.frontendauction.model.LoginResult;
+import com.frontendauction.service.TokenStore;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;//Nap file FXML thanh giao dien JavaFx
@@ -155,8 +156,13 @@ public class LoginController {
         setLoading(false);
 
         if (result.success()) {
+            if (result.token() == null || result.token().isBlank()) {
+                showError("Login response missing token");
+                return;
+            }
+
             hideError();
-            System.out.println("Login success. Token = " + result.token());
+            TokenStore.setToken(result.token());
             try {
                 navigateToDashboard();
             } catch (IOException exception) {

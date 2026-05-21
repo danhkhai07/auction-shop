@@ -1,5 +1,6 @@
 package com.frontendauction.controller;
 
+import com.frontendauction.service.TokenStore;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -34,10 +35,11 @@ public class DashboardController {
 
     @FXML
     public void logout(Event event) throws IOException {
+        TokenStore.clear();
         FXMLLoader loader = new FXMLLoader(
                 Objects.requireNonNull(getClass().getResource("/com/frontendauction/login.fxml")));
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        Scene scene = new Scene(loader.load(), 800, 600); // Standard login size or use FXML root bounds
+        Scene scene = new Scene(loader.load());
         stage.setScene(scene);
         stage.show();
     }

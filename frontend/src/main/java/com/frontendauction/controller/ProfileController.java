@@ -1,5 +1,6 @@
 package com.frontendauction.controller;
 
+import com.frontendauction.service.TokenStore;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -24,6 +25,7 @@ public class ProfileController {
 
     @FXML
     public void logout(Event event) throws IOException {
+        TokenStore.clear();
         FXMLLoader loader = new FXMLLoader(
                 Objects.requireNonNull(getClass().getResource("/com/frontendauction/login.fxml")));
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
