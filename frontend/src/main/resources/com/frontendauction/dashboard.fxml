@@ -3,142 +3,122 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Separator?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: #f0f4f8;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.frontendauction.controller.DashboardController">
-
-    <left>
-        <VBox prefWidth="250.0" style="-fx-background-color: #ffffff; -fx-border-color: #e2e8f0; -fx-border-width: 0 1 0 0;">
-            <padding>
-                <Insets bottom="30.0" left="20.0" right="20.0" top="40.0" />
-            </padding>
-
-            <Label text="AUCTION DASHBOARD" textFill="#1e3a8a">
-                <font>
-                    <Font name="System Bold" size="18.0" />
-                </font>
-                <VBox.margin>
-                    <Insets bottom="40.0" />
-                </VBox.margin>
-            </Label>
-
-            <VBox spacing="10.0">
-                <Button alignment="BASELINE_LEFT" maxWidth="Infinity" onAction="#goToProfile" prefHeight="45.0" style="-fx-background-color: transparent; -fx-text-fill: #475569; -fx-font-size: 15px; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 8;" text="Profile">
+<VBox prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.frontendauction.controller.DashboardController">
+    <children>
+        <fx:include source="title-bar.fxml" />
+        <BorderPane style="-fx-background-color: #f0f4f8;" VBox.vgrow="ALWAYS">
+            <left>
+                <VBox prefWidth="250.0" style="-fx-background-color: #ffffff; -fx-border-color: #e2e8f0; -fx-border-width: 0 1 0 0;">
                     <padding>
-                        <Insets left="15.0" />
+                        <Insets bottom="30.0" left="20.0" right="20.0" top="40.0" />
                     </padding>
-                </Button>
 
-                <Button alignment="BASELINE_LEFT" maxWidth="Infinity" onAction="#goToLiveAuction" prefHeight="45.0" style="-fx-background-color: #e0e7ff; -fx-text-fill: #2d5af0; -fx-font-size: 15px; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 8;" text="Live auction">
-                    <padding>
-                        <Insets left="15.0" />
-                    </padding>
-                </Button>
+                    <Label text="AUCTION DASHBOARD" textFill="#1e3a8a">
+                        <font>
+                            <Font name="System Bold" size="18.0" />
+                        </font>
+                        <VBox.margin>
+                            <Insets bottom="40.0" />
+                        </VBox.margin>
+                    </Label>
 
-                <Button alignment="BASELINE_LEFT" maxWidth="Infinity" onAction="#goToProductManagement" prefHeight="45.0" style="-fx-background-color: transparent; -fx-text-fill: #475569; -fx-font-size: 15px; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 8;" text="Product">
-                    <padding>
-                        <Insets left="15.0" />
-                    </padding>
-                </Button>
-            </VBox>
+                    <VBox spacing="10.0">
+                        <Button alignment="BASELINE_LEFT" maxWidth="Infinity" onAction="#goToProfile" prefHeight="45.0" style="-fx-background-color: transparent; -fx-text-fill: #475569; -fx-font-size: 15px; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 8;" text="Profile">
+                            <padding>
+                                <Insets left="15.0" />
+                            </padding>
+                        </Button>
 
-            <Region VBox.vgrow="ALWAYS" />
-            <Button alignment="BASELINE_LEFT" maxWidth="Infinity" onAction="#logout" prefHeight="45.0" style="-fx-background-color: transparent; -fx-text-fill: #475569; -fx-font-size: 15px; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 8; -fx-background-color: aliceblue;" text="Log out" textFill="RED">
-                <padding>
-                    <Insets left="15.0" />
-                </padding>
-            </Button>
-        </VBox>
-    </left>
+                        <Button alignment="BASELINE_LEFT" maxWidth="Infinity" onAction="#goToLiveAuction" prefHeight="45.0" style="-fx-background-color: #e0e7ff; -fx-text-fill: #2d5af0; -fx-font-size: 15px; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 8;" text="Live Auction">
+                            <padding>
+                                <Insets left="15.0" />
+                            </padding>
+                        </Button>
 
-    <center>
-        <VBox alignment="TOP_CENTER" spacing="20.0">
-            <padding>
-                <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
-            </padding>
+                        <Button alignment="BASELINE_LEFT" maxWidth="Infinity" onAction="#goToProductManagement" prefHeight="45.0" style="-fx-background-color: transparent; -fx-text-fill: #475569; -fx-font-size: 15px; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 8;" text="Products">
+                            <padding>
+                                <Insets left="15.0" />
+                            </padding>
+                        </Button>
+                    </VBox>
 
-            <VBox maxWidth="800.0" style="-fx-background-color: #ffffff; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 15, 0, 0, 4);" VBox.vgrow="ALWAYS">
-                <padding>
-                    <Insets bottom="40.0" left="50.0" right="50.0" top="40.0" />
-                </padding>
+                    <Region VBox.vgrow="ALWAYS" />
 
-                <Label alignment="CENTER" maxWidth="Infinity" text="Dashboard" textFill="#1e3a8a">
-                    <font>
-                        <Font name="System Bold" size="28.0" />
-                    </font>
-                    <VBox.margin>
-                        <Insets bottom="15.0" />
-                    </VBox.margin>
-                </Label>
-
-                <Separator style="-fx-background-color: transparent;" />
-                <Region prefHeight="1.0" style="-fx-background-color: #e2e8f0;">
-                    <VBox.margin>
-                        <Insets bottom="30.0" top="10.0" />
-                    </VBox.margin>
-                </Region>
-
-                <VBox spacing="15.0">
-
-                    <HBox alignment="CENTER_LEFT" onMouseClicked="#goToProfile" pickOnBounds="true" prefHeight="60.0" style="-fx-background-color: #f8fafc; -fx-background-radius: 8; -fx-border-color: #f1f5f9; -fx-border-radius: 8; -fx-border-width: 1; -fx-cursor: hand;">
+                    <Button alignment="BASELINE_LEFT" maxWidth="Infinity" onAction="#logout" prefHeight="45.0" style="-fx-background-color: #eff6ff; -fx-text-fill: #b91c1c; -fx-font-size: 15px; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 8;" text="Log out">
                         <padding>
-                            <Insets left="20.0" right="20.0" />
+                            <Insets left="15.0" />
                         </padding>
-                        <Label text="Profile" textFill="#334155">
-                            <font>
-                                <Font name="System Bold" size="16.0" />
-                            </font>
-                        </Label>
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Label text=">" textFill="#94a3b8">
-                            <font>
-                                <Font name="System Bold" size="18.0" />
-                            </font>
-                        </Label>
-                    </HBox>
-
-                    <HBox alignment="CENTER_LEFT" onMouseClicked="#goToLiveAuction" pickOnBounds="true" prefHeight="60.0" style="-fx-background-color: #f8fafc; -fx-background-radius: 8; -fx-border-color: #f1f5f9; -fx-border-radius: 8; -fx-border-width: 1; -fx-cursor: hand;">
-                        <padding>
-                            <Insets left="20.0" right="20.0" />
-                        </padding>
-                        <Label text="Live auction" textFill="#334155">
-                            <font>
-                                <Font name="System Bold" size="16.0" />
-                            </font>
-                        </Label>
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Label text=">" textFill="#94a3b8">
-                            <font>
-                                <Font name="System Bold" size="18.0" />
-                            </font>
-                        </Label>
-                    </HBox>
-
-                    <HBox alignment="CENTER_LEFT" onMouseClicked="#goToProductManagement" pickOnBounds="true" prefHeight="60.0" style="-fx-background-color: #f8fafc; -fx-background-radius: 8; -fx-border-color: #f1f5f9; -fx-border-radius: 8; -fx-border-width: 1; -fx-cursor: hand;">
-                        <padding>
-                            <Insets left="20.0" right="20.0" />
-                        </padding>
-                        <Label text="Product" textFill="#334155">
-                            <font>
-                                <Font name="System Bold" size="16.0" />
-                            </font>
-                        </Label>
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Label text=">" textFill="#94a3b8">
-                            <font>
-                                <Font name="System Bold" size="18.0" />
-                            </font>
-                        </Label>
-                    </HBox>
-
+                    </Button>
                 </VBox>
-            </VBox>
-        </VBox>
-    </center>
+            </left>
 
-</BorderPane>
+            <center>
+                <VBox spacing="24.0" style="-fx-padding: 32 36 32 36;">
+                    <children>
+                        <VBox spacing="10.0" style="-fx-background-color: #ffffff; -fx-background-radius: 8; -fx-padding: 28; -fx-border-color: #e2e8f0; -fx-border-radius: 8;">
+                            <children>
+                                <Label text="Dashboard" textFill="#1e3a8a">
+                                    <font>
+                                        <Font name="System Bold" size="28.0" />
+                                    </font>
+                                </Label>
+                                <Label fx:id="lblWelcome" text="Loading user..." textFill="#0f172a">
+                                    <font>
+                                        <Font name="System Bold" size="22.0" />
+                                    </font>
+                                </Label>
+                                <Label fx:id="lblSummary" text="Loading dashboard data..." textFill="#475569" wrapText="true" />
+                            </children>
+                        </VBox>
+
+                        <HBox spacing="20.0">
+                            <children>
+                                <VBox onMouseClicked="#goToProfile" pickOnBounds="true" prefHeight="150.0" style="-fx-background-color: #ffffff; -fx-background-radius: 8; -fx-padding: 22; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-cursor: hand;" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label text="Profile" textFill="#1e3a8a">
+                                            <font>
+                                                <Font name="System Bold" size="18.0" />
+                                            </font>
+                                        </Label>
+                                        <Region VBox.vgrow="ALWAYS" />
+                                        <Label fx:id="lblProfileMeta" text="Loading profile..." textFill="#475569" wrapText="true" />
+                                    </children>
+                                </VBox>
+
+                                <VBox onMouseClicked="#goToLiveAuction" pickOnBounds="true" prefHeight="150.0" style="-fx-background-color: #ffffff; -fx-background-radius: 8; -fx-padding: 22; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-cursor: hand;" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label text="Live Auction" textFill="#1e3a8a">
+                                            <font>
+                                                <Font name="System Bold" size="18.0" />
+                                            </font>
+                                        </Label>
+                                        <Region VBox.vgrow="ALWAYS" />
+                                        <Label fx:id="lblAuctionMeta" text="Loading auctions..." textFill="#475569" wrapText="true" />
+                                    </children>
+                                </VBox>
+
+                                <VBox onMouseClicked="#goToProductManagement" pickOnBounds="true" prefHeight="150.0" style="-fx-background-color: #ffffff; -fx-background-radius: 8; -fx-padding: 22; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-cursor: hand;" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label text="Products" textFill="#1e3a8a">
+                                            <font>
+                                                <Font name="System Bold" size="18.0" />
+                                            </font>
+                                        </Label>
+                                        <Region VBox.vgrow="ALWAYS" />
+                                        <Label fx:id="lblProductMeta" text="Loading products..." textFill="#475569" wrapText="true" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+            </center>
+        </BorderPane>
+    </children>
+</VBox>

@@ -9,6 +9,7 @@ public class ProductManagementModel {
     private String description;
     private Double startingPrice;
     private String status;
+    private String sellerId;
 
     public ProductManagementModel() {}
 
@@ -35,4 +36,7 @@ public class ProductManagementModel {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getSellerId() { return sellerId; }
+    public void setSellerId(String sellerId) { this.sellerId = sellerId; }
 }

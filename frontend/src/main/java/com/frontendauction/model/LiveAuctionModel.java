@@ -14,12 +14,14 @@ public class LiveAuctionModel {
         private String id;
         private String name;
         private Double startingPrice;
+        private Double currentHighestPrice;
         private String startTime;
         private String endTime;
         private String status;
         private List<BidEntry> bidHistory;
 
-        public AuctionDetail() {}
+        public AuctionDetail() {
+        }
 
         public String getId() { return id; }
         public void setId(String id) { this.id = id; }
@@ -27,6 +29,8 @@ public class LiveAuctionModel {
         public void setName(String name) { this.name = name; }
         public Double getStartingPrice() { return startingPrice; }
         public void setStartingPrice(Double startingPrice) { this.startingPrice = startingPrice; }
+        public Double getCurrentHighestPrice() { return currentHighestPrice; }
+        public void setCurrentHighestPrice(Double currentHighestPrice) { this.currentHighestPrice = currentHighestPrice; }
         public String getStartTime() { return startTime; }
         public void setStartTime(String startTime) { this.startTime = startTime; }
         public String getEndTime() { return endTime; }
@@ -37,6 +41,9 @@ public class LiveAuctionModel {
         public void setBidHistory(List<BidEntry> bidHistory) { this.bidHistory = bidHistory; }
 
         public Double getCurrentPrice() {
+            if (currentHighestPrice != null) {
+                return currentHighestPrice;
+            }
             if (bidHistory != null && !bidHistory.isEmpty()) {
                 return bidHistory.getLast().getBidAmount();
             }
@@ -48,7 +55,7 @@ public class LiveAuctionModel {
                 LocalDateTime end = LocalDateTime.parse(endTime);
                 long seconds = ChronoUnit.SECONDS.between(LocalDateTime.now(), end);
                 return Math.max(0, seconds);
-            } catch (Exception e) {
+            } catch (Exception exception) {
                 return 0;
             }
         }
@@ -58,10 +65,12 @@ public class LiveAuctionModel {
     public static class BidEntry {
         private String transactionId;
         private BidderInfo bidder;
+        @JsonProperty("amount")
         private Double bidAmount;
         private String timestamp;
 
-        public BidEntry() {}
+        public BidEntry() {
+        }
 
         public String getTransactionId() { return transactionId; }
         public void setTransactionId(String transactionId) { this.transactionId = transactionId; }
@@ -79,9 +88,11 @@ public class LiveAuctionModel {
             String time = timestamp != null ? timestamp : "";
             if (time.contains("T")) {
                 time = time.substring(time.indexOf("T") + 1);
-                if (time.contains(".")) time = time.substring(0, time.indexOf("."));
+                if (time.contains(".")) {
+                    time = time.substring(0, time.indexOf("."));
+                }
             }
-            return time + " — " + bidderName + ": " + String.format("%,.0f VNĐ", bidAmount);
+            return time + " - " + bidderName + ": " + String.format("%,.0f VND", bidAmount);
         }
     }
 
@@ -90,7 +101,8 @@ public class LiveAuctionModel {
         private String id;
         private String username;
 
-        public BidderInfo() {}
+        public BidderInfo() {
+        }
 
         public String getId() { return id; }
         public void setId(String id) { this.id = id; }

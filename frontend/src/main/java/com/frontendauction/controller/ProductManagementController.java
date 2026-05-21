@@ -11,20 +11,25 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.List;
 
 public class ProductManagementController {
 
     @FXML private TableView<ProductManagementModel> tvProducts;
     @FXML private TableColumn<ProductManagementModel, String> colId;
     @FXML private TableColumn<ProductManagementModel, String> colName;
-    @FXML private TableColumn<ProductManagementModel, Double> colPrice;
+    @FXML private TableColumn<ProductManagementModel, String> colPrice;
     @FXML private TableColumn<ProductManagementModel, String> colDescription;
 
     @FXML private TextField txtId;
@@ -38,11 +43,12 @@ public class ProductManagementController {
     @FXML private Button btnBack;
 
     private final ProductManagementService productService = new ProductManagementService();
-    private ObservableList<ProductManagementModel> productList = FXCollections.observableArrayList();
+    private final ObservableList<ProductManagementModel> productList = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
         setupTable();
+        setupForm();
         loadData();
 
         tvProducts.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
@@ -51,143 +57,151 @@ public class ProductManagementController {
             }
         });
 
-        btnAdd.setOnAction(e -> handleAdd());
-        btnUpdate.setOnAction(e -> handleUpdate());
-        btnDelete.setOnAction(e -> handleDelete());
+        btnAdd.setOnAction(event -> handleAdd());
+        btnUpdate.setOnAction(event -> handleUpdate());
+        btnDelete.setOnAction(event -> handleDelete());
     }
 
     private void setupTable() {
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
-        colPrice.setCellValueFactory(new PropertyValueFactory<>("startingPrice"));
+        colPrice.setCellValueFactory(new PropertyValueFactory<>("sellerId"));
         colDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
-        
-        colPrice.setCellFactory(tc -> new TableCell<ProductManagementModel, Double>() {
+
+        colPrice.setText("Seller ID");
+        colPrice.setCellFactory(column -> new TableCell<>() {
             @Override
-            protected void updateItem(Double price, boolean empty) {
-                super.updateItem(price, empty);
-                if (empty || price == null) {
+            protected void updateItem(String value, boolean empty) {
+                super.updateItem(value, empty);
+                if (empty) {
                     setText(null);
-                } else {
-                    setText(String.format("%,.0f VNĐ", price));
+                    return;
                 }
+                setText(value == null || value.isBlank() ? "-" : value);
             }
         });
 
         tvProducts.setItems(productList);
     }
 
+    private void setupForm() {
+        txtPrice.setDisable(true);
+        txtPrice.setText("-");
+        txtPrice.setPromptText("Derived from logged-in user");
+    }
+
     private void loadData() {
-        productService.getAllProducts().thenAccept(products -> {
-            Platform.runLater(() -> {
-                productList.clear();
-                productList.addAll(products);
-            });
-        });
+        productService.getAllProducts()
+                .thenAccept(products -> Platform.runLater(() -> {
+                    productList.clear();
+                    productList.addAll(products);
+                }))
+                .exceptionally(exception -> {
+                    Platform.runLater(() -> showError(resolveErrorMessage(exception)));
+                    return null;
+                });
     }
 
     private void populateForm(ProductManagementModel product) {
         txtId.setText(product.getId() != null ? product.getId() : "");
         txtName.setText(product.getName() != null ? product.getName() : "");
-        txtPrice.setText(product.getStartingPrice() != null ? String.valueOf(product.getStartingPrice()) : "");
+        txtPrice.setText(product.getSellerId() != null && !product.getSellerId().isBlank()
+                ? product.getSellerId()
+                : "-");
         txtDescription.setText(product.getDescription() != null ? product.getDescription() : "");
     }
 
     private void clearForm() {
         txtId.clear();
         txtName.clear();
-        txtPrice.clear();
+        txtPrice.setText("-");
         txtDescription.clear();
         tvProducts.getSelectionModel().clearSelection();
     }
 
     private void handleAdd() {
-        if (!validateForm()) return;
+        if (!validateForm()) {
+            return;
+        }
 
         ProductManagementModel newProduct = new ProductManagementModel();
-        newProduct.setName(txtName.getText());
-        newProduct.setStartingPrice(Double.parseDouble(txtPrice.getText()));
-        newProduct.setDescription(txtDescription.getText());
+        newProduct.setName(txtName.getText().trim());
+        newProduct.setDescription(txtDescription.getText().trim());
 
         btnAdd.setDisable(true);
         btnAdd.setText("Processing...");
 
-        productService.addProduct(newProduct).thenAccept(success -> {
-            Platform.runLater(() -> {
-                btnAdd.setDisable(false);
-                btnAdd.setText("Thêm Mới");
-                if (success) {
-                    showSuccess("Product added successfully!");
-                    clearForm();
-                    loadData();
-                } else {
-                    showError("Failed to add product. Please check API.");
-                }
-            });
-        });
+        productService.addProduct(newProduct).thenAccept(success -> Platform.runLater(() -> {
+            btnAdd.setDisable(false);
+            btnAdd.setText("Add");
+            if (success) {
+                showSuccess("Product added successfully.");
+                clearForm();
+                loadData();
+            } else {
+                showError("Failed to add product.");
+            }
+        }));
     }
 
     private void handleUpdate() {
         ProductManagementModel selected = tvProducts.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            showError("Please select a product from the table to update.");
+            showError("Please select a product to update.");
             return;
         }
 
-        if (!validateForm()) return;
+        if (!validateForm()) {
+            return;
+        }
 
-        selected.setName(txtName.getText());
-        selected.setStartingPrice(Double.parseDouble(txtPrice.getText()));
-        selected.setDescription(txtDescription.getText());
+        selected.setName(txtName.getText().trim());
+        selected.setDescription(txtDescription.getText().trim());
 
         btnUpdate.setDisable(true);
         btnUpdate.setText("Processing...");
 
-        productService.updateProduct(selected.getId(), selected).thenAccept(success -> {
-            Platform.runLater(() -> {
-                btnUpdate.setDisable(false);
-                btnUpdate.setText("Cập Nhật");
-                if (success) {
-                    showSuccess("Product updated successfully!");
-                    clearForm();
-                    loadData();
-                } else {
-                    showError("Failed to update product. Please check API.");
-                }
-            });
-        });
+        productService.updateProduct(selected.getId(), selected).thenAccept(success -> Platform.runLater(() -> {
+            btnUpdate.setDisable(false);
+            btnUpdate.setText("Update");
+            if (success) {
+                showSuccess("Product updated successfully.");
+                clearForm();
+                loadData();
+            } else {
+                showError("Failed to update product.");
+            }
+        }));
     }
 
     private void handleDelete() {
         ProductManagementModel selected = tvProducts.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            showError("Please select a product from the table to delete.");
+            showError("Please select a product to delete.");
             return;
         }
 
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Confirm Deletion");
+        confirm.setTitle("Confirm deletion");
         confirm.setHeaderText(null);
-        confirm.setContentText("Are you sure you want to delete this product?");
-        
+        confirm.setContentText("Delete this product?");
+
         confirm.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
                 btnDelete.setDisable(true);
                 btnDelete.setText("Processing...");
 
-                productService.deleteProduct(selected.getId()).thenAccept(success -> {
-                    Platform.runLater(() -> {
-                        btnDelete.setDisable(false);
-                        btnDelete.setText("Xóa");
-                        if (success) {
-                            showSuccess("Product deleted successfully!");
-                            clearForm();
-                            loadData();
-                        } else {
-                            showError("Failed to delete product. Please check API.");
-                        }
-                    });
-                });
+                productService.deleteProduct(selected.getId()).thenAccept(success -> Platform.runLater(() -> {
+                    btnDelete.setDisable(false);
+                    btnDelete.setText("Delete");
+                    if (success) {
+                        showSuccess("Product deleted successfully.");
+                        clearForm();
+                        loadData();
+                    } else {
+                        showError("Failed to delete product.");
+                    }
+                }));
             }
         });
     }
@@ -197,13 +211,19 @@ public class ProductManagementController {
             showError("Product name cannot be empty.");
             return false;
         }
-        try {
-            Double.parseDouble(txtPrice.getText().trim());
-        } catch (NumberFormatException e) {
-            showError("Price must be a valid number.");
+
+        if (txtDescription.getText().trim().isEmpty()) {
+            showError("Product description cannot be empty.");
             return false;
         }
+
         return true;
+    }
+
+    private String resolveErrorMessage(Throwable exception) {
+        Throwable cause = exception.getCause() == null ? exception : exception.getCause();
+        String message = cause.getMessage();
+        return message == null || message.isBlank() ? "Unable to load your products." : message;
     }
 
     private void showSuccess(String message) {
@@ -230,9 +250,9 @@ public class ProductManagementController {
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             AppWindow.applyScene(stage, root);
             stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            showError("Failed to return to Dashboard: " + e.getMessage());
+        } catch (IOException exception) {
+            exception.printStackTrace();
+            showError("Failed to return to Dashboard: " + exception.getMessage());
         }
     }
 }
