@@ -137,6 +137,10 @@ public class Auction {
 
     public boolean isCurrentlyActive() {
         LocalDateTime now = LocalDateTime.now();
+        if (now.isAfter(endTime)) {
+            this.status = AuctionStatus.FINISHED;
+            return false;
+        }
         return this.status == AuctionStatus.RUNNING
                 && now.isAfter(startTime)
                 && now.isBefore(endTime);

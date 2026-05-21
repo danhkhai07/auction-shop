@@ -3,9 +3,9 @@ server:
 
 spring:
   r2dbc:
-    url: r2dbc:postgresql://localhost:${POSTGRES_PORT}/${POSTGRES_DB}
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
+    url: ${APP_DB_URL}
+    username: ${APP_DB_USERNAME}
+    password: ${APP_DB_PASSWORD}
   lifecycle:
     timeout-per-shutdown-phase: 30s
 
@@ -13,4 +13,4 @@ security:
   jwt:
     issuer: auction-shop
     expiration-ms: 86400000
-    secret: ${JWT_SECRET}
+    secret: ${SECURITY_JWT_SECRET}

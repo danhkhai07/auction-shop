@@ -5,3 +5,5 @@ frontend/target/
 /target/
 
 /.env
+# direnv config file
+/.envrc
