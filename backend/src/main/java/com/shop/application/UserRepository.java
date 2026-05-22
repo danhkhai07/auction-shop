@@ -2,12 +2,14 @@ package com.shop.application;
 
 import com.shop.domain.User;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface UserRepository {
 
     Mono<Boolean> existsByID(String id);
 
+    Flux<User> getAll();
     Mono<User> getByID(String id);
     Mono<User> getByName(String name);
 

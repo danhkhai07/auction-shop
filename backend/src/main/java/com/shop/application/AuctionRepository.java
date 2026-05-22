@@ -8,6 +8,7 @@ import reactor.core.publisher.Mono;
 
 @Repository
 public interface AuctionRepository {
+    Flux<Auction> getAll();
     Mono<Auction> getByID(String id);
     Flux<Auction> getActives();
 

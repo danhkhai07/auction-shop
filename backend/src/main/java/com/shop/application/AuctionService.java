@@ -6,6 +6,7 @@ import com.shop.domain.Role;
 import com.shop.domain.User;
 import com.shop.dto.request.UploadAuctionRequest;
 import com.shop.dto.response.GetAuctionResponse;
+import com.shop.dto.response.GetUserResponse;
 import com.shop.dto.response.IDResponse;
 import de.huxhorn.sulky.ulid.ULID;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -41,6 +43,12 @@ public class AuctionService {
     public Mono<GetAuctionResponse> getAuctionResponseByID(String id){
         return getAuctionByID(id)
                 .map(this::toResponse);
+    }
+
+    public Mono<List<GetAuctionResponse>> getAllAuctions(){
+        return auctionRepository.getAll()
+                .map(GetAuctionResponse::new)
+                .collectList();
     }
 
     public Flux<GetAuctionResponse> getActiveAuctions(){

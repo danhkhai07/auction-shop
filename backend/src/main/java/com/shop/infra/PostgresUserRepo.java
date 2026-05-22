@@ -40,6 +40,12 @@ public class PostgresUserRepo implements UserRepository {
                     "WHERE u.username = :username " +
                     "ORDER BY ur.role_name";
 
+    private static final String SELECT_ALL_USER_ROWS =
+            "SELECT u.id, u.username, u.password_hash, ur.role_name " +
+                    "FROM users u " +
+                    "LEFT JOIN user_roles ur ON ur.user_id = u.id " +
+                    "ORDER BY u.id, ur.role_name";
+
     private static final String UPDATE_USER_SQL =
             "UPDATE users " +
                     "SET username = :username, " +
@@ -101,6 +107,20 @@ public class PostgresUserRepo implements UserRepository {
                 .map((row, metadata) -> Boolean.TRUE.equals(row.get("user_exists", Boolean.class)))
                 .one()
                 .defaultIfEmpty(false);
+    }
+
+    @Override
+    public Flux<User> getAll() {
+        return databaseClient.sql(SELECT_ALL_USER_ROWS)
+                .map((row, metadata) -> new UserRow(
+                        row.get("id", String.class),
+                        row.get("username", String.class),
+                        row.get("password_hash", String.class),
+                        row.get("role_name", String.class)
+                ))
+                .all()
+                .bufferUntilChanged(UserRow::id)
+                .flatMap(this::mapUser);
     }
 
     @Override

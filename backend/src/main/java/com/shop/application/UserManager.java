@@ -63,6 +63,12 @@ public class UserManager {
                 .map(user -> new GetUserResponse(user));
     }
 
+    public Mono<List<GetUserResponse>> getAllUsers(){
+        return userRepository.getAll()
+                .map(GetUserResponse::new)
+                .collectList();
+    }
+
     private GetItemResponse toItemResponse(Item item) {
         return new GetItemResponse(item);
     }

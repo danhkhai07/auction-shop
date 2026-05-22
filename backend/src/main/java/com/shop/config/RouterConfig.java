@@ -27,8 +27,8 @@ public class RouterConfig {
         AdminActionsHandler elevateUserHandler,
 
         AuthFilter authFilter,
-        RoleFilter roleFilter
-    ) {
+        RoleFilter roleFilter,
+        AdminActionsHandler adminActionsHandler) {
         return RouterFunctions.route()
                 .GET("/", indexHandler::index)
                 .path("/auth", builder -> builder
@@ -72,6 +72,9 @@ public class RouterConfig {
                 .path("/admin", builder -> builder
                         .filter(roleFilter)
                         .POST("/elevate/user/{id}", elevateUserHandler::elevateUser)
+                        .GET("/user/all", adminActionsHandler::getAllUsers)
+                        .GET("/auction/all", adminActionsHandler::getAllAuctions)
+                        .GET("/item/all", adminActionsHandler::getAllItems)
                 )
                 .build();
     }
