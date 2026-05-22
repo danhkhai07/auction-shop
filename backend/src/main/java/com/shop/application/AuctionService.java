@@ -2,6 +2,7 @@ package com.shop.application;
 
 import com.shop.cache.CacheManager;
 import com.shop.domain.Auction;
+import com.shop.domain.AuctionStatus;
 import com.shop.domain.Role;
 import com.shop.domain.User;
 import com.shop.dto.request.UploadAuctionRequest;
@@ -81,7 +82,15 @@ public class AuctionService {
                         auction.getItem().getSeller().getId().equals(deleterID) || deleterIsAdmin)
                 )
                 .switchIfEmpty(Mono.error(new IllegalAccessException("unauthorized")))
-                .flatMap(b -> auctionRepository.deleteByID(id))
+                .flatMap(auction -> {
+                    if (auction.getStatus() == AuctionStatus.RUNNING) {
+                        return Mono.error(new IllegalStateException("running auction must be cancelled before delete"));
+                    }
+                    if (!auction.getBidHistory().isEmpty()) {
+                        return Mono.error(new IllegalStateException("auction with bids cannot be deleted"));
+                    }
+                    return auctionRepository.deleteByID(id);
+                })
                 .then(Mono.fromRunnable(() -> cacheManager.delete(id)));
     }
 
