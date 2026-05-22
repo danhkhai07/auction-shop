@@ -16,6 +16,8 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
+
 @Component
 @RequiredArgsConstructor
 public class AuctionHandler {
@@ -39,10 +41,18 @@ public class AuctionHandler {
                     return auctionService.getAuctionByID(auctionID)
                             .flatMap(auction -> {
                                 auction.placeBid(bidder, bidRequest.amount());
+                                boolean antiSniped = LocalDateTime.now().isAfter(auction.getEndTime().minusMinutes(1));
+                                if (antiSniped) {
+                                    auction.extendEndtime(LocalDateTime.now().plusMinutes(1));
+                                }
                                 return auctionService.updateAuctionStatus(auction)
                                         .doOnSuccess(v -> {
                                             stream.publish(auctionID,
                                                     new AuctionEvent("BID_PLACED", auction));
+                                            if (antiSniped) {
+                                                stream.publish(auctionID,
+                                                    new AuctionEvent("ANTI_SNIPE_AUCTION_EXTENDED", auction));
+                                            }
                                         });
                             });
                 })
