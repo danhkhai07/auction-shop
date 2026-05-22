@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono;
 
 @Component
 @RequiredArgsConstructor
-public class ElevateUserHandler {
+public class AdminActionsHandler {
     private final UserManager userManager;
 
     public Mono<ServerResponse> elevateUser(ServerRequest request) {

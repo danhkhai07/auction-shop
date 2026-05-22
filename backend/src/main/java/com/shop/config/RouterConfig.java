@@ -6,7 +6,6 @@ import com.shop.handler.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.server.RequestPredicates;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -25,7 +24,7 @@ public class RouterConfig {
         DeleteHandler deleteHandler,
         UploadHandler uploadHandler,
         AuctionHandler auctionHandler,
-        ElevateUserHandler elevateUserHandler,
+        AdminActionsHandler elevateUserHandler,
 
         AuthFilter authFilter,
         RoleFilter roleFilter
@@ -42,7 +41,6 @@ public class RouterConfig {
                 .path("/user", builder -> builder
                         .GET("/{id}", viewHandler::getUser)
                         .POST("/delete/{id}", deleteHandler::deleteUser).filter(roleFilter)
-                        .POST("/elevate/{id}", elevateUserHandler::elevateUser).filter(authFilter)
                 )
                 .path("/item", builder -> builder
                         .GET("/{id}", viewHandler::getItem)
@@ -70,6 +68,10 @@ public class RouterConfig {
                 )
                 .path("/feed", builder -> builder
                         .GET("", viewHandler::getFeed)
+                )
+                .path("/admin", builder -> builder
+                        .filter(roleFilter)
+                        .POST("/elevate/user/{id}", elevateUserHandler::elevateUser)
                 )
                 .build();
     }
