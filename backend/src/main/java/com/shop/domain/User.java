@@ -4,12 +4,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 public class User {
     private final String id;
     private String username;
     private String passwordHash;
+    private boolean banned;
+    private String bannedReason;
+    private LocalDateTime bannedAt;
+    private String bannedBy;
     private Set<Role> roles = new HashSet<>();
 
     private List<Item> ownedItems = new ArrayList<>();
@@ -55,6 +60,20 @@ public class User {
         return roles != null && roles.contains(role);
     }
 
+    public void ban(String reason, String bannedBy) {
+        this.banned = true;
+        this.bannedReason = reason;
+        this.bannedBy = bannedBy;
+        this.bannedAt = LocalDateTime.now();
+    }
+
+    public void unban() {
+        this.banned = false;
+        this.bannedReason = null;
+        this.bannedAt = null;
+        this.bannedBy = null;
+    }
+
     // =================================================================================================================
     //                  HELPER
     // =================================================================================================================
@@ -77,6 +96,10 @@ public class User {
 
     public int getItemCount() {
         return ownedItems.size();
+    }
+
+    public boolean isBanned() {
+        return banned;
     }
 
     // =================================================================================================================
@@ -123,6 +146,18 @@ public class User {
         return Collections.unmodifiableSet(roles);
     }
 
+    public String getBannedReason() {
+        return bannedReason;
+    }
+
+    public LocalDateTime getBannedAt() {
+        return bannedAt;
+    }
+
+    public String getBannedBy() {
+        return bannedBy;
+    }
+
     // =================================================================================================================
     //                  SETTERS
     // =================================================================================================================
@@ -148,5 +183,20 @@ public class User {
             this.roles = new HashSet<>();
         }
     }
-}
 
+    public void setBanned(boolean banned) {
+        this.banned = banned;
+    }
+
+    public void setBannedReason(String bannedReason) {
+        this.bannedReason = bannedReason;
+    }
+
+    public void setBannedAt(LocalDateTime bannedAt) {
+        this.bannedAt = bannedAt;
+    }
+
+    public void setBannedBy(String bannedBy) {
+        this.bannedBy = bannedBy;
+    }
+}

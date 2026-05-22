@@ -17,4 +17,6 @@ public interface UserRepository {
     Mono<Void> deleteByID(String id);
     Mono<Void> newUser(User user);
     Mono<Void> changePassword(String id, String password);
+    Mono<Void> banByID(String id, String reason, String bannedBy);
+    Mono<Void> unbanByID(String id);
 }

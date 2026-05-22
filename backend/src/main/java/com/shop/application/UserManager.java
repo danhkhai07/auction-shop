@@ -5,7 +5,6 @@ import com.shop.domain.Auction;
 import com.shop.domain.Item;
 import com.shop.domain.Role;
 import com.shop.domain.User;
-import com.shop.dto.response.BidTransactionResponse;
 import com.shop.dto.response.GetAuctionResponse;
 import com.shop.dto.response.GetItemResponse;
 import com.shop.dto.response.GetUserResponse;
@@ -16,7 +15,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +24,11 @@ public class UserManager {
 
     private String addNameCachePrefix(String name) {
         return "username$" + name;
+    }
+
+    private void evictUserCache(User user) {
+        cacheManager.delete(user.getId());
+        cacheManager.delete(addNameCachePrefix(user.getUsername()));
     }
 
     public Mono<User> getUserByID(String id){
@@ -86,8 +89,7 @@ public class UserManager {
 
         return this.getUserByID(id)
                 .flatMap(user -> {
-                    cacheManager.delete(id);
-                    cacheManager.delete(addNameCachePrefix(user.getUsername()));
+                    evictUserCache(user);
                     return userRepository.deleteByID(id);
                 });
     }
@@ -116,5 +118,31 @@ public class UserManager {
                     user.addRole(Role.ADMIN);
                     return this.updateUser(user);
                 });
+    }
+
+    public Mono<Void> banUser(String targetUserId, String adminId, String reason) {
+        if (targetUserId == null || targetUserId.isBlank()) {
+            return Mono.error(new IllegalArgumentException("user id is invalid"));
+        }
+        if (adminId.equals(targetUserId)) {
+            return Mono.error(new IllegalAccessException("cannot ban yourself"));
+        }
+
+        return this.getUserByID(targetUserId)
+                .flatMap(user -> userRepository.banByID(targetUserId, reason, adminId)
+                        .then(Mono.fromRunnable(() -> evictUserCache(user))));
+    }
+
+    public Mono<Void> unbanUser(String targetUserId, String adminId) {
+        if (targetUserId == null || targetUserId.isBlank()) {
+            return Mono.error(new IllegalArgumentException("user id is invalid"));
+        }
+        if (adminId.equals(targetUserId)) {
+            return Mono.error(new IllegalAccessException("cannot unban yourself"));
+        }
+
+        return this.getUserByID(targetUserId)
+                .flatMap(user -> userRepository.unbanByID(targetUserId)
+                        .then(Mono.fromRunnable(() -> evictUserCache(user))));
     }
 }

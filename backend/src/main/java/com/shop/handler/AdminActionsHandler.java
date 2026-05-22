@@ -4,6 +4,7 @@ import com.shop.application.AuctionService;
 import com.shop.application.ItemService;
 import com.shop.application.UserManager;
 import com.shop.domain.Role;
+import com.shop.dto.request.BanUserRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -49,5 +50,26 @@ public class AdminActionsHandler {
                 .filter(requester -> requester.hasRole(Role.ADMIN))
                 .switchIfEmpty(Mono.error(new IllegalAccessException("unauthorized")))
                 .flatMap(requester -> ServerResponse.ok().body(itemService.getAllItems(), Object.class));
+    }
+
+    public Mono<ServerResponse> banUser(ServerRequest request) {
+        String targetUserId = request.pathVariable("id");
+        String requesterID = request.attribute("userID").map(Object::toString).orElseThrow();
+        return userManager.getUserByID(requesterID)
+                .filter(requester -> requester.hasRole(Role.ADMIN))
+                .switchIfEmpty(Mono.error(new IllegalAccessException("unauthorized")))
+                .then(request.bodyToMono(BanUserRequest.class))
+                .flatMap(body -> userManager.banUser(targetUserId, requesterID, body.reason()))
+                .then(ServerResponse.status(204).build());
+    }
+
+    public Mono<ServerResponse> unbanUser(ServerRequest request) {
+        String targetUserId = request.pathVariable("id");
+        String requesterID = request.attribute("userID").map(Object::toString).orElseThrow();
+        return userManager.getUserByID(requesterID)
+                .filter(requester -> requester.hasRole(Role.ADMIN))
+                .switchIfEmpty(Mono.error(new IllegalAccessException("unauthorized")))
+                .flatMap(requester -> userManager.unbanUser(targetUserId, requesterID))
+                .then(ServerResponse.status(204).build());
     }
 }
