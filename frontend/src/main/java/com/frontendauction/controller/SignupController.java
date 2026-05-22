@@ -112,8 +112,6 @@ public class SignupController {
 
         if (result.success()) {
             hideError();
-            System.out.println("Signup success. Message = " + result.message());
-
             try {
                 handleBacktoLogin();
             } catch (IOException exception) {

@@ -11,6 +11,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class ProductManagementService {
@@ -37,13 +38,17 @@ public class ProductManagementService {
         return userProfileService.getOwnedItems();
     }
 
-    public CompletableFuture<Boolean> addProduct(ProductManagementModel product) {
+    /**
+     * Thêm sản phẩm mới. Trả về Optional<String> chứa ID của item vừa tạo nếu thành công,
+     * hoặc Optional.empty() nếu thất bại.
+     */
+    public CompletableFuture<Optional<String>> addProduct(ProductManagementModel product) {
         if (!TokenStore.hasToken()) {
-            return CompletableFuture.completedFuture(false);
+            return CompletableFuture.completedFuture(Optional.empty());
         }
 
         return userProfileService.getCurrentUser()
-                .thenCompose(user -> sendItemRequest(
+                .thenCompose(user -> sendItemRequestForId(
                         "/item",
                         userProfileService.createItemPayload(product, user.getId())
                 ));
@@ -92,6 +97,40 @@ public class ProductManagementService {
         } catch (Exception exception) {
             exception.printStackTrace();
             return CompletableFuture.completedFuture(false);
+        }
+    }
+
+    /**
+     * Gửi POST request và trả về ID từ server response {"id": "..."} nếu thành công.
+     */
+    private CompletableFuture<Optional<String>> sendItemRequestForId(String path, Map<String, String> payload) {
+        try {
+            String jsonRequest = objectMapper.writeValueAsString(payload);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(BASE_URL + path))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + TokenStore.getToken())
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonRequest, StandardCharsets.UTF_8))
+                    .build();
+
+            return client.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8))
+                    .thenApply(response -> {
+                        if (response.statusCode() == 200 || response.statusCode() == 201) {
+                            try {
+                                String id = objectMapper.readTree(response.body()).path("id").asText("");
+                                return id.isBlank() ? Optional.<String>empty() : Optional.of(id);
+                            } catch (Exception e) {
+                                System.err.println("[ProductService] Failed to parse ID from response: " + e.getMessage());
+                                return Optional.<String>empty();
+                            }
+                        }
+                        System.err.println("[ProductService] POST " + path + " failed with status " + response.statusCode() + ": " + response.body());
+                        return Optional.<String>empty();
+                    });
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return CompletableFuture.completedFuture(Optional.empty());
         }
     }
 }

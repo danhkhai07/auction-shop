@@ -23,6 +23,9 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class ProductManagementController {
 
@@ -102,6 +105,15 @@ public class ProductManagementController {
                 });
     }
 
+    /**
+     * Đợi 700ms trước khi reload để server kịp cập nhật itemList trong user profile.
+     * Nguyên nhân: sau khi add/update/delete, /auth/me có thể chưa phản ánh thay đổi ngay.
+     */
+    private void loadDataWithDelay() {
+        CompletableFuture.delayedExecutor(700, TimeUnit.MILLISECONDS)
+                .execute(this::loadData);
+    }
+
     private void populateForm(ProductManagementModel product) {
         txtId.setText(product.getId() != null ? product.getId() : "");
         txtName.setText(product.getName() != null ? product.getName() : "");
@@ -124,24 +136,41 @@ public class ProductManagementController {
             return;
         }
 
+        String name = txtName.getText().trim();
+        String description = txtDescription.getText().trim();
+
         ProductManagementModel newProduct = new ProductManagementModel();
-        newProduct.setName(txtName.getText().trim());
-        newProduct.setDescription(txtDescription.getText().trim());
+        newProduct.setName(name);
+        newProduct.setDescription(description);
 
         btnAdd.setDisable(true);
         btnAdd.setText("Processing...");
 
-        productService.addProduct(newProduct).thenAccept(success -> Platform.runLater(() -> {
-            btnAdd.setDisable(false);
-            btnAdd.setText("Add");
-            if (success) {
-                showSuccess("Product added successfully.");
-                clearForm();
-                loadData();
-            } else {
-                showError("Failed to add product.");
-            }
-        }));
+        productService.addProduct(newProduct)
+                .thenAccept(optionalId -> Platform.runLater(() -> {
+                    btnAdd.setDisable(false);
+                    btnAdd.setText("Add");
+                    if (optionalId.isPresent()) {
+                        // Thêm trực tiếp vào list với ID từ server, không cần reload
+                        ProductManagementModel created = new ProductManagementModel();
+                        created.setId(optionalId.get());
+                        created.setName(name);
+                        created.setDescription(description);
+                        productList.add(created);
+                        showSuccess("Product added successfully.");
+                        clearForm();
+                    } else {
+                        showError("Failed to add product. Check console for details.");
+                    }
+                }))
+                .exceptionally(exception -> {
+                    Platform.runLater(() -> {
+                        btnAdd.setDisable(false);
+                        btnAdd.setText("Add");
+                        showError(resolveErrorMessage(exception));
+                    });
+                    return null;
+                });
     }
 
     private void handleUpdate() {
@@ -155,23 +184,45 @@ public class ProductManagementController {
             return;
         }
 
-        selected.setName(txtName.getText().trim());
-        selected.setDescription(txtDescription.getText().trim());
+        // Lưu giá trị mới ở local, KHÔNG mutate object cho đến khi server confirm
+        String newName = txtName.getText().trim();
+        String newDescription = txtDescription.getText().trim();
+        String oldName = selected.getName();
+        String oldDescription = selected.getDescription();
+
+        ProductManagementModel payload = new ProductManagementModel();
+        payload.setId(selected.getId());
+        payload.setName(newName);
+        payload.setDescription(newDescription);
+        payload.setSellerId(selected.getSellerId());
 
         btnUpdate.setDisable(true);
         btnUpdate.setText("Processing...");
 
-        productService.updateProduct(selected.getId(), selected).thenAccept(success -> Platform.runLater(() -> {
-            btnUpdate.setDisable(false);
-            btnUpdate.setText("Update");
-            if (success) {
-                showSuccess("Product updated successfully.");
-                clearForm();
-                loadData();
-            } else {
-                showError("Failed to update product.");
-            }
-        }));
+        productService.updateProduct(selected.getId(), payload)
+                .thenAccept(success -> Platform.runLater(() -> {
+                    btnUpdate.setDisable(false);
+                    btnUpdate.setText("Update");
+                    if (success) {
+                        // Chỉ cập nhật object sau khi server xác nhận
+                        selected.setName(newName);
+                        selected.setDescription(newDescription);
+                        // Buộc TableView refresh
+                        tvProducts.refresh();
+                        showSuccess("Product updated successfully.");
+                        clearForm();
+                    } else {
+                        showError("Failed to update product.");
+                    }
+                }))
+                .exceptionally(exception -> {
+                    Platform.runLater(() -> {
+                        btnUpdate.setDisable(false);
+                        btnUpdate.setText("Update");
+                        showError(resolveErrorMessage(exception));
+                    });
+                    return null;
+                });
     }
 
     private void handleDelete() {
@@ -191,17 +242,27 @@ public class ProductManagementController {
                 btnDelete.setDisable(true);
                 btnDelete.setText("Processing...");
 
-                productService.deleteProduct(selected.getId()).thenAccept(success -> Platform.runLater(() -> {
-                    btnDelete.setDisable(false);
-                    btnDelete.setText("Delete");
-                    if (success) {
-                        showSuccess("Product deleted successfully.");
-                        clearForm();
-                        loadData();
-                    } else {
-                        showError("Failed to delete product.");
-                    }
-                }));
+                productService.deleteProduct(selected.getId())
+                        .thenAccept(success -> Platform.runLater(() -> {
+                            btnDelete.setDisable(false);
+                            btnDelete.setText("Delete");
+                            if (success) {
+                                // Xóa trực tiếp khỏi list, không cần reload
+                                productList.remove(selected);
+                                showSuccess("Product deleted successfully.");
+                                clearForm();
+                            } else {
+                                showError("Failed to delete product.");
+                            }
+                        }))
+                        .exceptionally(exception -> {
+                            Platform.runLater(() -> {
+                                btnDelete.setDisable(false);
+                                btnDelete.setText("Delete");
+                                showError(resolveErrorMessage(exception));
+                            });
+                            return null;
+                        });
             }
         });
     }

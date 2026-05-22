@@ -33,18 +33,18 @@ public class LiveAuctionService {
                 .build();
 
         return client.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8))
-                .thenApply(response -> {
+                .thenCompose(response -> {
                     try {
                         if (response.statusCode() == 200) {
-                            return objectMapper.readValue(response.body(), LiveAuctionModel.AuctionDetail.class);
-                        } else {
-                            System.err.println("API Error getAuctionDetails: " + response.statusCode()
-                                    + " — " + response.body());
+                            return CompletableFuture.completedFuture(
+                                    objectMapper.readValue(response.body(), LiveAuctionModel.AuctionDetail.class));
                         }
+                        String errMsg = "Server returned status " + response.statusCode();
+                        System.err.println("API Error getAuctionDetails: " + response.statusCode() + " — " + response.body());
+                        return CompletableFuture.failedFuture(new IllegalStateException(errMsg));
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        return CompletableFuture.failedFuture(e);
                     }
-                    return null;
                 });
     }
 

@@ -52,7 +52,14 @@ public class LiveAuctionModel {
 
         public long getRemainingSeconds() {
             try {
-                LocalDateTime end = LocalDateTime.parse(endTime);
+                if (endTime == null || endTime.isBlank()) return 0;
+                // Xử lý cả timestamp có timezone (ví dụ: "2025-05-21T15:00:00Z" hoặc "+07:00")
+                String normalized = endTime.replace("Z", "");
+                int tzIndex = normalized.lastIndexOf('+');
+                if (tzIndex > 10) normalized = normalized.substring(0, tzIndex); // bỏ phần +07:00
+                int minusTzIndex = normalized.lastIndexOf('-');
+                if (minusTzIndex > 10) normalized = normalized.substring(0, minusTzIndex);
+                LocalDateTime end = LocalDateTime.parse(normalized);
                 long seconds = ChronoUnit.SECONDS.between(LocalDateTime.now(), end);
                 return Math.max(0, seconds);
             } catch (Exception exception) {
@@ -92,7 +99,9 @@ public class LiveAuctionModel {
                     time = time.substring(0, time.indexOf("."));
                 }
             }
-            return time + " - " + bidderName + ": " + String.format("%,.0f VND", bidAmount);
+            // Tránh NPE nếu bidAmount là null
+            String amountStr = bidAmount != null ? String.format("%,.0f VND", bidAmount) : "-";
+            return time + " - " + bidderName + ": " + amountStr;
         }
     }
 

@@ -17,8 +17,8 @@ public final class AppWindow {
     }
 
     public static void applyScene(Stage stage, Parent root) {
-        stage.setScene(createScene(root));
-        stage.setWidth(WIDTH);
-        stage.setHeight(HEIGHT);
+        double width = stage.getWidth() > 0 ? stage.getWidth() : WIDTH;
+        double height = stage.getHeight() > 0 ? stage.getHeight() : HEIGHT;
+        stage.setScene(new Scene(root, width, height));
     }
 }
