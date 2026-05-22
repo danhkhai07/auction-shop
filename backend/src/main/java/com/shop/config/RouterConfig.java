@@ -72,6 +72,9 @@ public class RouterConfig {
                 .path("/admin", builder -> builder
                         .filter(roleFilter)
                         .POST("/elevate/user/{id}", elevateUserHandler::elevateUser)
+                        .POST("/delete/user/{id}", deleteHandler::deleteUser)
+                        .POST("/delete/item/{id}", deleteHandler::deleteItem)
+                        .POST("/delete/auction/{id}", deleteHandler::deleteAuction)
                         .POST("/ban/user/{id}", contentType(MediaType.APPLICATION_JSON), adminActionsHandler::banUser)
                         .POST("/unban/user/{id}", adminActionsHandler::unbanUser)
                         .GET("/user/all", adminActionsHandler::getAllUsers)
