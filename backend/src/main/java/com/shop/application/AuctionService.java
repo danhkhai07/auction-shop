@@ -2,10 +2,12 @@ package com.shop.application;
 
 import com.shop.cache.CacheManager;
 import com.shop.domain.Auction;
+import com.shop.domain.AuctionStatus;
 import com.shop.domain.Role;
 import com.shop.domain.User;
 import com.shop.dto.request.UploadAuctionRequest;
 import com.shop.dto.response.GetAuctionResponse;
+import com.shop.dto.response.GetUserResponse;
 import com.shop.dto.response.IDResponse;
 import de.huxhorn.sulky.ulid.ULID;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -41,6 +44,12 @@ public class AuctionService {
     public Mono<GetAuctionResponse> getAuctionResponseByID(String id){
         return getAuctionByID(id)
                 .map(this::toResponse);
+    }
+
+    public Mono<List<GetAuctionResponse>> getAllAuctions(){
+        return auctionRepository.getAll()
+                .map(GetAuctionResponse::new)
+                .collectList();
     }
 
     public Flux<GetAuctionResponse> getActiveAuctions(){
@@ -73,7 +82,15 @@ public class AuctionService {
                         auction.getItem().getSeller().getId().equals(deleterID) || deleterIsAdmin)
                 )
                 .switchIfEmpty(Mono.error(new IllegalAccessException("unauthorized")))
-                .flatMap(b -> auctionRepository.deleteByID(id))
+                .flatMap(auction -> {
+                    if (auction.getStatus() == AuctionStatus.RUNNING) {
+                        return Mono.error(new IllegalStateException("running auction must be cancelled before delete"));
+                    }
+                    if (!auction.getBidHistory().isEmpty()) {
+                        return Mono.error(new IllegalStateException("auction with bids cannot be deleted"));
+                    }
+                    return auctionRepository.deleteByID(id);
+                })
                 .then(Mono.fromRunnable(() -> cacheManager.delete(id)));
     }
 

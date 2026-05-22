@@ -42,6 +42,8 @@ public class PostgresAuctionRepo implements AuctionRepository {
 
     private static final String SELECT_AUCTION_BY_ID = SELECT_AUCTION + "WHERE a.id = :id";
     
+    private static final String SELECT_ALL_AUCTIONS = SELECT_AUCTION + "ORDER BY a.start_time DESC";
+
     private static final String SELECT_ACTIVES = SELECT_AUCTION + "WHERE a.status = 'RUNNING'";
 
     private static final String SELECT_BIDS_BY_AUCTION_ID =
@@ -80,6 +82,14 @@ public class PostgresAuctionRepo implements AuctionRepository {
     // =================================================================================================================
     // IMPLEMENTATION CỦA AUCTION REPOSITORY
     // =================================================================================================================
+
+    @Override
+    public Flux<Auction> getAll() {
+        return databaseClient.sql(SELECT_ALL_AUCTIONS)
+                .map(this::mapRowToAuction)
+                .all()
+                .flatMap(this::loadBidsForAuction);
+    }
 
     @Override
     public Mono<Auction> getByID(String id) {
