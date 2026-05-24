@@ -68,7 +68,7 @@
 
                                 <HBox alignment="CENTER" spacing="5.0" styleClass="section-header-box">
                                     <children>
-                                        <Label style="-fx-letter-spacing: 1px;" text="CHI TIẾT SẢN PHẨM" textFill="#3d52b0">
+                                        <Label style="-fx-letter-spacing: 1px;" text="PRODUCT DETAILS" textFill="#3d52b0">
                                             <font><Font name="System Bold" size="16.0" /></font>
                                         </Label>
                                     </children>
@@ -96,10 +96,10 @@
                                             <GridPane.margin><Insets top="10.0" /></GridPane.margin>
                                         </Label>
 
-                                        <TextField fx:id="txtId" disable="true" prefHeight="40.0" promptText="(Tạo tự động)" styleClass="input-field" GridPane.columnIndex="1" />
-                                        <TextField fx:id="txtName" prefHeight="40.0" promptText="Nhập tên sản phẩm..." styleClass="input-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                        <TextField fx:id="txtPrice" prefHeight="40.0" promptText="Nhập giá khởi điểm..." styleClass="input-field" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                        <TextArea fx:id="txtDescription" prefHeight="100.0" promptText="Nhập thông tin chi tiết về tình trạng sản phẩm..." styleClass="input-area" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                        <TextField fx:id="txtId" disable="true" prefHeight="40.0" promptText="Auto" styleClass="input-field" GridPane.columnIndex="1" />
+                                        <TextField fx:id="txtName" prefHeight="40.0" promptText="Type Product Name..." styleClass="input-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                        <TextField fx:id="txtPrice" prefHeight="40.0" promptText="Type Started Price..." styleClass="input-field" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                        <TextArea fx:id="txtDescription" prefHeight="100.0" promptText="Type product detail description..." styleClass="input-area" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
                                     </children>
                                 </GridPane>
@@ -114,12 +114,12 @@
                                 </HBox>
 
                                 <Separator styleClass="separator-custom">
-                                    <VBox.margin><Insets top="10.0" bottom="5.0" /></VBox.margin>
+                                    <VBox.margin><Insets bottom="5.0" top="10.0" /></VBox.margin>
                                 </Separator>
 
                                 <HBox alignment="CENTER" spacing="5.0" styleClass="section-header-box">
                                     <children>
-                                        <Label style="-fx-letter-spacing: 1px;" text="TẠO PHIÊN ĐẤU GIÁ" textFill="#3d52b0">
+                                        <Label style="-fx-letter-spacing: 1px;" text="CREATE NEW AUCTION" textFill="#3d52b0">
                                             <font><Font name="System Bold" size="14.0" /></font>
                                         </Label>
                                     </children>

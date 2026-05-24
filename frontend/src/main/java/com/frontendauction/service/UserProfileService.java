@@ -81,7 +81,7 @@ public class UserProfileService {
     }
 
     public CompletableFuture<ProductManagementModel> getItemById(String itemId) {
-        HttpRequest request = plainRequest("/item/" + itemId)
+        HttpRequest request = authorizedRequest("/item/" + itemId)
                 .GET()
                 .build();
 

@@ -1,5 +1,6 @@
 package com.frontendauction.model;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.List;
@@ -10,7 +11,9 @@ public class UserProfileModel {
     private String id;
     private String username;
     private Set<String> roles;
+    @JsonAlias({"items", "itemList"})
     private List<String> itemList;
+    @JsonAlias({"auctions", "auctionList"})
     private List<String> auctionList;
 
     public UserProfileModel() {
