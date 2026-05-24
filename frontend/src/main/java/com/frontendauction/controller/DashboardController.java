@@ -12,7 +12,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -27,6 +30,9 @@ public class DashboardController {
     @FXML private Label lblProfileMeta;
     @FXML private Label lblAuctionMeta;
     @FXML private Label lblProductMeta;
+    @FXML private Button btnHamburger;
+    @FXML private AnchorPane menuOverlay;
+    @FXML private VBox sideMenu;
 
     private final UserProfileService userProfileService = new UserProfileService();
     private final LiveAuctionService liveAuctionService = new LiveAuctionService();
@@ -36,6 +42,20 @@ public class DashboardController {
     @FXML
     public void initialize() {
         loadDashboardData();
+    }
+
+    @FXML
+    public void toggleMenu() {
+        if (menuOverlay != null) {
+            menuOverlay.setVisible(!menuOverlay.isVisible());
+        }
+    }
+
+    @FXML
+    public void closeMenu() {
+        if (menuOverlay != null) {
+            menuOverlay.setVisible(false);
+        }
     }
 
     @FXML

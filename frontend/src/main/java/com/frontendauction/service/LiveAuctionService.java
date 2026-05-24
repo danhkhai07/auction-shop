@@ -3,21 +3,28 @@ package com.frontendauction.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.frontendauction.model.AuctionEventData;
 import com.frontendauction.model.LiveAuctionModel;
 import com.frontendauction.model.BidResult;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public class LiveAuctionService {
 
     private static final String BASE_URL = "http://103.75.182.151:1234";
     private final HttpClient client;
     private final ObjectMapper objectMapper;
+    private volatile Thread sseThread;
+    private volatile boolean sseConnected;
 
     public LiveAuctionService() {
         this.client = HttpClient.newHttpClient();
@@ -96,6 +103,85 @@ public class LiveAuctionService {
                 });
     }
 
+    /**
+     * Connect to SSE event stream for real-time auction updates.
+     * Events are delivered on a background thread — caller must use Platform.runLater for UI updates.
+     */
+    public void connectToEventStream(String auctionId, Consumer<AuctionEventData> onEvent, Runnable onError) {
+        disconnectEventStream();
+
+        sseConnected = true;
+        sseThread = new Thread(() -> {
+            try {
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(BASE_URL + "/auction/" + auctionId + "/events"))
+                        .header("Accept", "text/event-stream")
+                        .GET()
+                        .build();
+
+                HttpResponse<InputStream> response = client.send(request,
+                        HttpResponse.BodyHandlers.ofInputStream());
+
+                if (response.statusCode() != 200) {
+                    System.err.println("SSE connection failed: status " + response.statusCode());
+                    if (onError != null) onError.run();
+                    return;
+                }
+
+                System.out.println("SSE connected to auction: " + auctionId);
+
+                try (BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(response.body(), StandardCharsets.UTF_8))) {
+                    StringBuilder dataBuffer = new StringBuilder();
+                    String line;
+
+                    while (sseConnected && (line = reader.readLine()) != null) {
+                        if (Thread.currentThread().isInterrupted()) break;
+
+                        if (line.startsWith("data:")) {
+                            String data = line.substring(5).trim();
+                            dataBuffer.append(data);
+                        } else if (line.isEmpty() && !dataBuffer.isEmpty()) {
+                            // Empty line = end of SSE event
+                            try {
+                                String jsonData = dataBuffer.toString();
+                                AuctionEventData event = objectMapper.readValue(
+                                        jsonData, AuctionEventData.class);
+                                onEvent.accept(event);
+                            } catch (Exception e) {
+                                System.err.println("Failed to parse SSE event: " + dataBuffer);
+                                e.printStackTrace();
+                            }
+                            dataBuffer.setLength(0);
+                        }
+                        // Ignore "event:", "id:", "retry:" lines
+                    }
+                }
+            } catch (Exception e) {
+                if (sseConnected) {
+                    System.err.println("SSE stream error: " + e.getMessage());
+                    if (onError != null) onError.run();
+                }
+            }
+
+            System.out.println("SSE disconnected from auction: " + auctionId);
+        }, "SSE-AuctionStream-" + auctionId);
+
+        sseThread.setDaemon(true);
+        sseThread.start();
+    }
+
+    /**
+     * Disconnect from the current SSE stream.
+     */
+    public void disconnectEventStream() {
+        sseConnected = false;
+        if (sseThread != null) {
+            sseThread.interrupt();
+            sseThread = null;
+        }
+    }
+
     private BidResult mapBidResponse(HttpResponse<String> response) {
         try {
             if (response.statusCode() == 200 || response.statusCode() == 201) {
@@ -119,3 +205,4 @@ public class LiveAuctionService {
         return fallback;
     }
 }
+

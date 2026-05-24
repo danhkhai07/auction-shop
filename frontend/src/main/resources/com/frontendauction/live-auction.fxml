@@ -194,6 +194,61 @@
                                         </VBox>
                                     </children>
                                 </HBox>
+
+                                <!-- Create Auction Section -->
+                                <VBox spacing="16.0" styleClass="premium-card">
+                                    <padding>
+                                        <Insets bottom="24.0" left="28.0" right="28.0" top="24.0" />
+                                    </padding>
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" spacing="5.0" styleClass="section-header-box">
+                                            <children>
+                                                <Label style="-fx-letter-spacing: 1px;" text="TẠO PHIÊN ĐẤU GIÁ MỚI" textFill="#3d52b0">
+                                                    <font><Font name="System Bold" size="16.0" /></font>
+                                                </Label>
+                                            </children>
+                                        </HBox>
+                                        
+                                        <Separator styleClass="separator-custom" />
+
+                                        <HBox spacing="30.0">
+                                            <children>
+                                                <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                                                    <children>
+                                                        <Label styleClass="form-label" text="Select Product" />
+                                                        <javafx.scene.control.ComboBox fx:id="cbProducts" prefHeight="40.0" prefWidth="300.0" promptText="Select a product..." styleClass="input-field" />
+                                                    </children>
+                                                </VBox>
+                                                <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                                                    <children>
+                                                        <Label styleClass="form-label" text="Starting Price" />
+                                                        <TextField fx:id="txtCreatePrice" prefHeight="40.0" promptText="VD: 100000" styleClass="input-field" />
+                                                    </children>
+                                                </VBox>
+                                                <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                                                    <children>
+                                                        <Label styleClass="form-label" text="Start Time" />
+                                                        <TextField fx:id="txtCreateStartTime" prefHeight="40.0" promptText="yyyy-MM-ddTHH:mm:ss" styleClass="input-field" />
+                                                    </children>
+                                                </VBox>
+                                                <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                                                    <children>
+                                                        <Label styleClass="form-label" text="End Time" />
+                                                        <TextField fx:id="txtCreateEndTime" prefHeight="40.0" promptText="yyyy-MM-ddTHH:mm:ss" styleClass="input-field" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </HBox>
+
+                                        <HBox alignment="CENTER_RIGHT">
+                                            <VBox.margin><Insets top="10.0" /></VBox.margin>
+                                            <children>
+                                                <Button fx:id="btnCreateAuction" mnemonicParsing="false" onAction="#handleCreateAuction" prefHeight="45.0" prefWidth="200.0" styleClass="btn-primary" text="Create Auction" />
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </VBox>
+                                
                             </children>
                         </VBox>
                     </content>

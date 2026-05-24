@@ -298,3 +298,76 @@
     -fx-stroke-width: 3px;
     -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.4), 10, 0, 0, 5);
 }
+
+/* ======== HAMBURGER MENU (DASHBOARD) ======== */
+
+/* Nút hamburger ☰ */
+.hamburger-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #1e3a8a;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 6 12 6 12;
+    -fx-background-radius: 8;
+}
+
+.hamburger-btn:hover {
+    -fx-background-color: #e0e7ff;
+}
+
+/* Overlay bán trong suốt phía sau menu */
+.menu-overlay {
+    -fx-background-color: rgba(0, 0, 0, 0.35);
+}
+
+/* Menu trượt từ bên trái */
+.side-menu {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 0 1 0 0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 20, 0, 4, 0);
+}
+
+/* Mục menu */
+.menu-item {
+    -fx-background-color: transparent;
+    -fx-text-fill: #475569;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-background-radius: 8;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.menu-item:hover {
+    -fx-background-color: #e0e7ff;
+    -fx-text-fill: #2d5af0;
+}
+
+/* Mục menu đang active */
+.menu-item-active {
+    -fx-background-color: #e0e7ff;
+    -fx-text-fill: #2d5af0;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-background-radius: 8;
+    -fx-alignment: CENTER_LEFT;
+}
+
+/* Nút logout trong menu */
+.menu-item-logout {
+    -fx-background-color: #fef2f2;
+    -fx-text-fill: #b91c1c;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-background-radius: 8;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.menu-item-logout:hover {
+    -fx-background-color: #fee2e2;
+    -fx-text-fill: #991b1b;
+}

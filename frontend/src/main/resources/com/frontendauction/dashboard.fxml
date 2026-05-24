@@ -3,63 +3,34 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.frontendauction.controller.DashboardController">
+<VBox prefHeight="720.0" prefWidth="1280.0" stylesheets="@css/global.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.frontendauction.controller.DashboardController">
     <children>
         <fx:include source="title-bar.fxml" />
-        <BorderPane style="-fx-background-color: #f0f4f8;" VBox.vgrow="ALWAYS">
-            <left>
-                <VBox prefWidth="250.0" style="-fx-background-color: #ffffff; -fx-border-color: #e2e8f0; -fx-border-width: 0 1 0 0;">
-                    <padding>
-                        <Insets bottom="30.0" left="20.0" right="20.0" top="40.0" />
-                    </padding>
+        <StackPane VBox.vgrow="ALWAYS">
+            <!-- Main content layer -->
+            <VBox style="-fx-background-color: #f0f4f8;">
+                <!-- Top bar with hamburger button -->
+                <HBox alignment="CENTER_LEFT" prefHeight="56.0" spacing="16.0" style="-fx-background-color: #ffffff; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0; -fx-padding: 0 24;">
+                    <children>
+                        <Button fx:id="btnHamburger" mnemonicParsing="false" onAction="#toggleMenu" styleClass="hamburger-btn" text="☰" />
+                        <Label text="AUCTION DASHBOARD" textFill="#1e3a8a">
+                            <font>
+                                <Font name="System Bold" size="18.0" />
+                            </font>
+                        </Label>
+                        <Region HBox.hgrow="ALWAYS" />
+                    </children>
+                </HBox>
 
-                    <Label text="AUCTION DASHBOARD" textFill="#1e3a8a">
-                        <font>
-                            <Font name="System Bold" size="18.0" />
-                        </font>
-                        <VBox.margin>
-                            <Insets bottom="40.0" />
-                        </VBox.margin>
-                    </Label>
-
-                    <VBox spacing="10.0">
-                        <Button alignment="BASELINE_LEFT" maxWidth="Infinity" onAction="#goToProfile" prefHeight="45.0" style="-fx-background-color: transparent; -fx-text-fill: #475569; -fx-font-size: 15px; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 8;" text="Profile">
-                            <padding>
-                                <Insets left="15.0" />
-                            </padding>
-                        </Button>
-
-                        <Button alignment="BASELINE_LEFT" maxWidth="Infinity" onAction="#goToLiveAuction" prefHeight="45.0" style="-fx-background-color: #e0e7ff; -fx-text-fill: #2d5af0; -fx-font-size: 15px; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 8;" text="Live Auction">
-                            <padding>
-                                <Insets left="15.0" />
-                            </padding>
-                        </Button>
-
-                        <Button alignment="BASELINE_LEFT" maxWidth="Infinity" onAction="#goToProductManagement" prefHeight="45.0" style="-fx-background-color: transparent; -fx-text-fill: #475569; -fx-font-size: 15px; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 8;" text="Products">
-                            <padding>
-                                <Insets left="15.0" />
-                            </padding>
-                        </Button>
-                    </VBox>
-
-                    <Region VBox.vgrow="ALWAYS" />
-
-                    <Button alignment="BASELINE_LEFT" maxWidth="Infinity" onAction="#logout" prefHeight="45.0" style="-fx-background-color: #eff6ff; -fx-text-fill: #b91c1c; -fx-font-size: 15px; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 8;" text="Log out">
-                        <padding>
-                            <Insets left="15.0" />
-                        </padding>
-                    </Button>
-                </VBox>
-            </left>
-
-            <center>
-                <VBox spacing="24.0" style="-fx-padding: 32 36 32 36;">
+                <!-- Dashboard content -->
+                <VBox spacing="24.0" style="-fx-padding: 32 36 32 36;" VBox.vgrow="ALWAYS">
                     <children>
                         <VBox spacing="10.0" style="-fx-background-color: #ffffff; -fx-background-radius: 8; -fx-padding: 28; -fx-border-color: #e2e8f0; -fx-border-radius: 8;">
                             <children>
@@ -118,7 +89,55 @@
                         </HBox>
                     </children>
                 </VBox>
-            </center>
-        </BorderPane>
+            </VBox>
+
+            <!-- Overlay layer (menu) — initially hidden -->
+            <AnchorPane fx:id="menuOverlay" onMouseClicked="#closeMenu" styleClass="menu-overlay" visible="false">
+                <!-- Side menu panel -->
+                <VBox fx:id="sideMenu" prefWidth="260.0" styleClass="side-menu" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <padding>
+                        <Insets bottom="30.0" left="20.0" right="20.0" top="24.0" />
+                    </padding>
+                    <children>
+                        <Label text="MENU" textFill="#1e3a8a">
+                            <font>
+                                <Font name="System Bold" size="18.0" />
+                            </font>
+                            <VBox.margin>
+                                <Insets bottom="24.0" />
+                            </VBox.margin>
+                        </Label>
+
+                        <VBox spacing="8.0">
+                            <children>
+                                <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#goToProfile" prefHeight="45.0" styleClass="menu-item" text="👤  Profile">
+                                    <padding>
+                                        <Insets left="15.0" />
+                                    </padding>
+                                </Button>
+                                <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#goToLiveAuction" prefHeight="45.0" styleClass="menu-item-active" text="🔴  Live Auction">
+                                    <padding>
+                                        <Insets left="15.0" />
+                                    </padding>
+                                </Button>
+                                <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#goToProductManagement" prefHeight="45.0" styleClass="menu-item" text="📦  Products">
+                                    <padding>
+                                        <Insets left="15.0" />
+                                    </padding>
+                                </Button>
+                            </children>
+                        </VBox>
+
+                        <Region VBox.vgrow="ALWAYS" />
+
+                        <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#logout" prefHeight="45.0" styleClass="menu-item-logout" text="🚪  Log out">
+                            <padding>
+                                <Insets left="15.0" />
+                            </padding>
+                        </Button>
+                    </children>
+                </VBox>
+            </AnchorPane>
+        </StackPane>
     </children>
 </VBox>

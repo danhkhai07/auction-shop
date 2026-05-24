@@ -1,9 +1,12 @@
 package com.frontendauction.controller;
 
 import com.frontendauction.AppWindow;
+import com.frontendauction.model.AuctionEventData;
 import com.frontendauction.model.BidResult;
 import com.frontendauction.model.LiveAuctionModel;
+import com.frontendauction.model.ProductManagementModel;
 import com.frontendauction.service.LiveAuctionService;
+import com.frontendauction.service.ProductManagementService;
 import com.frontendauction.service.TokenStore;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -21,6 +24,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -28,6 +32,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javafx.util.StringConverter;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -54,8 +59,16 @@ public class LiveAuctionController {
     @FXML private Button btnPlaceBid;
     @FXML private LineChart<String, Number> priceChart;
     @FXML private ListView<LiveAuctionModel.BidEntry> lvBidHistory;
+    
+    // Create Auction fields
+    @FXML private ComboBox<ProductManagementModel> cbProducts;
+    @FXML private TextField txtCreatePrice;
+    @FXML private TextField txtCreateStartTime;
+    @FXML private TextField txtCreateEndTime;
+    @FXML private Button btnCreateAuction;
 
     private final LiveAuctionService auctionService = new LiveAuctionService();
+    private final ProductManagementService productService = new ProductManagementService();
 
     private String currentAuctionId;
     private boolean initialLoadDone;
@@ -76,6 +89,8 @@ public class LiveAuctionController {
             priceChart.setAnimated(false);
             priceChart.setLegendVisible(false);
         }
+        
+        setupCreateAuctionForm();
 
         Platform.runLater(() -> {
             if (!initialLoadDone) {
@@ -158,6 +173,113 @@ public class LiveAuctionController {
         updateBidHistoryUI(auction.getBidHistory());
         updateBidAvailability(auction);
         startCountdown();
+        connectSseStream();
+    }
+
+    private void connectSseStream() {
+        if (currentAuctionId == null || currentAuctionId.isBlank()) return;
+
+        auctionService.connectToEventStream(
+                currentAuctionId,
+                event -> Platform.runLater(() -> handleSseEvent(event)),
+                () -> System.err.println("SSE stream connection failed for auction: " + currentAuctionId)
+        );
+    }
+
+    private void handleSseEvent(AuctionEventData event) {
+        if (event == null || event.getType() == null) return;
+
+        String type = event.getType();
+        System.out.println("[SSE] Event received: " + type);
+
+        switch (type) {
+            case "BID_PLACED" -> {
+                // Update current price
+                if (event.getCurrentHighestPrice() != null && lblCurrentPrice != null) {
+                    lblCurrentPrice.setText(formatCurrency(event.getCurrentHighestPrice()));
+                }
+                // Reload full auction data to refresh bid history + chart
+                if (currentAuctionId != null) {
+                    auctionService.getAuctionDetails(currentAuctionId)
+                            .thenAccept(auction -> Platform.runLater(() -> {
+                                updateBidHistoryUI(auction.getBidHistory());
+                                updateBidAvailability(auction);
+                            }))
+                            .exceptionally(ex -> { ex.printStackTrace(); return null; });
+                }
+                // Auto bid logic
+                handleAutoBid(event.getCurrentHighestPrice());
+            }
+            case "AUCTION_FINISHED", "AUCTION_CANCELLED" -> {
+                timeLeftSeconds = 0;
+                updateTimeLabel();
+                disableBidControls();
+                stopCountdown();
+                if (lblSeller != null) {
+                    lblSeller.setText("Status: " + type.replace("AUCTION_", "") + " | Auction ID: " + fallback(currentAuctionId, "-"));
+                }
+            }
+            case "ANTI_SNIPE_AUCTION_EXTENDED", "AUCTION_EXTENDED" -> {
+                // Recalculate remaining time from new endTime
+                if (event.getEndTime() != null) {
+                    try {
+                        String normalized = event.getEndTime().replace("Z", "");
+                        int tzIndex = normalized.lastIndexOf('+');
+                        if (tzIndex > 10) normalized = normalized.substring(0, tzIndex);
+                        int minusTzIndex = normalized.lastIndexOf('-');
+                        if (minusTzIndex > 10) normalized = normalized.substring(0, minusTzIndex);
+                        LocalDateTime end = LocalDateTime.parse(normalized);
+                        long seconds = java.time.temporal.ChronoUnit.SECONDS.between(LocalDateTime.now(), end);
+                        timeLeftSeconds = Math.max(0, seconds);
+                        updateTimeLabel();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            case "AUCTION_STARTED", "AUCTION_UNPAUSED" -> {
+                // Reload full data to get updated status
+                loadAuctionData();
+            }
+            case "AUCTION_PAUSED" -> {
+                disableBidControls();
+                if (lblSeller != null) {
+                    lblSeller.setText("Status: PAUSED | Auction ID: " + fallback(currentAuctionId, "-"));
+                }
+            }
+        }
+    }
+
+    private void handleAutoBid(Double currentHighestPrice) {
+        if (chkAutoBid == null || !chkAutoBid.isSelected()) return;
+        if (txtMaxAutoBid == null || txtMaxAutoBid.getText() == null) return;
+        if (currentAuctionId == null || !TokenStore.hasToken()) return;
+
+        try {
+            double maxBid = Double.parseDouble(txtMaxAutoBid.getText().trim());
+            if (currentHighestPrice == null) return;
+
+            // Auto bid = current price + 10% of starting increment, but not exceeding max
+            double autoBidAmount = currentHighestPrice + Math.max(1000, currentHighestPrice * 0.01);
+            if (autoBidAmount > maxBid) {
+                System.out.println("[AutoBid] Price " + autoBidAmount + " exceeds max " + maxBid + ", skipping.");
+                return;
+            }
+
+            System.out.println("[AutoBid] Placing auto bid: " + autoBidAmount);
+            LiveAuctionModel.BidRequest request = new LiveAuctionModel.BidRequest(autoBidAmount);
+            auctionService.placeBid(currentAuctionId, request)
+                    .thenAccept(result -> Platform.runLater(() -> {
+                        if (result.success()) {
+                            System.out.println("[AutoBid] Success: " + autoBidAmount);
+                        } else {
+                            System.out.println("[AutoBid] Failed: " + result.errorMessage());
+                        }
+                    }))
+                    .exceptionally(ex -> { ex.printStackTrace(); return null; });
+        } catch (NumberFormatException e) {
+            System.err.println("[AutoBid] Invalid max auto bid amount");
+        }
     }
 
     private String buildDescription(LiveAuctionModel.AuctionDetail auction) {
@@ -456,6 +578,7 @@ public class LiveAuctionController {
     @FXML
     public void handleBackToDashboard(ActionEvent event) {
         stopCountdown();
+        auctionService.disconnectEventStream();
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/frontendauction/dashboard.fxml"));
             Parent root = loader.load();
@@ -466,5 +589,107 @@ public class LiveAuctionController {
             exception.printStackTrace();
             showError("Failed to return to Dashboard: " + exception.getMessage());
         }
+    }
+
+    private void setupCreateAuctionForm() {
+        if (cbProducts != null) {
+            cbProducts.setConverter(new StringConverter<>() {
+                @Override
+                public String toString(ProductManagementModel product) {
+                    if (product == null) return "";
+                    return product.getName() + " (ID: " + product.getId() + ")";
+                }
+
+                @Override
+                public ProductManagementModel fromString(String string) {
+                    return null;
+                }
+            });
+
+            productService.getAllProducts()
+                    .thenAccept(products -> Platform.runLater(() -> {
+                        cbProducts.getItems().clear();
+                        cbProducts.getItems().addAll(products);
+                    }))
+                    .exceptionally(ex -> {
+                        ex.printStackTrace();
+                        return null;
+                    });
+        }
+
+        if (txtCreateStartTime != null) {
+            java.time.LocalDateTime now = java.time.LocalDateTime.now();
+            txtCreateStartTime.setText(now.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
+        }
+        if (txtCreateEndTime != null) {
+            java.time.LocalDateTime endDefault = java.time.LocalDateTime.now().plusHours(1);
+            txtCreateEndTime.setText(endDefault.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
+        }
+    }
+
+    @FXML
+    public void handleCreateAuction(ActionEvent event) {
+        if (cbProducts == null || cbProducts.getSelectionModel().getSelectedItem() == null) {
+            showError("Please select a product to create an auction for.");
+            return;
+        }
+
+        ProductManagementModel selected = cbProducts.getSelectionModel().getSelectedItem();
+
+        if (txtCreatePrice == null || txtCreateStartTime == null || txtCreateEndTime == null) return;
+
+        String priceText = txtCreatePrice.getText().trim();
+        String startTime = txtCreateStartTime.getText().trim();
+        String endTime = txtCreateEndTime.getText().trim();
+
+        if (priceText.isEmpty()) {
+            showError("Please enter a starting price for the auction.");
+            return;
+        }
+        if (startTime.isEmpty() || endTime.isEmpty()) {
+            showError("Please enter start and end time.");
+            return;
+        }
+
+        double startingPrice;
+        try {
+            startingPrice = Double.parseDouble(priceText);
+        } catch (NumberFormatException e) {
+            showError("Starting price must be a valid number.");
+            return;
+        }
+
+        if (btnCreateAuction != null) {
+            btnCreateAuction.setDisable(true);
+            btnCreateAuction.setText("Creating...");
+        }
+
+        productService.createAuction(selected.getId(), startingPrice, startTime, endTime)
+                .thenAccept(optionalId -> Platform.runLater(() -> {
+                    if (btnCreateAuction != null) {
+                        btnCreateAuction.setDisable(false);
+                        btnCreateAuction.setText("Create Auction");
+                    }
+                    if (optionalId.isPresent()) {
+                        showSuccess("Auction created! ID: " + optionalId.get());
+                        txtCreatePrice.clear();
+                        setupCreateAuctionForm(); // Reset times
+                        
+                        // Automatically switch to the newly created auction
+                        setAuctionId(optionalId.get());
+                    } else {
+                        showError("Failed to create auction. Check console for details.");
+                    }
+                }))
+                .exceptionally(exception -> {
+                    Platform.runLater(() -> {
+                        if (btnCreateAuction != null) {
+                            btnCreateAuction.setDisable(false);
+                            btnCreateAuction.setText("Create Auction");
+                        }
+                        showError(resolveErrorMessage(exception));
+                    });
+                    return null;
+                });
     }
 }

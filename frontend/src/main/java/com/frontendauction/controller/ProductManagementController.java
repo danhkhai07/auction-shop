@@ -23,16 +23,13 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 public class ProductManagementController {
 
     @FXML private TableView<ProductManagementModel> tvProducts;
     @FXML private TableColumn<ProductManagementModel, String> colId;
     @FXML private TableColumn<ProductManagementModel, String> colName;
-    @FXML private TableColumn<ProductManagementModel, String> colPrice;
+    @FXML private TableColumn<ProductManagementModel, Double> colPrice;
     @FXML private TableColumn<ProductManagementModel, String> colDescription;
 
     @FXML private TextField txtId;
@@ -44,6 +41,10 @@ public class ProductManagementController {
     @FXML private Button btnUpdate;
     @FXML private Button btnDelete;
     @FXML private Button btnBack;
+    @FXML private Button btnCreateAuction;
+    @FXML private TextField txtAuctionPrice;
+    @FXML private TextField txtStartTime;
+    @FXML private TextField txtEndTime;
 
     private final ProductManagementService productService = new ProductManagementService();
     private final ObservableList<ProductManagementModel> productList = FXCollections.observableArrayList();
@@ -52,6 +53,7 @@ public class ProductManagementController {
     public void initialize() {
         setupTable();
         setupForm();
+        setupAuctionForm();
         loadData();
 
         tvProducts.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
@@ -63,24 +65,26 @@ public class ProductManagementController {
         btnAdd.setOnAction(event -> handleAdd());
         btnUpdate.setOnAction(event -> handleUpdate());
         btnDelete.setOnAction(event -> handleDelete());
+        if (btnCreateAuction != null) {
+            btnCreateAuction.setOnAction(event -> handleCreateAuction());
+        }
     }
 
     private void setupTable() {
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
-        colPrice.setCellValueFactory(new PropertyValueFactory<>("sellerId"));
+        colPrice.setCellValueFactory(new PropertyValueFactory<>("startingPrice"));
         colDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
 
-        colPrice.setText("Seller ID");
         colPrice.setCellFactory(column -> new TableCell<>() {
             @Override
-            protected void updateItem(String value, boolean empty) {
+            protected void updateItem(Double value, boolean empty) {
                 super.updateItem(value, empty);
-                if (empty) {
+                if (empty || value == null) {
                     setText(null);
                     return;
                 }
-                setText(value == null || value.isBlank() ? "-" : value);
+                setText(String.format("%,.0f", value));
             }
         });
 
@@ -88,9 +92,7 @@ public class ProductManagementController {
     }
 
     private void setupForm() {
-        txtPrice.setDisable(true);
-        txtPrice.setText("-");
-        txtPrice.setPromptText("Derived from logged-in user");
+        // Price field is enabled for user input
     }
 
     private void loadData() {
@@ -105,28 +107,21 @@ public class ProductManagementController {
                 });
     }
 
-    /**
-     * Đợi 700ms trước khi reload để server kịp cập nhật itemList trong user profile.
-     * Nguyên nhân: sau khi add/update/delete, /auth/me có thể chưa phản ánh thay đổi ngay.
-     */
-    private void loadDataWithDelay() {
-        CompletableFuture.delayedExecutor(700, TimeUnit.MILLISECONDS)
-                .execute(this::loadData);
-    }
+
 
     private void populateForm(ProductManagementModel product) {
         txtId.setText(product.getId() != null ? product.getId() : "");
         txtName.setText(product.getName() != null ? product.getName() : "");
-        txtPrice.setText(product.getSellerId() != null && !product.getSellerId().isBlank()
-                ? product.getSellerId()
-                : "-");
+        txtPrice.setText(product.getStartingPrice() != null
+                ? String.valueOf(product.getStartingPrice())
+                : "");
         txtDescription.setText(product.getDescription() != null ? product.getDescription() : "");
     }
 
     private void clearForm() {
         txtId.clear();
         txtName.clear();
-        txtPrice.setText("-");
+        txtPrice.clear();
         txtDescription.clear();
         tvProducts.getSelectionModel().clearSelection();
     }
@@ -138,11 +133,23 @@ public class ProductManagementController {
 
         String name = txtName.getText().trim();
         String description = txtDescription.getText().trim();
+        String priceText = txtPrice.getText().trim();
+        Double price = null;
+        if (!priceText.isEmpty()) {
+            try {
+                price = Double.parseDouble(priceText);
+            } catch (NumberFormatException e) {
+                showError("Started Price must be a valid number.");
+                return;
+            }
+        }
 
         ProductManagementModel newProduct = new ProductManagementModel();
         newProduct.setName(name);
         newProduct.setDescription(description);
+        newProduct.setStartingPrice(price);
 
+        final Double finalPrice = price;
         btnAdd.setDisable(true);
         btnAdd.setText("Processing...");
 
@@ -151,12 +158,10 @@ public class ProductManagementController {
                     btnAdd.setDisable(false);
                     btnAdd.setText("Add");
                     if (optionalId.isPresent()) {
-                        // Thêm trực tiếp vào list với ID từ server, không cần reload
-                        ProductManagementModel created = new ProductManagementModel();
-                        created.setId(optionalId.get());
-                        created.setName(name);
-                        created.setDescription(description);
-                        productList.add(created);
+                        // Thêm sản phẩm mới trực tiếp vào local list để hiển thị ngay
+                        ProductManagementModel addedProduct = new ProductManagementModel(
+                                optionalId.get(), name, description, finalPrice);
+                        productList.add(addedProduct);
                         showSuccess("Product added successfully.");
                         clearForm();
                     } else {
@@ -204,10 +209,9 @@ public class ProductManagementController {
                     btnUpdate.setDisable(false);
                     btnUpdate.setText("Update");
                     if (success) {
-                        // Chỉ cập nhật object sau khi server xác nhận
+                        // Cập nhật trực tiếp object trong local list
                         selected.setName(newName);
                         selected.setDescription(newDescription);
-                        // Buộc TableView refresh
                         tvProducts.refresh();
                         showSuccess("Product updated successfully.");
                         clearForm();
@@ -247,7 +251,7 @@ public class ProductManagementController {
                             btnDelete.setDisable(false);
                             btnDelete.setText("Delete");
                             if (success) {
-                                // Xóa trực tiếp khỏi list, không cần reload
+                                // Xóa khỏi local list
                                 productList.remove(selected);
                                 showSuccess("Product deleted successfully.");
                                 clearForm();
@@ -268,17 +272,83 @@ public class ProductManagementController {
     }
 
     private boolean validateForm() {
-        if (txtName.getText().trim().isEmpty()) {
+        if (txtName.getText() == null || txtName.getText().trim().isEmpty()) {
             showError("Product name cannot be empty.");
             return false;
         }
 
-        if (txtDescription.getText().trim().isEmpty()) {
+        if (txtDescription.getText() == null || txtDescription.getText().trim().isEmpty()) {
             showError("Product description cannot be empty.");
             return false;
         }
 
         return true;
+    }
+
+    private void setupAuctionForm() {
+        if (txtStartTime != null) {
+            java.time.LocalDateTime now = java.time.LocalDateTime.now();
+            txtStartTime.setText(now.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
+        }
+        if (txtEndTime != null) {
+            java.time.LocalDateTime endDefault = java.time.LocalDateTime.now().plusHours(1);
+            txtEndTime.setText(endDefault.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
+        }
+    }
+
+    private void handleCreateAuction() {
+        ProductManagementModel selected = tvProducts.getSelectionModel().getSelectedItem();
+        if (selected == null || selected.getId() == null || selected.getId().isBlank()) {
+            showError("Please select a product from the table to create an auction.");
+            return;
+        }
+
+        if (txtAuctionPrice == null || txtStartTime == null || txtEndTime == null) return;
+
+        String priceText = txtAuctionPrice.getText().trim();
+        String startTime = txtStartTime.getText().trim();
+        String endTime = txtEndTime.getText().trim();
+
+        if (priceText.isEmpty()) {
+            showError("Please enter a starting price for the auction.");
+            return;
+        }
+        if (startTime.isEmpty() || endTime.isEmpty()) {
+            showError("Please enter start and end time.");
+            return;
+        }
+
+        double startingPrice;
+        try {
+            startingPrice = Double.parseDouble(priceText);
+        } catch (NumberFormatException e) {
+            showError("Starting price must be a valid number.");
+            return;
+        }
+
+        btnCreateAuction.setDisable(true);
+        btnCreateAuction.setText("Creating...");
+
+        productService.createAuction(selected.getId(), startingPrice, startTime, endTime)
+                .thenAccept(optionalId -> Platform.runLater(() -> {
+                    btnCreateAuction.setDisable(false);
+                    btnCreateAuction.setText("Create Auction");
+                    if (optionalId.isPresent()) {
+                        showSuccess("Auction created! ID: " + optionalId.get());
+                        txtAuctionPrice.clear();
+                        setupAuctionForm();
+                    } else {
+                        showError("Failed to create auction. Check console for details.");
+                    }
+                }))
+                .exceptionally(exception -> {
+                    Platform.runLater(() -> {
+                        btnCreateAuction.setDisable(false);
+                        btnCreateAuction.setText("Create Auction");
+                        showError(resolveErrorMessage(exception));
+                    });
+                    return null;
+                });
     }
 
     private String resolveErrorMessage(Throwable exception) {

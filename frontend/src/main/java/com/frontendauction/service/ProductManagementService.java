@@ -133,4 +133,50 @@ public class ProductManagementService {
             return CompletableFuture.completedFuture(Optional.empty());
         }
     }
+
+    /**
+     * Tạo auction mới. Body: {"itemID": "...", "startingPrice": ..., "startTime": "...", "endTime": "..."}
+     * Endpoint: POST /auction (requires auth)
+     */
+    public CompletableFuture<Optional<String>> createAuction(String itemId, double startingPrice,
+                                                              String startTime, String endTime) {
+        if (!TokenStore.hasToken()) {
+            return CompletableFuture.completedFuture(Optional.empty());
+        }
+
+        try {
+            Map<String, Object> payload = Map.of(
+                    "itemID", itemId,
+                    "startingPrice", startingPrice,
+                    "startTime", startTime,
+                    "endTime", endTime
+            );
+            String jsonRequest = objectMapper.writeValueAsString(payload);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(BASE_URL + "/auction"))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + TokenStore.getToken())
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonRequest, StandardCharsets.UTF_8))
+                    .build();
+
+            return client.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8))
+                    .thenApply(response -> {
+                        if (response.statusCode() == 200 || response.statusCode() == 201) {
+                            try {
+                                String id = objectMapper.readTree(response.body()).path("id").asText("");
+                                return id.isBlank() ? Optional.<String>empty() : Optional.of(id);
+                            } catch (Exception e) {
+                                System.err.println("[ProductService] Failed to parse auction ID: " + e.getMessage());
+                                return Optional.<String>empty();
+                            }
+                        }
+                        System.err.println("[ProductService] POST /auction failed: " + response.statusCode() + ": " + response.body());
+                        return Optional.<String>empty();
+                    });
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return CompletableFuture.completedFuture(Optional.empty());
+        }
+    }
 }
