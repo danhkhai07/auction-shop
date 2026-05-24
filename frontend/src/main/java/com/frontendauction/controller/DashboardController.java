@@ -119,6 +119,13 @@ public class DashboardController {
     private void updateDashboard(DashboardData data) {
         UserProfileModel user = data.user();
         List<LiveAuctionModel.AuctionDetail> activeAuctions = data.activeAuctions();
+        
+        if (activeAuctions != null) {
+            activeAuctions = activeAuctions.stream()
+                    .filter(a -> a.getRemainingSeconds() > 0)
+                    .toList();
+        }
+        
         int ownedItems = safeSize(user.getItemList());
         int ownedAuctions = safeSize(user.getAuctionList());
         int activeCount = activeAuctions == null ? 0 : activeAuctions.size();
