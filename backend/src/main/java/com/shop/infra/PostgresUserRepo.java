@@ -27,18 +27,24 @@ import java.util.Set;
 @Repository
 public class PostgresUserRepo implements UserRepository {
     private static final String SELECT_USER_BY_ID =
-            "SELECT u.id, u.username, u.password_hash, ur.role_name " + //lấy id,username,pass,role tu bảng user và userrole
+            "SELECT u.id, u.username, u.password_hash, u.banned, u.banned_reason, u.banned_at, u.banned_by, ur.role_name " + //lấy id,username,pass,role tu bảng user và userrole
                     "FROM users u " +
                     "LEFT JOIN user_roles ur ON ur.user_id = u.id " +
                     "WHERE u.id = :id " +
                     "ORDER BY ur.role_name";
 
     private static final String SELECT_USER_BY_NAME =
-            "SELECT u.id, u.username, u.password_hash, ur.role_name " +
+            "SELECT u.id, u.username, u.password_hash, u.banned, u.banned_reason, u.banned_at, u.banned_by, ur.role_name " +
                     "FROM users u " +
                     "LEFT JOIN user_roles ur ON ur.user_id = u.id " +
                     "WHERE u.username = :username " +
                     "ORDER BY ur.role_name";
+
+    private static final String SELECT_ALL_USER_ROWS =
+            "SELECT u.id, u.username, u.password_hash, u.banned, u.banned_reason, u.banned_at, u.banned_by, ur.role_name " +
+                    "FROM users u " +
+                    "LEFT JOIN user_roles ur ON ur.user_id = u.id " +
+                    "ORDER BY u.id, ur.role_name";
 
     private static final String UPDATE_USER_SQL =
             "UPDATE users " +
@@ -53,6 +59,24 @@ public class PostgresUserRepo implements UserRepository {
     private static final String UPDATE_PASSWORD_SQL =
             "UPDATE users " +
                     "SET password_hash = :passwordHash, " +
+                    "    updated_at = CURRENT_TIMESTAMP " +
+                    "WHERE id = :id";
+
+    private static final String BAN_USER_SQL =
+            "UPDATE users " +
+                    "SET banned = TRUE, " +
+                    "    banned_reason = :reason, " +
+                    "    banned_at = CURRENT_TIMESTAMP, " +
+                    "    banned_by = :bannedBy, " +
+                    "    updated_at = CURRENT_TIMESTAMP " +
+                    "WHERE id = :id";
+
+    private static final String UNBAN_USER_SQL =
+            "UPDATE users " +
+                    "SET banned = FALSE, " +
+                    "    banned_reason = NULL, " +
+                    "    banned_at = NULL, " +
+                    "    banned_by = NULL, " +
                     "    updated_at = CURRENT_TIMESTAMP " +
                     "WHERE id = :id";
 
@@ -104,6 +128,24 @@ public class PostgresUserRepo implements UserRepository {
     }
 
     @Override
+    public Flux<User> getAll() {
+        return databaseClient.sql(SELECT_ALL_USER_ROWS)
+                .map((row, metadata) -> new UserRow(
+                        row.get("id", String.class),
+                        row.get("username", String.class),
+                        row.get("password_hash", String.class),
+                        Boolean.TRUE.equals(row.get("banned", Boolean.class)),
+                        row.get("banned_reason", String.class),
+                        row.get("banned_at", LocalDateTime.class),
+                        row.get("banned_by", String.class),
+                        row.get("role_name", String.class)
+                ))
+                .all()
+                .bufferUntilChanged(UserRow::id)
+                .flatMap(this::mapUser);
+    }
+
+    @Override
     public Mono<User> getByID(String id) {
         if (!StringUtils.hasText(id)) {
             return Mono.empty();
@@ -115,6 +157,10 @@ public class PostgresUserRepo implements UserRepository {
                         row.get("id", String.class),
                         row.get("username", String.class),
                         row.get("password_hash", String.class),
+                        Boolean.TRUE.equals(row.get("banned", Boolean.class)),
+                        row.get("banned_reason", String.class),
+                        row.get("banned_at", LocalDateTime.class),
+                        row.get("banned_by", String.class),
                         row.get("role_name", String.class)
                 ))
                 .all()
@@ -134,6 +180,10 @@ public class PostgresUserRepo implements UserRepository {
                         row.get("id", String.class),
                         row.get("username", String.class),
                         row.get("password_hash", String.class),
+                        Boolean.TRUE.equals(row.get("banned", Boolean.class)),
+                        row.get("banned_reason", String.class),
+                        row.get("banned_at", LocalDateTime.class),
+                        row.get("banned_by", String.class),
                         row.get("role_name", String.class)
                 ))
                 .all()
@@ -215,6 +265,42 @@ public class PostgresUserRepo implements UserRepository {
                 .then();
     }
 
+    @Override
+    @Transactional
+    public Mono<Void> banByID(String id, String reason, String bannedBy) {
+        if (!StringUtils.hasText(id) || !StringUtils.hasText(bannedBy)) {
+            return Mono.error(new IllegalArgumentException("id or bannedBy is invalid"));
+        }
+
+        DatabaseClient.GenericExecuteSpec spec = databaseClient.sql(BAN_USER_SQL)
+                .bind("id", id)
+                .bind("bannedBy", bannedBy);
+
+        if (reason != null) {
+            spec = spec.bind("reason", reason);
+        } else {
+            spec = spec.bindNull("reason", String.class);
+        }
+
+        return spec.fetch()
+                .rowsUpdated()
+                .then();
+    }
+
+    @Override
+    @Transactional
+    public Mono<Void> unbanByID(String id) {
+        if (!StringUtils.hasText(id)) {
+            return Mono.error(new IllegalArgumentException("id is invalid"));
+        }
+
+        return databaseClient.sql(UNBAN_USER_SQL)
+                .bind("id", id)
+                .fetch()
+                .rowsUpdated()
+                .then();
+    }
+
     private Mono<User> mapUser(List<UserRow> rows) {
         if (rows.isEmpty()) {
             return Mono.empty();
@@ -223,6 +309,10 @@ public class PostgresUserRepo implements UserRepository {
         UserRow firstRow = rows.get(0);
         User user = new User(firstRow.id(), firstRow.username(), "");
         user.setPasswordHash(firstRow.passwordHash());
+        user.setBanned(firstRow.banned());
+        user.setBannedReason(firstRow.bannedReason());
+        user.setBannedAt(firstRow.bannedAt());
+        user.setBannedBy(firstRow.bannedBy());
 
         for (UserRow row : rows) {
             if (row.roleName() != null) {
@@ -366,12 +456,21 @@ public class PostgresUserRepo implements UserRepository {
         private final String id;
         private final String username;
         private final String passwordHash;
+        private final boolean banned;
+        private final String bannedReason;
+        private final LocalDateTime bannedAt;
+        private final String bannedBy;
         private final String roleName;
 
-        private UserRow(String id, String username, String passwordHash, String roleName) {
+        private UserRow(String id, String username, String passwordHash, boolean banned, String bannedReason,
+                        LocalDateTime bannedAt, String bannedBy, String roleName) {
             this.id = id;
             this.username = username;
             this.passwordHash = passwordHash;
+            this.banned = banned;
+            this.bannedReason = bannedReason;
+            this.bannedAt = bannedAt;
+            this.bannedBy = bannedBy;
             this.roleName = roleName;
         }
 
@@ -385,6 +484,22 @@ public class PostgresUserRepo implements UserRepository {
 
         private String passwordHash() {
             return passwordHash;
+        }
+
+        private boolean banned() {
+            return banned;
+        }
+
+        private String bannedReason() {
+            return bannedReason;
+        }
+
+        private LocalDateTime bannedAt() {
+            return bannedAt;
+        }
+
+        private String bannedBy() {
+            return bannedBy;
         }
 
         private String roleName() {

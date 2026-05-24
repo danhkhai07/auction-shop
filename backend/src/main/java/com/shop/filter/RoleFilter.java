@@ -36,6 +36,9 @@ public class RoleFilter implements HandlerFilterFunction<ServerResponse, ServerR
             return userManager.getUserByID(userID)
                     .switchIfEmpty(Mono.error(new IllegalStateException("user does not exist")))
                     .flatMap(user -> {
+                        if (user.isBanned()) {
+                            return ServerResponse.status(403).build();
+                        }
                         Set<Role> roles = user.getRoles();
                         request.attributes().put("resolved_role", roles);
                         request.attributes().put("userID", userID);

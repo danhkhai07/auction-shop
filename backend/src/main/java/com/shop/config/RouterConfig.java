@@ -6,7 +6,6 @@ import com.shop.handler.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.server.RequestPredicates;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -25,11 +24,11 @@ public class RouterConfig {
         DeleteHandler deleteHandler,
         UploadHandler uploadHandler,
         AuctionHandler auctionHandler,
-        ElevateUserHandler elevateUserHandler,
+        AdminActionsHandler elevateUserHandler,
 
         AuthFilter authFilter,
-        RoleFilter roleFilter
-    ) {
+        RoleFilter roleFilter,
+        AdminActionsHandler adminActionsHandler) {
         return RouterFunctions.route()
                 .GET("/", indexHandler::index)
                 .path("/auth", builder -> builder
@@ -42,7 +41,6 @@ public class RouterConfig {
                 .path("/user", builder -> builder
                         .GET("/{id}", viewHandler::getUser)
                         .POST("/delete/{id}", deleteHandler::deleteUser).filter(roleFilter)
-                        .POST("/elevate/{id}", elevateUserHandler::elevateUser).filter(authFilter)
                 )
                 .path("/item", builder -> builder
                         .GET("/{id}", viewHandler::getItem)
@@ -51,10 +49,9 @@ public class RouterConfig {
                         .POST("/{id}", contentType(MediaType.APPLICATION_JSON), uploadHandler::updateItem).filter(authFilter)
                 )
                 .path("/auction", builder -> builder
-                        .GET("/{id}", viewHandler::getAuction)
                         .POST("/delete/{id}", deleteHandler::deleteAuction).filter(roleFilter)
                         .POST("", contentType(MediaType.APPLICATION_JSON), uploadHandler::uploadAuction).filter(authFilter)
-                        .path("/{id}", builder2 -> builder2
+                        .path("/{id}", secured -> secured
                                 .POST("", contentType(MediaType.APPLICATION_JSON), uploadHandler::updateAuction).filter(authFilter)
                                 .POST("/bid", contentType(MediaType.APPLICATION_JSON), auctionHandler::placeBid).filter(authFilter)
                                 .POST("/start", auctionHandler::startAuction).filter(authFilter)
@@ -65,8 +62,24 @@ public class RouterConfig {
                                 .POST("/extend/endtime", contentType(MediaType.APPLICATION_JSON), auctionHandler::extendEndtime).filter(authFilter)
                         )
                 )
+                .path("/auction", builder -> builder
+                        .GET("/{id}", viewHandler::getAuction)
+                        .GET("/{id}/events", auctionHandler::stream)
+                )
                 .path("/feed", builder -> builder
                         .GET("", viewHandler::getFeed)
+                )
+                .path("/admin", builder -> builder
+                        .filter(roleFilter)
+                        .POST("/elevate/user/{id}", elevateUserHandler::elevateUser)
+                        .POST("/delete/user/{id}", deleteHandler::deleteUser)
+                        .POST("/delete/item/{id}", deleteHandler::deleteItem)
+                        .POST("/delete/auction/{id}", deleteHandler::deleteAuction)
+                        .POST("/ban/user/{id}", contentType(MediaType.APPLICATION_JSON), adminActionsHandler::banUser)
+                        .POST("/unban/user/{id}", adminActionsHandler::unbanUser)
+                        .GET("/user/all", adminActionsHandler::getAllUsers)
+                        .GET("/auction/all", adminActionsHandler::getAllAuctions)
+                        .GET("/item/all", adminActionsHandler::getAllItems)
                 )
                 .build();
     }

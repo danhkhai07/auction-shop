@@ -11,6 +11,7 @@ public record GetUserResponse(
     @JsonProperty("id") String id,
     @JsonProperty("username") String username,
     @JsonProperty("roles") Set<Role> roles,
+    @JsonProperty("banned") boolean banned,
     @JsonProperty("itemList") List<String> itemList,
     @JsonProperty("auctionList") List<String> auctionList
 ){
@@ -18,6 +19,7 @@ public record GetUserResponse(
         this(user.getId(),
             user.getUsername(),
             user.getRoles(),
+            user.isBanned(),
             user.getOwnedItemIds(),
             user.getOwnedAuctionIds());
     }

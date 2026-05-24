@@ -4,6 +4,7 @@ import com.shop.cache.CacheManager;
 import com.shop.domain.Item;
 import com.shop.domain.Role;
 import com.shop.dto.request.UploadItemRequest;
+import com.shop.dto.response.GetAuctionResponse;
 import com.shop.dto.response.GetItemResponse;
 import com.shop.dto.response.IDResponse;
 import de.huxhorn.sulky.ulid.ULID;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -39,6 +41,12 @@ public class ItemService {
         return getItemByID(id)
                 .switchIfEmpty(Mono.error(new IllegalAccessException("item not found")))
                 .map(this::toResponse);
+    }
+
+    public Mono<List<GetItemResponse>> getAllItems(){
+        return itemRepository.getAll()
+                .map(GetItemResponse::new)
+                .collectList();
     }
 
     private GetItemResponse toResponse(Item item) {

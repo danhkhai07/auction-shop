@@ -1,5 +1,6 @@
 package com.shop.filter;
 
+import com.shop.application.UserManager;
 import com.shop.security.jwt.JWTService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class AuthFilter implements HandlerFilterFunction<ServerResponse, ServerResponse> {
     private final JWTService jwtService;
+    private final UserManager userManager;
 
     @Override
     public Mono<ServerResponse> filter(ServerRequest request, HandlerFunction<ServerResponse> next) {
@@ -24,8 +26,15 @@ public class AuthFilter implements HandlerFilterFunction<ServerResponse, ServerR
         String token = auth.substring(7);
         try {
             String userID = jwtService.extractUserId(token);
-            request.attributes().put("userID", userID);
-            return next.handle(request);
+            return userManager.getUserByID(userID)
+                    .flatMap(user -> {
+                        if (user.isBanned()) {
+                            return ServerResponse.status(403).build();
+                        }
+                        request.attributes().put("userID", userID);
+                        return next.handle(request);
+                    })
+                    .onErrorResume(IllegalAccessException.class, error -> ServerResponse.status(403).build());
         } catch (Exception e) {
             return ServerResponse.status(401).build();
         }
