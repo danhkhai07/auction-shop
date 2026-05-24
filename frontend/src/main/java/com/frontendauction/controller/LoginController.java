@@ -1,12 +1,17 @@
 package com.frontendauction.controller;
 
+import com.frontendauction.AppWindow;
 import com.frontendauction.service.AuthService;
 import com.frontendauction.service.HttpAuthService;
 import com.frontendauction.model.LoginResult;
+import com.frontendauction.service.TokenStore;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;//Nap file FXML thanh giao dien JavaFx
+import javafx.scene.Parent;
 import javafx.scene.Scene;//Tao Scene moi cho cua so
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;//Dieu khien cua so hien tai
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -27,6 +32,10 @@ public class LoginController {
         this.authService = authService;
     }
 
+    @FXML
+    private StackPane loginContainer;
+    @FXML
+    private AnchorPane loginForm;
     @FXML
     private TextField usernameField;
     @FXML
@@ -54,15 +63,39 @@ public class LoginController {
             }
         });
         Stage stage = (Stage) loginButton.getScene().getWindow();//Lay cua so hien tai tu Login Button
-        Scene scene = new Scene(loader.load(), 600, 400);
-        stage.setScene(scene);//Chuyen qua Scene Signup
+        Parent root = loader.load();
+        AppWindow.applyScene(stage, root);//Chuyen qua Scene Signup
         stage.show();
     }
 
+    @FXML
     public void initialize() {
+        loginContainer.widthProperty().addListener((observable, oldValue, newValue) -> scaleFormProportionally());
+        loginContainer.heightProperty().addListener((observable, oldValue, newValue) -> scaleFormProportionally());
         hideError();
     }
 
+    private void scaleFormProportionally() {
+        double containerWidth = loginContainer.getWidth();
+        double containerHeight = loginContainer.getHeight();
+
+        if (containerWidth == 0 || containerHeight == 0) {
+            return;
+        }
+
+        double scaleX = containerWidth / 600.0;
+        double scaleY = containerHeight / 400.0;
+
+        // Chọn tỷ lệ nhỏ hơn để đảm bảo Form đăng nhập luôn vừa vặn, không bị tràn/bị cắt mất góc
+        double finalScale = Math.min(scaleX, scaleY);
+
+        if (finalScale < 1.0) {
+            finalScale = 1.0;
+        }
+
+        loginForm.setScaleX(finalScale);
+        loginForm.setScaleY(finalScale);
+    }
     private void showError(String message) {
         errorLabel.setText(message);
         errorLabel.setVisible(true);
@@ -125,8 +158,13 @@ public class LoginController {
         setLoading(false);
 
         if (result.success()) {
+            if (result.token() == null || result.token().isBlank()) {
+                showError("Login response missing token");
+                return;
+            }
+
             hideError();
-            System.out.println("Login success. Token = " + result.token());
+            TokenStore.setToken(result.token());
             try {
                 navigateToDashboard();
             } catch (IOException exception) {
@@ -142,8 +180,8 @@ public class LoginController {
         FXMLLoader loader = new FXMLLoader(
                 Objects.requireNonNull(getClass().getResource("/com/frontendauction/dashboard.fxml")));
         Stage stage = (Stage) loginButton.getScene().getWindow();
-        Scene scene = new Scene(loader.load());
-        stage.setScene(scene);
+        Parent root = loader.load();
+        AppWindow.applyScene(stage, root);
         stage.show();
     }
 

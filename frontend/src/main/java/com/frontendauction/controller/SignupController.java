@@ -1,11 +1,13 @@
 package com.frontendauction.controller;
 
+import com.frontendauction.AppWindow;
 import com.frontendauction.model.SignupResult;
 import com.frontendauction.service.AuthService;
 import com.frontendauction.service.HttpAuthService;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
@@ -110,8 +112,6 @@ public class SignupController {
 
         if (result.success()) {
             hideError();
-            System.out.println("Signup success. Message = " + result.message());
-
             try {
                 handleBacktoLogin();
             } catch (IOException exception) {
@@ -152,8 +152,8 @@ public class SignupController {
             }
         });
         Stage stage = (Stage) backButton.getScene().getWindow();
-        Scene scene = new Scene(loader.load(), 600, 400);
-        stage.setScene(scene);
+        Parent root = loader.load();
+        AppWindow.applyScene(stage, root);
         stage.show();
     }
 }
