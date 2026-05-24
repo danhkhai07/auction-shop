@@ -4,6 +4,7 @@ import com.shop.cache.CacheManager;
 import com.shop.domain.Item;
 import com.shop.domain.Role;
 import com.shop.dto.request.UploadItemRequest;
+import com.shop.dto.response.GetAuctionResponse;
 import com.shop.dto.response.GetItemResponse;
 import com.shop.dto.response.IDResponse;
 import de.huxhorn.sulky.ulid.ULID;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -38,15 +40,22 @@ public class ItemService {
     public Mono<GetItemResponse> getItemResponseByID(String id) {
         return getItemByID(id)
                 .switchIfEmpty(Mono.error(new IllegalAccessException("item not found")))
-                .map(item -> {
-                    GetItemResponse response = new GetItemResponse(
-                            item.getId(),
-                            item.getName(),
-                            item.getDescription(),
-                            item.getSeller().getId()
-                    );
-                    return response;
-                });
+                .map(this::toResponse);
+    }
+
+    public Mono<List<GetItemResponse>> getAllItems(){
+        return itemRepository.getAll()
+                .map(GetItemResponse::new)
+                .collectList();
+    }
+
+    private GetItemResponse toResponse(Item item) {
+        return new GetItemResponse(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.getSeller().getId()
+        );
     }
 
     public Mono<Void> deleteItem(String id, String deleterID, Set<Role> deleterRoles){
@@ -70,9 +79,7 @@ public class ItemService {
                 .filter(item -> (item.getSeller().getId().equals(deleterID) || deleterIsAdmin))
                 .switchIfEmpty(Mono.error(new IllegalAccessException("unauthorized")))
                 .flatMap(b -> itemRepository.deleteByID(id))
-                .doOnNext(v -> {
-                        cacheManager.delete(id);
-                });
+                .then(Mono.fromRunnable(() -> cacheManager.delete(id)));
     }
 
     public Mono<IDResponse> newItem(String posterID, UploadItemRequest request) {
@@ -87,7 +94,12 @@ public class ItemService {
                             request.description(),
                             owner
                     );
-                    return itemRepository.newItem(item);
+                    return itemRepository.newItem(item)
+                            .then(Mono.fromRunnable(() -> {
+                                cacheManager.put(item.getId(), item);
+                                owner.addItem(item);
+                            }))
+                            .then(userManager.updateUser(owner));
                 })
                 .thenReturn(new IDResponse(id));
     }

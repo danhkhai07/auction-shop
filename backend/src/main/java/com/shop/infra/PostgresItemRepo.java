@@ -6,6 +6,7 @@ import com.shop.domain.User;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Repository
@@ -33,6 +34,29 @@ public class PostgresItemRepo implements ItemRepository {
                 .map((row, metadata) -> Boolean.TRUE.equals(row.get("item_exists", Boolean.class)))
                 .one()
                 .defaultIfEmpty(false);
+    }
+
+    @Override
+    public Flux<Item> getAll() {
+        String sql = "SELECT i.id AS item_id, i.name, i.description, u.id AS seller_id, u.username AS seller_name " +
+                "FROM items i " +
+                "JOIN users u ON i.seller_id = u.id " +
+                "ORDER BY i.id";
+
+        return databaseClient.sql(sql)
+                .map((row, metadata) -> {
+                    User seller = new User(
+                            row.get("seller_id", String.class),
+                            row.get("seller_name", String.class),
+                            "");
+
+                    return new Item(
+                            row.get("item_id", String.class),
+                            row.get("name", String.class),
+                            row.get("description", String.class),
+                            seller);
+                })
+                .all();
     }
 
     @Override

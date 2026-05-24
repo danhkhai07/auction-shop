@@ -2,9 +2,12 @@ package com.shop.application;
 
 import com.shop.cache.CacheManager;
 import com.shop.domain.Auction;
+import com.shop.domain.AuctionStatus;
 import com.shop.domain.Role;
+import com.shop.domain.User;
 import com.shop.dto.request.UploadAuctionRequest;
 import com.shop.dto.response.GetAuctionResponse;
+import com.shop.dto.response.GetUserResponse;
 import com.shop.dto.response.IDResponse;
 import de.huxhorn.sulky.ulid.ULID;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -19,6 +23,7 @@ import java.util.Set;
 public class AuctionService {
     private final AuctionRepository auctionRepository;
     private final ItemService itemService;
+    private final UserManager userManager;
     private final ULID ulid;
     private final CacheManager cacheManager;
 
@@ -38,35 +43,23 @@ public class AuctionService {
 
     public Mono<GetAuctionResponse> getAuctionResponseByID(String id){
         return getAuctionByID(id)
-                .map(auction -> {
-                    GetAuctionResponse response = new GetAuctionResponse(
-                            auction.getId(),
-                            "Auction",
-                            auction.getStartingPrice(),
-                            auction.getStartTime(),
-                            auction.getEndTime(),
-                            auction.getStatus(),
-                            auction.getBidHistory()
-                    );
-                    return response;
-                });
+                .map(this::toResponse);
+    }
+
+    public Mono<List<GetAuctionResponse>> getAllAuctions(){
+        return auctionRepository.getAll()
+                .map(GetAuctionResponse::new)
+                .collectList();
     }
 
     public Flux<GetAuctionResponse> getActiveAuctions(){
         return auctionRepository.getActives()
                 .switchIfEmpty(Mono.error(new IllegalStateException("no auction found")))
-                .map(auction -> {
-                    GetAuctionResponse response = new GetAuctionResponse(
-                            auction.getId(),
-                            "Auction",
-                            auction.getStartingPrice(),
-                            auction.getStartTime(),
-                            auction.getEndTime(),
-                            auction.getStatus(),
-                            auction.getBidHistory()
-                    );
-                    return response;
-                });
+                .map(this::toResponse);
+    }
+
+    private GetAuctionResponse toResponse(Auction auction) {
+        return new GetAuctionResponse(auction);
     }
 
     public Mono<Void> deleteAuction(String id, String deleterID, Set<Role> deleterRoles){
@@ -80,22 +73,25 @@ public class AuctionService {
         if (cacheManager.contains(id)) {
             stream = Mono.just((Auction) cacheManager.get(id));
         } else {
-            stream = auctionRepository.existsByID(id)
-                    .filter(b -> b)
-                    .flatMap(b -> auctionRepository.getByID(id));
+            stream = auctionRepository.getByID(id);
         }
 
         return stream
-                .switchIfEmpty(Mono.error(new IllegalStateException("item does not exist")))
+                .switchIfEmpty(Mono.error(new IllegalStateException("auction does not exist")))
                 .filter(auction -> (
                         auction.getItem().getSeller().getId().equals(deleterID) || deleterIsAdmin)
                 )
                 .switchIfEmpty(Mono.error(new IllegalAccessException("unauthorized")))
-                .flatMap(b -> auctionRepository.deleteByID(id))
-                .filter(v -> {
-                    cacheManager.delete(id);
-                    return true;
-                });
+                .flatMap(auction -> {
+                    if (auction.getStatus() == AuctionStatus.RUNNING) {
+                        return Mono.error(new IllegalStateException("running auction must be cancelled before delete"));
+                    }
+                    if (!auction.getBidHistory().isEmpty()) {
+                        return Mono.error(new IllegalStateException("auction with bids cannot be deleted"));
+                    }
+                    return auctionRepository.deleteByID(id);
+                })
+                .then(Mono.fromRunnable(() -> cacheManager.delete(id)));
     }
 
     public Mono<IDResponse> newAuction(String posterID, UploadAuctionRequest request) {
@@ -112,7 +108,13 @@ public class AuctionService {
                             request.startTime(),
                             request.endTime()
                     );
-                    return auctionRepository.newAuction(auction);
+                    return userManager.getUserByID(item.getSeller().getId())
+                            .flatMap(owner -> auctionRepository.newAuction(auction)
+                                    .then(Mono.fromRunnable(() -> {
+                                        cacheManager.put(auction.getId(), auction);
+                                        owner.addAuction(auction);
+                                    }))
+                                    .then(userManager.updateUser(owner)));
                 })
                 .thenReturn(new IDResponse(id));
     }
@@ -139,8 +141,6 @@ public class AuctionService {
 
     public Mono<Void> updateAuctionStatus(Auction auction) {
         return auctionRepository.saveAuction(auction)
-                .doOnNext(v -> {
-                    cacheManager.put(auction.getId(), auction);
-                });
+                .then(Mono.fromRunnable(() -> cacheManager.put(auction.getId(), auction)));
     }
 }

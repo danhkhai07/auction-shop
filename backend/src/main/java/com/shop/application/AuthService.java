@@ -50,6 +50,12 @@ public class AuthService {
                 .switchIfEmpty(Mono.error(
                         new IllegalAccessException(invalidCredentialsMessage)
                 ))
+                .flatMap(user -> {
+                    if (user.isBanned()) {
+                        return Mono.error(new IllegalAccessException("account is banned"));
+                    }
+                    return Mono.just(user);
+                })
                 .map(user ->
                         new LoginResponse(jwtService.generateToken(user.getId()))
                 );
