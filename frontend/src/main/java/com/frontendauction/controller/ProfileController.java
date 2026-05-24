@@ -14,6 +14,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -44,6 +45,7 @@ public class ProfileController {
     @FXML private TableColumn<LiveAuctionModel.AuctionDetail, String> colOwnedAuctionName;
     @FXML private TableColumn<LiveAuctionModel.AuctionDetail, Double> colOwnedAuctionPrice;
     @FXML private TableColumn<LiveAuctionModel.AuctionDetail, String> colOwnedAuctionStatus;
+    @FXML private TableColumn<LiveAuctionModel.AuctionDetail, Void> colOwnedAuctionAction;
 
     private final UserProfileService userProfileService = new UserProfileService();
 
@@ -95,6 +97,35 @@ public class ProfileController {
                 setText(value == null ? "-" : String.format("%,.0f VND", value));
             }
         });
+
+        colOwnedAuctionAction.setCellFactory(column -> new TableCell<>() {
+            private final Button btnStart = new Button("Start");
+
+            {
+                btnStart.setStyle("-fx-background-color: #22c55e; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 4; -fx-font-weight: bold;");
+                btnStart.setOnAction(event -> {
+                    LiveAuctionModel.AuctionDetail auction = getTableView().getItems().get(getIndex());
+                    if (auction != null) {
+                        startAuction(auction.getId());
+                    }
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || getTableView().getItems().get(getIndex()) == null) {
+                    setGraphic(null);
+                } else {
+                    LiveAuctionModel.AuctionDetail auction = getTableView().getItems().get(getIndex());
+                    if ("OPEN".equalsIgnoreCase(auction.getStatus())) {
+                        setGraphic(btnStart);
+                    } else {
+                        setGraphic(null);
+                    }
+                }
+            }
+        });
     }
 
     private void loadProfile() {
@@ -141,6 +172,21 @@ public class ProfileController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void startAuction(String auctionId) {
+        userProfileService.startAuction(auctionId)
+                .thenAccept(v -> Platform.runLater(this::loadProfile))
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Start Auction Error");
+                        alert.setHeaderText(null);
+                        alert.setContentText(resolveErrorMessage(ex));
+                        alert.showAndWait();
+                    });
+                    return null;
+                });
     }
 
     private String joinRoles(Set<String> roles) {
