@@ -33,6 +33,7 @@ public class DashboardController {
     @FXML private Button btnHamburger;
     @FXML private AnchorPane menuOverlay;
     @FXML private VBox sideMenu;
+    @FXML private VBox auctionListContainer;
 
     private final UserProfileService userProfileService = new UserProfileService();
     private final LiveAuctionService liveAuctionService = new LiveAuctionService();
@@ -118,6 +119,13 @@ public class DashboardController {
     private void updateDashboard(DashboardData data) {
         UserProfileModel user = data.user();
         List<LiveAuctionModel.AuctionDetail> activeAuctions = data.activeAuctions();
+        
+        if (activeAuctions != null) {
+            activeAuctions = activeAuctions.stream()
+                    .filter(a -> a.getRemainingSeconds() > 0)
+                    .toList();
+        }
+        
         int ownedItems = safeSize(user.getItemList());
         int ownedAuctions = safeSize(user.getAuctionList());
         int activeCount = activeAuctions == null ? 0 : activeAuctions.size();
@@ -126,17 +134,40 @@ public class DashboardController {
 
         lblWelcome.setText("Welcome, " + fallback(user.getUsername(), "user"));
         lblSummary.setText("User ID: " + fallback(user.getId(), "-") + " | Roles: " + joinRoles(user.getRoles()));
-        lblProfileMeta.setText(ownedItems + " item(s), " + ownedAuctions + " auction(s)");
-        lblAuctionMeta.setText(activeCount > 0 ? activeCount + " active auction(s)" : "No active auctions");
-        lblProductMeta.setText(ownedItems > 0 ? ownedItems + " product(s) managed" : "No owned products");
+        if (lblProfileMeta != null) lblProfileMeta.setText(ownedItems + " item(s), " + ownedAuctions + " auction(s)");
+        if (lblAuctionMeta != null) lblAuctionMeta.setText(activeCount > 0 ? activeCount + " active auction(s)" : "No active auctions");
+        if (lblProductMeta != null) lblProductMeta.setText(ownedItems > 0 ? ownedItems + " product(s) managed" : "No owned products");
+        
+        loadAuctionCards(activeAuctions);
+    }
+
+    private void loadAuctionCards(List<LiveAuctionModel.AuctionDetail> auctions) {
+        if (auctionListContainer == null) return;
+        auctionListContainer.getChildren().clear();
+        if (auctions == null || auctions.isEmpty()) {
+            Label noAuction = new Label("No auctions available.");
+            auctionListContainer.getChildren().add(noAuction);
+            return;
+        }
+        for (LiveAuctionModel.AuctionDetail auction : auctions) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/frontendauction/auction_card.fxml"));
+                Node card = loader.load();
+                AuctionCardController controller = loader.getController();
+                controller.setAuction(auction);
+                auctionListContainer.getChildren().add(card);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void showLoadFailure(String message) {
         lblWelcome.setText("Dashboard");
         lblSummary.setText(message);
-        lblProfileMeta.setText("Unable to load profile");
-        lblAuctionMeta.setText("Unable to load auctions");
-        lblProductMeta.setText("Unable to load products");
+        if (lblProfileMeta != null) lblProfileMeta.setText("Unable to load profile");
+        if (lblAuctionMeta != null) lblAuctionMeta.setText("Unable to load auctions");
+        if (lblProductMeta != null) lblProductMeta.setText("Unable to load products");
         firstActiveAuctionId = null;
     }
 

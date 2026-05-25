@@ -198,4 +198,20 @@ public class UserProfileService {
                         .filter(Objects::nonNull)
                         .toList());
     }
+
+    public CompletableFuture<Void> startAuction(String auctionId) {
+        HttpRequest request = authorizedRequest("/auction/" + auctionId + "/start")
+                .POST(HttpRequest.BodyPublishers.noBody())
+                .build();
+
+        return client.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8))
+                .thenCompose(response -> {
+                    if (response.statusCode() == 200 || response.statusCode() == 204) {
+                        return CompletableFuture.completedFuture(null);
+                    }
+                    return CompletableFuture.failedFuture(
+                            new IllegalStateException(readError(response.body(), "Unable to start auction"))
+                    );
+                });
+    }
 }

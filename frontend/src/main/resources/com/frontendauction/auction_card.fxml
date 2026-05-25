@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox fx:id="cardContainer" onMouseClicked="#onCardClick" pickOnBounds="true" prefHeight="25.0" prefWidth="1208.0" style="-fx-background-color: #ffffff; -fx-background-radius: 8; -fx-padding: 22; -fx-border-color: #e2e8f0; -fx-border-radius: 8;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.frontendauction.controller.AuctionCardController">
+    <children>
+        <Label fx:id="lblAuctionName" text="Auction Name" textFill="#1e3a8a">
+            <font>
+                <Font name="System Bold" size="18.0" />
+            </font>
+        </Label>
+        <Region VBox.vgrow="ALWAYS" />
+        <Label fx:id="lblAuctionStatus" text="Loading auction..." textFill="#475569" wrapText="true" />
+    </children>
+</VBox>

@@ -109,7 +109,8 @@
                                         <TableColumn fx:id="colOwnedAuctionId" prefWidth="140.0" text="Auction ID" />
                                         <TableColumn fx:id="colOwnedAuctionName" prefWidth="240.0" text="Name" />
                                         <TableColumn fx:id="colOwnedAuctionPrice" prefWidth="180.0" text="Current Price" />
-                                        <TableColumn fx:id="colOwnedAuctionStatus" prefWidth="160.0" text="Status" />
+                                        <TableColumn fx:id="colOwnedAuctionStatus" prefWidth="140.0" text="Status" />
+                                        <TableColumn fx:id="colOwnedAuctionAction" prefWidth="100.0" text="Action" />
                                     </columns>
                                     <columnResizePolicy>
                                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
