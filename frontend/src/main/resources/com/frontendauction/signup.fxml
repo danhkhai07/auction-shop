@@ -1,38 +1,113 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: linear-gradient(to bottom right, #e6effd, #adcce9);" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.frontendauction.controller.SignupController">
+<VBox prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: #f7f7f7;" stylesheets="@css/global.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.frontendauction.controller.SignupController">
    <children>
       <fx:include source="title-bar.fxml" />
       <StackPane VBox.vgrow="ALWAYS">
          <children>
-            <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0">
+
+            <VBox alignment="CENTER" maxWidth="420.0" spacing="0.0" style="-fx-background-color: #ffffff; -fx-background-radius: 16; -fx-border-color: #e5e5e5; -fx-border-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 4);">
+               <padding>
+                  <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+               </padding>
                <children>
-                  <Label layoutX="133.0" layoutY="45.0" text="CREATE YOUR ACCOUNT">
+                  <!-- Logo & Title -->
+                  <Label text="🏪" style="-fx-font-size: 32px;">
+                     <VBox.margin>
+                        <Insets bottom="8.0" />
+                     </VBox.margin>
+                  </Label>
+                  <Label text="Create Account" textFill="#191919">
                      <font>
-                        <Font size="30.0" />
+                        <Font name="System Bold" size="24.0" />
                      </font>
                   </Label>
-                  <TextField fx:id="usernameField" layoutX="133.0" layoutY="118.0" prefHeight="46.0" prefWidth="334.0" promptText="USERNAME*" />
-                  <PasswordField fx:id="passwordField" layoutX="133.0" layoutY="185.0" prefHeight="46.0" prefWidth="334.0" promptText="PASSWORD*" />
-                  <PasswordField fx:id="confirmpassField" layoutX="131.0" layoutY="250.0" prefHeight="46.0" prefWidth="334.0" promptText="CONFIRM PASSWORD*" />
-                  <Button fx:id="signupButton" alignment="CENTER" layoutX="264.0" layoutY="334.0" mnemonicParsing="false" onAction="#handleSignup" text="Sign Up">
+                  <Label text="Join Auction Shop today" textFill="#707070">
                      <font>
-                        <Font size="14.0" />
+                        <Font size="13.0" />
                      </font>
+                     <VBox.margin>
+                        <Insets bottom="24.0" top="4.0" />
+                     </VBox.margin>
+                  </Label>
+
+                  <!-- Username field -->
+                  <Label text="Username" textFill="#333333" style="-fx-font-weight: bold; -fx-font-size: 13px;">
+                     <VBox.margin>
+                        <Insets bottom="6.0" />
+                     </VBox.margin>
+                  </Label>
+                  <TextField fx:id="usernameField" prefHeight="42.0" promptText="Choose a username" styleClass="input-field">
+                     <VBox.margin>
+                        <Insets bottom="16.0" />
+                     </VBox.margin>
+                  </TextField>
+
+                  <!-- Password field -->
+                  <Label text="Password" textFill="#333333" style="-fx-font-weight: bold; -fx-font-size: 13px;">
+                     <VBox.margin>
+                        <Insets bottom="6.0" />
+                     </VBox.margin>
+                  </Label>
+                  <PasswordField fx:id="passwordField" prefHeight="42.0" promptText="Create a password" styleClass="input-field">
+                     <VBox.margin>
+                        <Insets bottom="16.0" />
+                     </VBox.margin>
+                  </PasswordField>
+
+                  <!-- Confirm Password field -->
+                  <Label text="Confirm Password" textFill="#333333" style="-fx-font-weight: bold; -fx-font-size: 13px;">
+                     <VBox.margin>
+                        <Insets bottom="6.0" />
+                     </VBox.margin>
+                  </Label>
+                  <PasswordField fx:id="confirmpassField" prefHeight="42.0" promptText="Re-enter your password" styleClass="input-field">
+                     <VBox.margin>
+                        <Insets bottom="8.0" />
+                     </VBox.margin>
+                  </PasswordField>
+
+                  <!-- Error label -->
+                  <Label fx:id="errorLabel" alignment="CENTER" maxWidth="Infinity" textFill="#e53238" visible="false" wrapText="true" style="-fx-font-size: 12px;">
+                     <VBox.margin>
+                        <Insets bottom="8.0" />
+                     </VBox.margin>
+                  </Label>
+
+                  <!-- Create account button -->
+                  <Button fx:id="signupButton" maxWidth="Infinity" mnemonicParsing="false" onAction="#handleSignup" prefHeight="44.0" styleClass="btn-primary" text="Create Account">
+                     <VBox.margin>
+                        <Insets bottom="16.0" top="8.0" />
+                     </VBox.margin>
                   </Button>
-                  <Label fx:id="errorLabel" alignment="CENTER" layoutX="189.0" layoutY="306.0" prefHeight="18.0" prefWidth="218.0" textFill="#fc0000" visible="false" />
-                  <Button fx:id="backButton" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#handleBacktoLogin" text="Back to Login" />
+
+                  <Separator style="-fx-padding: 4 0;">
+                     <VBox.margin>
+                        <Insets bottom="16.0" />
+                     </VBox.margin>
+                  </Separator>
+
+                  <!-- Back to login link -->
+                  <HBox alignment="CENTER" spacing="6.0">
+                     <children>
+                        <Label text="Already have an account?" textFill="#707070" style="-fx-font-size: 13px;" />
+                        <Button fx:id="backButton" mnemonicParsing="false" onAction="#handleBacktoLogin" styleClass="btn-text-only" text="Sign in" style="-fx-font-size: 13px;" />
+                     </children>
+                  </HBox>
                </children>
-            </AnchorPane>
+            </VBox>
+
          </children>
       </StackPane>
    </children>

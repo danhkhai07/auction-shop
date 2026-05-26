@@ -13,25 +13,31 @@
                 <SplitPane dividerPositions="0.55" styleClass="split-pane-custom" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <items>
 
+                <!-- LEFT PANEL: Product List -->
                 <AnchorPane minHeight="0.0" minWidth="0.0">
                     <children>
                         <VBox styleClass="premium-card" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="0.0">
                             <padding>
-                                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                                <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
                             </padding>
                             <children>
 
-                                <HBox alignment="CENTER_LEFT">
-                                    <VBox.margin><Insets bottom="10.0" /></VBox.margin>
+                                <!-- Breadcrumb -->
+                                <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                    <VBox.margin><Insets bottom="12.0" /></VBox.margin>
                                     <children>
-                                        <Button fx:id="btnBack" mnemonicParsing="false" onAction="#handleBackToDashboard" styleClass="btn-text-only" text="&lt; Back to Dashboard" />
+                                        <Button fx:id="btnBack" mnemonicParsing="false" onAction="#handleBackToDashboard" styleClass="btn-text-only" text="← Dashboard" style="-fx-font-size: 13px;" />
+                                        <Label text="  /  " textFill="#a0a0a0" />
+                                        <Label text="Products" textFill="#555555" style="-fx-font-weight: bold; -fx-font-size: 13px;" />
                                     </children>
                                 </HBox>
 
-                                <HBox alignment="CENTER" spacing="5.0" styleClass="section-header-box">
+                                <!-- Section header -->
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
                                     <children>
-                                        <Label style="-fx-letter-spacing: 1px;" text="YOUR PRODUCTS" textFill="#3d52b0">
-                                            <font><Font name="System Bold" size="16.0" /></font>
+                                        <Label text="📦" style="-fx-font-size: 16px;" />
+                                        <Label text="YOUR PRODUCTS" textFill="#191919">
+                                            <font><Font name="System Bold" size="15.0" /></font>
                                         </Label>
                                     </children>
                                     <VBox.margin><Insets bottom="10.0" /></VBox.margin>
@@ -44,8 +50,7 @@
                                 <TableView fx:id="tvProducts" styleClass="table-view-custom" VBox.vgrow="ALWAYS">
                                     <columns>
                                         <TableColumn fx:id="colId" prefWidth="60.0" style="-fx-alignment: CENTER;" text="ID" />
-                                        <TableColumn fx:id="colName" prefWidth="220.0" text="Product name" />
-                                        <TableColumn fx:id="colPrice" prefWidth="140.0" style="-fx-alignment: CENTER-RIGHT;" text="Started Price" />
+                                        <TableColumn fx:id="colName" prefWidth="220.0" text="Product Name" />
                                         <TableColumn fx:id="colDescription" prefWidth="200.0" text="Description" />
                                     </columns>
                                     <columnResizePolicy>
@@ -58,31 +63,34 @@
                     </children>
                 </AnchorPane>
 
+                <!-- RIGHT PANEL: Product Details Form + Create Auction -->
                 <AnchorPane minHeight="0.0" minWidth="0.0">
                     <children>
-                        <VBox alignment="TOP_CENTER" spacing="15.0" styleClass="premium-card" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <VBox alignment="TOP_CENTER" spacing="16.0" styleClass="premium-card" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <padding>
-                                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                                <Insets bottom="20.0" left="24.0" right="24.0" top="24.0" />
                             </padding>
                             <children>
 
-                                <HBox alignment="CENTER" spacing="5.0" styleClass="section-header-box">
+                                <!-- Product Details Header -->
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
                                     <children>
-                                        <Label style="-fx-letter-spacing: 1px;" text="PRODUCT DETAILS" textFill="#3d52b0">
-                                            <font><Font name="System Bold" size="16.0" /></font>
+                                        <Label text="📝" style="-fx-font-size: 16px;" />
+                                        <Label text="PRODUCT DETAILS" textFill="#191919">
+                                            <font><Font name="System Bold" size="15.0" /></font>
                                         </Label>
                                     </children>
                                 </HBox>
 
                                 <Separator styleClass="separator-custom" />
 
+                                <!-- Product Form -->
                                 <GridPane hgap="15.0" vgap="15.0">
                                     <columnConstraints>
-                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="10.0" prefWidth="130.0" />
+                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="130.0" minWidth="10.0" prefWidth="120.0" />
                                         <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="250.0" />
                                     </columnConstraints>
                                     <rowConstraints>
-                                        <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
                                         <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
                                         <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
                                         <RowConstraints minHeight="10.0" prefHeight="100.0" vgrow="SOMETIMES" />
@@ -91,35 +99,36 @@
 
                                         <Label styleClass="form-label" text="ID" />
                                         <Label styleClass="form-label" text="Product Name" GridPane.rowIndex="1" />
-                                        <Label styleClass="form-label" text="Started Price" GridPane.rowIndex="2" />
-                                        <Label styleClass="form-label" text="Description" GridPane.rowIndex="3" GridPane.valignment="TOP">
+                                        <Label styleClass="form-label" text="Description" GridPane.rowIndex="2" GridPane.valignment="TOP">
                                             <GridPane.margin><Insets top="10.0" /></GridPane.margin>
                                         </Label>
 
-                                        <TextField fx:id="txtId" disable="true" prefHeight="40.0" promptText="Auto" styleClass="input-field" GridPane.columnIndex="1" />
-                                        <TextField fx:id="txtName" prefHeight="40.0" promptText="Type Product Name..." styleClass="input-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                        <TextField fx:id="txtPrice" prefHeight="40.0" promptText="Type Started Price..." styleClass="input-field" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                        <TextArea fx:id="txtDescription" prefHeight="100.0" promptText="Type product detail description..." styleClass="input-area" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                        <TextField fx:id="txtId" disable="true" prefHeight="38.0" promptText="Auto" styleClass="input-field" GridPane.columnIndex="1" />
+                                        <TextField fx:id="txtName" prefHeight="38.0" promptText="Type Product Name..." styleClass="input-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                        <TextArea fx:id="txtDescription" prefHeight="100.0" promptText="Type product description..." styleClass="input-area" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
                                     </children>
                                 </GridPane>
 
-                                <HBox alignment="CENTER" spacing="15.0">
-                                    <VBox.margin><Insets top="10.0" /></VBox.margin>
+                                <!-- Action Buttons -->
+                                <HBox alignment="CENTER" spacing="12.0">
+                                    <VBox.margin><Insets top="6.0" /></VBox.margin>
                                     <children>
-                                        <Button fx:id="btnAdd" mnemonicParsing="false" prefHeight="45.0" prefWidth="120.0" styleClass="btn-success" text="Add" />
-                                        <Button fx:id="btnUpdate" mnemonicParsing="false" prefHeight="45.0" prefWidth="120.0" styleClass="btn-warning" text="Update" />
-                                        <Button fx:id="btnDelete" mnemonicParsing="false" prefHeight="45.0" prefWidth="120.0" styleClass="btn-danger" text="Delete" />
+                                        <Button fx:id="btnAdd" mnemonicParsing="false" prefHeight="42.0" prefWidth="110.0" styleClass="btn-success" text="Add" />
+                                        <Button fx:id="btnUpdate" mnemonicParsing="false" prefHeight="42.0" prefWidth="110.0" styleClass="btn-warning" text="Update" />
+                                        <Button fx:id="btnDelete" mnemonicParsing="false" prefHeight="42.0" prefWidth="110.0" styleClass="btn-danger" text="Delete" />
                                     </children>
                                 </HBox>
 
                                 <Separator styleClass="separator-custom">
-                                    <VBox.margin><Insets bottom="5.0" top="10.0" /></VBox.margin>
+                                    <VBox.margin><Insets bottom="4.0" top="8.0" /></VBox.margin>
                                 </Separator>
 
-                                <HBox alignment="CENTER" spacing="5.0" styleClass="section-header-box">
+                                <!-- Create Auction Section -->
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
                                     <children>
-                                        <Label style="-fx-letter-spacing: 1px;" text="CREATE NEW AUCTION" textFill="#3d52b0">
+                                        <Label text="🔨" style="-fx-font-size: 16px;" />
+                                        <Label text="CREATE NEW AUCTION" textFill="#191919">
                                             <font><Font name="System Bold" size="14.0" /></font>
                                         </Label>
                                     </children>
@@ -127,7 +136,7 @@
 
                                 <GridPane hgap="15.0" vgap="10.0">
                                     <columnConstraints>
-                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="10.0" prefWidth="130.0" />
+                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="130.0" minWidth="10.0" prefWidth="120.0" />
                                         <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="250.0" />
                                     </columnConstraints>
                                     <rowConstraints>
@@ -140,16 +149,16 @@
                                         <Label styleClass="form-label" text="Start Time" GridPane.rowIndex="1" />
                                         <Label styleClass="form-label" text="End Time" GridPane.rowIndex="2" />
 
-                                        <TextField fx:id="txtAuctionPrice" prefHeight="40.0" promptText="VD: 100000" styleClass="input-field" GridPane.columnIndex="1" />
-                                        <TextField fx:id="txtStartTime" prefHeight="40.0" promptText="yyyy-MM-ddTHH:mm:ss" styleClass="input-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                        <TextField fx:id="txtEndTime" prefHeight="40.0" promptText="yyyy-MM-ddTHH:mm:ss" styleClass="input-field" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                        <TextField fx:id="txtAuctionPrice" prefHeight="38.0" promptText="VD: 100000" styleClass="input-field" GridPane.columnIndex="1" />
+                                        <TextField fx:id="txtStartTime" prefHeight="38.0" promptText="yyyy-MM-ddTHH:mm:ss" styleClass="input-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                        <TextField fx:id="txtEndTime" prefHeight="38.0" promptText="yyyy-MM-ddTHH:mm:ss" styleClass="input-field" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                     </children>
                                 </GridPane>
 
                                 <HBox alignment="CENTER">
-                                    <VBox.margin><Insets top="5.0" /></VBox.margin>
+                                    <VBox.margin><Insets top="4.0" /></VBox.margin>
                                     <children>
-                                        <Button fx:id="btnCreateAuction" mnemonicParsing="false" prefHeight="45.0" prefWidth="200.0" styleClass="btn-primary" text="Create Auction" />
+                                        <Button fx:id="btnCreateAuction" mnemonicParsing="false" prefHeight="42.0" prefWidth="180.0" styleClass="btn-primary" text="Create Auction" />
                                     </children>
                                 </HBox>
 

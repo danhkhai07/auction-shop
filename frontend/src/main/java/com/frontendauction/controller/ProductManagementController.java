@@ -29,12 +29,10 @@ public class ProductManagementController {
     @FXML private TableView<ProductManagementModel> tvProducts;
     @FXML private TableColumn<ProductManagementModel, String> colId;
     @FXML private TableColumn<ProductManagementModel, String> colName;
-    @FXML private TableColumn<ProductManagementModel, Double> colPrice;
     @FXML private TableColumn<ProductManagementModel, String> colDescription;
 
     @FXML private TextField txtId;
     @FXML private TextField txtName;
-    @FXML private TextField txtPrice;
     @FXML private TextArea txtDescription;
 
     @FXML private Button btnAdd;
@@ -73,20 +71,7 @@ public class ProductManagementController {
     private void setupTable() {
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
-        colPrice.setCellValueFactory(new PropertyValueFactory<>("startingPrice"));
         colDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
-
-        colPrice.setCellFactory(column -> new TableCell<>() {
-            @Override
-            protected void updateItem(Double value, boolean empty) {
-                super.updateItem(value, empty);
-                if (empty || value == null) {
-                    setText(null);
-                    return;
-                }
-                setText(String.format("%,.0f", value));
-            }
-        });
 
         tvProducts.setItems(productList);
     }
@@ -112,16 +97,12 @@ public class ProductManagementController {
     private void populateForm(ProductManagementModel product) {
         txtId.setText(product.getId() != null ? product.getId() : "");
         txtName.setText(product.getName() != null ? product.getName() : "");
-        txtPrice.setText(product.getStartingPrice() != null
-                ? String.valueOf(product.getStartingPrice())
-                : "");
         txtDescription.setText(product.getDescription() != null ? product.getDescription() : "");
     }
 
     private void clearForm() {
         txtId.clear();
         txtName.clear();
-        txtPrice.clear();
         txtDescription.clear();
         tvProducts.getSelectionModel().clearSelection();
     }
@@ -133,23 +114,11 @@ public class ProductManagementController {
 
         String name = txtName.getText().trim();
         String description = txtDescription.getText().trim();
-        String priceText = txtPrice.getText().trim();
-        Double price = null;
-        if (!priceText.isEmpty()) {
-            try {
-                price = Double.parseDouble(priceText);
-            } catch (NumberFormatException e) {
-                showError("Started Price must be a valid number.");
-                return;
-            }
-        }
 
         ProductManagementModel newProduct = new ProductManagementModel();
         newProduct.setName(name);
         newProduct.setDescription(description);
-        newProduct.setStartingPrice(price);
 
-        final Double finalPrice = price;
         btnAdd.setDisable(true);
         btnAdd.setText("Processing...");
 
@@ -160,7 +129,7 @@ public class ProductManagementController {
                     if (optionalId.isPresent()) {
                         // Thêm sản phẩm mới trực tiếp vào local list để hiển thị ngay
                         ProductManagementModel addedProduct = new ProductManagementModel(
-                                optionalId.get(), name, description, finalPrice);
+                                optionalId.get(), name, description, null);
                         productList.add(addedProduct);
                         showSuccess("Product added successfully.");
                         clearForm();

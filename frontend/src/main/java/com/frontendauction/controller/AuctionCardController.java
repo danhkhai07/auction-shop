@@ -8,7 +8,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -16,7 +16,7 @@ import java.util.Objects;
 
 public class AuctionCardController {
 
-    @FXML private VBox cardContainer;
+    @FXML private HBox cardContainer;
     @FXML private Label lblAuctionName;
     @FXML private Label lblAuctionStatus;
 
@@ -35,9 +35,9 @@ public class AuctionCardController {
         
         if ("CLOSED".equalsIgnoreCase(status)) {
             cardContainer.setOpacity(0.6);
-            cardContainer.setStyle("-fx-background-color: #ffffff; -fx-background-radius: 8; -fx-padding: 22; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-cursor: default;");
+            cardContainer.setStyle("-fx-padding: 20 24; -fx-cursor: default;");
         } else {
-            cardContainer.setStyle("-fx-background-color: #ffffff; -fx-background-radius: 8; -fx-padding: 22; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-cursor: hand;");
+            cardContainer.setStyle("-fx-padding: 20 24; -fx-cursor: hand;");
         }
     }
 

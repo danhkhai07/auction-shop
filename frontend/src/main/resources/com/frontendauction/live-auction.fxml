@@ -11,9 +11,9 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
@@ -26,73 +26,98 @@
                     <content>
                         <VBox alignment="TOP_CENTER" spacing="20.0">
                             <padding>
-                                <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                                <Insets bottom="28.0" left="36.0" right="36.0" top="16.0" />
                             </padding>
                             <children>
-                                <HBox alignment="CENTER_LEFT">
+
+                                <!-- Breadcrumb Navigation -->
+                                <HBox alignment="CENTER_LEFT" spacing="8.0">
                                     <children>
-                                        <Button fx:id="btnBack" mnemonicParsing="false" onAction="#handleBackToDashboard" styleClass="btn-text-only" text="&lt; Dashboard">
+                                        <Button fx:id="btnBack" mnemonicParsing="false" onAction="#handleBackToDashboard" styleClass="btn-text-only" text="← Dashboard">
                                             <font>
-                                                <Font size="14.0" />
+                                                <Font size="13.0" />
                                             </font>
                                         </Button>
+                                        <Label text="  /  " textFill="#a0a0a0" />
+                                        <Label text="Live Auctions" textFill="#555555">
+                                            <font>
+                                                <Font name="System Bold" size="13.0" />
+                                            </font>
+                                        </Label>
                                     </children>
                                 </HBox>
 
-                                <HBox alignment="TOP_CENTER" spacing="24.0">
+                                <!-- ======== TOP SECTION: Auction Info + Bidding ======== -->
+                                <HBox alignment="TOP_CENTER" spacing="24.0" VBox.vgrow="NEVER">
                                     <children>
-                                        <VBox alignment="TOP_CENTER" maxWidth="450.0" minWidth="350.0" spacing="14.0" styleClass="premium-card" HBox.hgrow="ALWAYS">
-                                            <padding>
-                                                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                                            </padding>
-                                            <children>
-                                                <ImageView fx:id="imgProduct" fitHeight="240.0" fitWidth="350.0" pickOnBounds="true" preserveRatio="true" styleClass="image-dropshadow" />
-                                                <Separator styleClass="separator-custom" />
-                                                <ScrollPane fitToWidth="true" minHeight="60.0" prefHeight="100.0" styleClass="scroll-pane-custom">
-                                                    <content>
-                                                        <Label fx:id="lblDescription" alignment="TOP_LEFT" text="Loading auction details..." textFill="#4a5580" wrapText="true">
-                                                            <font>
-                                                                <Font size="15.0" />
-                                                            </font>
-                                                            <padding>
-                                                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                                            </padding>
-                                                        </Label>
-                                                    </content>
-                                                </ScrollPane>
-                                            </children>
-                                        </VBox>
 
-                                        <VBox minWidth="500.0" spacing="16.0" styleClass="premium-card" HBox.hgrow="ALWAYS">
+                                        <!-- LEFT: Auction Details & Description -->
+                                        <VBox spacing="16.0" styleClass="premium-card" HBox.hgrow="ALWAYS">
                                             <padding>
                                                 <Insets bottom="24.0" left="28.0" right="28.0" top="24.0" />
                                             </padding>
                                             <children>
+                                                <!-- Product Name -->
                                                 <Label fx:id="lblProductName" styleClass="text-primary-dark" text="Loading auction..." wrapText="true">
                                                     <font>
-                                                        <Font name="System Bold" size="32.0" />
+                                                        <Font name="System Bold" size="26.0" />
                                                     </font>
                                                 </Label>
-                                                <Label fx:id="lblSeller" text="Fetching auction data from API..." textFill="#7986a8">
+
+                                                <!-- Status & ID line -->
+                                                <Label fx:id="lblSeller" text="Fetching auction data..." textFill="#707070">
                                                     <font>
-                                                        <Font size="15.0" />
+                                                        <Font size="13.0" />
                                                     </font>
                                                 </Label>
 
                                                 <Separator styleClass="separator-custom" />
 
-                                                <HBox alignment="CENTER_LEFT" spacing="40.0">
+                                                <!-- Description block -->
+                                                <VBox spacing="6.0">
                                                     <children>
-                                                        <VBox spacing="4.0">
-                                                            <children>
-                                                                <Label text="CURRENT PRICE" textFill="#9ba8cc">
+                                                        <Label text="ITEM DESCRIPTION" textFill="#707070">
+                                                            <font>
+                                                                <Font name="System Bold" size="11.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <ScrollPane fitToWidth="true" minHeight="80.0" prefHeight="100.0" styleClass="scroll-pane-custom">
+                                                            <content>
+                                                                <Label fx:id="lblDescription" alignment="TOP_LEFT" text="Loading auction details..." textFill="#333333" wrapText="true">
                                                                     <font>
-                                                                        <Font name="System Bold" size="12.0" />
+                                                                        <Font size="14.0" />
+                                                                    </font>
+                                                                    <padding>
+                                                                        <Insets bottom="10.0" left="12.0" right="12.0" top="10.0" />
+                                                                    </padding>
+                                                                </Label>
+                                                            </content>
+                                                        </ScrollPane>
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+
+                                        <!-- RIGHT: Price, Timer & Bid Controls -->
+                                        <VBox minWidth="550.0" prefWidth="600.0" spacing="18.0" styleClass="premium-card" HBox.hgrow="NEVER">
+                                            <padding>
+                                                <Insets bottom="24.0" left="28.0" right="28.0" top="24.0" />
+                                            </padding>
+                                            <children>
+
+                                                <!-- Price & Time Row -->
+                                                <HBox alignment="CENTER_LEFT" spacing="30.0">
+                                                    <children>
+                                                        <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                                            <children>
+                                                                <Label text="CURRENT BID" textFill="#707070">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="11.0" />
                                                                     </font>
                                                                 </Label>
                                                                 <Label fx:id="lblCurrentPrice" styleClass="text-price-highlight" text="-">
                                                                     <font>
-                                                                        <Font name="System Bold" size="42.0" />
+                                                                        <Font name="System Bold" size="30.0" />
                                                                     </font>
                                                                 </Label>
                                                             </children>
@@ -100,14 +125,14 @@
 
                                                         <VBox alignment="CENTER" spacing="4.0" styleClass="time-box-urgent">
                                                             <children>
-                                                                <Label text="TIME LEFT" textFill="#dc2626">
+                                                                <Label text="TIME LEFT" textFill="#e53238">
                                                                     <font>
-                                                                        <Font name="System Bold" size="14.0" />
+                                                                        <Font name="System Bold" size="11.0" />
                                                                     </font>
                                                                 </Label>
-                                                                <Label fx:id="lblTimeLeft" text="00:00:00" textFill="#b91c1c">
+                                                                <Label fx:id="lblTimeLeft" text="00:00:00" textFill="#c62828">
                                                                     <font>
-                                                                        <Font name="System Bold" size="24.0" />
+                                                                        <Font name="System Bold" size="22.0" />
                                                                     </font>
                                                                 </Label>
                                                             </children>
@@ -117,28 +142,35 @@
 
                                                 <Separator styleClass="separator-custom" />
 
+                                                <!-- Bid Controls -->
                                                 <VBox spacing="14.0">
                                                     <children>
-                                                        <Label text="Bid actions" textFill="#1e293b">
+                                                        <Label text="Place your bid" textFill="#191919">
                                                             <font>
-                                                                <Font name="System Bold" size="16.0" />
+                                                                <Font name="System Bold" size="15.0" />
                                                             </font>
                                                         </Label>
+
+                                                        <!-- Bid input + button -->
                                                         <HBox alignment="CENTER_LEFT" spacing="12.0">
                                                             <children>
-                                                                <CheckBox fx:id="chkAutoBid" text="Enable auto bid" textFill="#1e293b">
-                                                                    <font>
-                                                                        <Font name="System Bold" size="14.0" />
-                                                                    </font>
-                                                                </CheckBox>
-                                                                <TextField fx:id="txtMaxAutoBid" prefHeight="40.0" prefWidth="220.0" promptText="Maximum auto bid..." styleClass="input-field" />
+                                                                <TextField fx:id="txtBidAmount" prefHeight="44.0" promptText="Enter bid amount..." styleClass="input-field-large" HBox.hgrow="ALWAYS" />
+                                                                <Button fx:id="btnPlaceBid" mnemonicParsing="false" prefHeight="44.0" prefWidth="160.0" styleClass="btn-premium" text="Place Bid" />
                                                             </children>
                                                         </HBox>
 
-                                                        <HBox alignment="CENTER_LEFT" spacing="16.0">
+                                                        <Separator styleClass="separator-custom" />
+
+                                                        <!-- Auto-bid section -->
+                                                        <HBox alignment="CENTER_LEFT" spacing="12.0">
                                                             <children>
-                                                                <TextField fx:id="txtBidAmount" prefHeight="45.0" promptText="Enter bid amount..." styleClass="input-field-large" HBox.hgrow="ALWAYS" />
-                                                                <Button fx:id="btnPlaceBid" mnemonicParsing="false" prefHeight="45.0" prefWidth="180.0" styleClass="btn-premium" text="Place Bid" />
+                                                                <CheckBox fx:id="chkAutoBid" text="Auto bid" textFill="#333333">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="13.0" />
+                                                                    </font>
+                                                                </CheckBox>
+                                                                <TextField fx:id="txtMaxAutoBid" prefHeight="36.0" prefWidth="200.0" promptText="Max auto bid limit..." styleClass="input-field" />
+                                                                <Region HBox.hgrow="ALWAYS" />
                                                             </children>
                                                         </HBox>
                                                     </children>
@@ -148,23 +180,26 @@
                                     </children>
                                 </HBox>
 
-                                <HBox alignment="TOP_CENTER" spacing="24.0">
+                                <!-- ======== BOTTOM SECTION: Chart + Bid History ======== -->
+                                <HBox alignment="TOP_CENTER" spacing="24.0" VBox.vgrow="ALWAYS">
                                     <children>
-                                        <VBox minHeight="280.0" styleClass="premium-card" HBox.hgrow="ALWAYS">
+
+                                        <!-- Price Chart -->
+                                        <VBox minHeight="300.0" styleClass="premium-card" HBox.hgrow="ALWAYS">
                                             <padding>
-                                                <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+                                                <Insets bottom="16.0" left="20.0" right="20.0" top="20.0" />
                                             </padding>
                                             <children>
-                                                <Label text="PRICE HISTORY" textFill="#1e293b">
+                                                <Label text="PRICE HISTORY" textFill="#191919">
                                                     <font>
-                                                        <Font name="System Bold" size="16.0" />
+                                                        <Font name="System Bold" size="14.0" />
                                                     </font>
                                                     <padding>
                                                         <Insets bottom="8.0" />
                                                     </padding>
                                                 </Label>
                                                 <Separator styleClass="separator-custom" />
-                                                <LineChart fx:id="priceChart" prefHeight="250.0" styleClass="premium-chart" VBox.vgrow="ALWAYS">
+                                                <LineChart fx:id="priceChart" prefHeight="260.0" styleClass="premium-chart" VBox.vgrow="ALWAYS">
                                                     <xAxis>
                                                         <CategoryAxis label="Time" side="BOTTOM" />
                                                     </xAxis>
@@ -175,80 +210,27 @@
                                             </children>
                                         </VBox>
 
-                                        <VBox minWidth="350.0" prefWidth="420.0" styleClass="premium-card" HBox.hgrow="NEVER">
+                                        <!-- Bid History List -->
+                                        <VBox minWidth="360.0" prefWidth="400.0" styleClass="premium-card" HBox.hgrow="NEVER">
                                             <padding>
-                                                <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+                                                <Insets bottom="16.0" left="20.0" right="20.0" top="20.0" />
                                             </padding>
                                             <children>
-                                                <Label text="BID HISTORY" textFill="#1e293b">
+                                                <Label text="BID HISTORY" textFill="#191919">
                                                     <font>
-                                                        <Font name="System Bold" size="16.0" />
+                                                        <Font name="System Bold" size="14.0" />
                                                     </font>
                                                     <padding>
                                                         <Insets bottom="8.0" />
                                                     </padding>
                                                 </Label>
                                                 <Separator styleClass="separator-custom" />
-                                                <ListView fx:id="lvBidHistory" prefHeight="250.0" styleClass="list-view-transparent" VBox.vgrow="ALWAYS" />
+                                                <ListView fx:id="lvBidHistory" prefHeight="260.0" styleClass="list-view-transparent" VBox.vgrow="ALWAYS" />
                                             </children>
                                         </VBox>
                                     </children>
                                 </HBox>
 
-                                <!-- Create Auction Section -->
-                                <VBox spacing="16.0" styleClass="premium-card">
-                                    <padding>
-                                        <Insets bottom="24.0" left="28.0" right="28.0" top="24.0" />
-                                    </padding>
-                                    <children>
-                                        <HBox alignment="CENTER_LEFT" spacing="5.0" styleClass="section-header-box">
-                                            <children>
-                                                <Label style="-fx-letter-spacing: 1px;" text="TẠO PHIÊN ĐẤU GIÁ MỚI" textFill="#3d52b0">
-                                                    <font><Font name="System Bold" size="16.0" /></font>
-                                                </Label>
-                                            </children>
-                                        </HBox>
-                                        
-                                        <Separator styleClass="separator-custom" />
-
-                                        <HBox spacing="30.0">
-                                            <children>
-                                                <VBox spacing="8.0" HBox.hgrow="ALWAYS">
-                                                    <children>
-                                                        <Label styleClass="form-label" text="Select Product" />
-                                                        <javafx.scene.control.ComboBox fx:id="cbProducts" prefHeight="40.0" prefWidth="300.0" promptText="Select a product..." styleClass="input-field" />
-                                                    </children>
-                                                </VBox>
-                                                <VBox spacing="8.0" HBox.hgrow="ALWAYS">
-                                                    <children>
-                                                        <Label styleClass="form-label" text="Starting Price" />
-                                                        <TextField fx:id="txtCreatePrice" prefHeight="40.0" promptText="VD: 100000" styleClass="input-field" />
-                                                    </children>
-                                                </VBox>
-                                                <VBox spacing="8.0" HBox.hgrow="ALWAYS">
-                                                    <children>
-                                                        <Label styleClass="form-label" text="Start Time" />
-                                                        <TextField fx:id="txtCreateStartTime" prefHeight="40.0" promptText="yyyy-MM-ddTHH:mm:ss" styleClass="input-field" />
-                                                    </children>
-                                                </VBox>
-                                                <VBox spacing="8.0" HBox.hgrow="ALWAYS">
-                                                    <children>
-                                                        <Label styleClass="form-label" text="End Time" />
-                                                        <TextField fx:id="txtCreateEndTime" prefHeight="40.0" promptText="yyyy-MM-ddTHH:mm:ss" styleClass="input-field" />
-                                                    </children>
-                                                </VBox>
-                                            </children>
-                                        </HBox>
-
-                                        <HBox alignment="CENTER_RIGHT">
-                                            <VBox.margin><Insets top="10.0" /></VBox.margin>
-                                            <children>
-                                                <Button fx:id="btnCreateAuction" mnemonicParsing="false" onAction="#handleCreateAuction" prefHeight="45.0" prefWidth="200.0" styleClass="btn-primary" text="Create Auction" />
-                                            </children>
-                                        </HBox>
-                                    </children>
-                                </VBox>
-                                
                             </children>
                         </VBox>
                     </content>
