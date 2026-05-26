@@ -62,7 +62,7 @@ public class InMemoryCacheStore<K, V> implements CacheStore<K, V> {
     @Override
     public void put(K key, V value, long ttl) {
         if (ttl <= 0) {
-            throw new IllegalArgumentException("ttl can lon hon 0");
+            throw new IllegalArgumentException("ttl must be greater than 0");
         }
 
         long ttlMillis = ttl * 1000L;

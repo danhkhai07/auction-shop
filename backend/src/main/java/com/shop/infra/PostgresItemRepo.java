@@ -126,7 +126,7 @@ public class PostgresItemRepo implements ItemRepository {
     public Mono<Void> saveItem(Item item) {
         // cap nhat thong tin item da co
         if (item == null || !StringUtils.hasText(item.getId())) {
-            return Mono.error(new IllegalArgumentException("Item không hợp lệ"));
+            return Mono.error(new IllegalArgumentException("Item is invalid"));
         }
 
         String sql = "UPDATE items SET name = :name, description = :description, seller_id = :sellerId WHERE id = :id";
@@ -163,7 +163,7 @@ public class PostgresItemRepo implements ItemRepository {
     public Mono<Void> newItem(Item item) {
         // them item moi vao database
         if (item == null || !StringUtils.hasText(item.getId())) {
-            return Mono.error(new IllegalArgumentException("Item không hợp lệ"));
+            return Mono.error(new IllegalArgumentException("Item is invalid"));
         }
 
         String sql = "INSERT INTO items (id, name, description, seller_id) VALUES (:id, :name, :description, :sellerId)";

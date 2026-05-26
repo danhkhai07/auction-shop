@@ -75,7 +75,7 @@ public class CacheManager<K, V> {
         try {
             cacheStore.cleanExpiredEntries();
         } catch (RuntimeException exception) {
-            System.err.println("Cache cleanup bi loi: " + exception.getMessage());
+            System.err.println("Cache cleanup failed: " + exception.getMessage());
         }
     }
 
