@@ -121,6 +121,7 @@ ALTER TABLE auctions
 
 CREATE INDEX IF NOT EXISTS idx_auctions_status_end_time ON auctions(status, end_time);
 CREATE INDEX IF NOT EXISTS idx_auctions_item_id ON auctions(item_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_auctions_unique_item_id ON auctions(item_id);
 CREATE INDEX IF NOT EXISTS idx_auctions_current_highest_bidder_id ON auctions(current_highest_bidder_id);
 
 CREATE TABLE IF NOT EXISTS bid_transactions (
