@@ -164,14 +164,14 @@ public class User {
 
     public void setUsername(String username) {
         if (username == null || username.isBlank()) {
-            throw new IllegalArgumentException("Username không được để trống");
+            throw new IllegalArgumentException("Username cannot be blank");
         }
         this.username = username.trim();
     }
 
     public void setPasswordHash(String passwordHash) {
         if (passwordHash == null || passwordHash.isBlank()) {
-            throw new IllegalArgumentException("Password hash không được để trống");
+            throw new IllegalArgumentException("Password hash cannot be blank");
         }
         this.passwordHash = passwordHash;
     }

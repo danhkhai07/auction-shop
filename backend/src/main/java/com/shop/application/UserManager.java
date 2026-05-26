@@ -1,12 +1,8 @@
 package com.shop.application;
 
 import com.shop.cache.CacheManager;
-import com.shop.domain.Auction;
-import com.shop.domain.Item;
 import com.shop.domain.Role;
 import com.shop.domain.User;
-import com.shop.dto.response.GetAuctionResponse;
-import com.shop.dto.response.GetItemResponse;
 import com.shop.dto.response.GetUserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
@@ -19,8 +15,10 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class UserManager {
+    private static final String ALL_USERS_CACHE_KEY = "users$all";
+
     private final UserRepository userRepository;
-    private final CacheManager cacheManager;
+    private final CacheManager<Object, Object> cacheManager;
 
     private String addNameCachePrefix(String name) {
         return "username$" + name;
@@ -29,35 +27,24 @@ public class UserManager {
     private void evictUserCache(User user) {
         cacheManager.delete(user.getId());
         cacheManager.delete(addNameCachePrefix(user.getUsername()));
+        cacheManager.delete(ALL_USERS_CACHE_KEY);
     }
 
     public Mono<User> getUserByID(String id){
-        Mono<User> stream;
-        if (cacheManager.contains(id)) {
-            stream = Mono.justOrEmpty(cacheManager.get(id))
-                    .filter(obj -> obj instanceof User)
-                    .cast(User.class);
-        } else {
-            stream = userRepository.getByID(id)
-                    .doOnNext(user -> cacheManager.put(id, user));
-        }
-
-        return stream.switchIfEmpty(Mono.error(new IllegalAccessException("user not found")));
+        return cacheManager.getAs(id, User.class)
+                .map(Mono::just)
+                .orElseGet(() -> userRepository.getByID(id)
+                        .doOnNext(user -> cacheManager.put(id, user)))
+                .switchIfEmpty(Mono.error(new IllegalAccessException("user not found")));
     }
 
     public Mono<User> getUserByName(String name){
-        Mono<User> stream;
         String key = addNameCachePrefix(name);
-        if (cacheManager.contains(key)) {
-            stream = Mono.justOrEmpty(cacheManager.get(key))
-                    .filter(obj -> obj instanceof User)
-                    .cast(User.class);
-        } else {
-            stream = userRepository.getByName(name)
-                    .doOnNext(user -> cacheManager.put(key, user));
-        }
-
-        return stream.switchIfEmpty(Mono.error(new IllegalAccessException("user not found")));
+        return cacheManager.getAs(key, User.class)
+                .map(Mono::just)
+                .orElseGet(() -> userRepository.getByName(name)
+                        .doOnNext(user -> cacheManager.put(key, user)))
+                .switchIfEmpty(Mono.error(new IllegalAccessException("user not found")));
     }
 
     public Mono<GetUserResponse> getUserResponseByID(String id){
@@ -67,17 +54,12 @@ public class UserManager {
     }
 
     public Mono<List<GetUserResponse>> getAllUsers(){
-        return userRepository.getAll()
-                .map(GetUserResponse::new)
-                .collectList();
-    }
-
-    private GetItemResponse toItemResponse(Item item) {
-        return new GetItemResponse(item);
-    }
-
-    private GetAuctionResponse toAuctionResponse(Auction auction) {
-        return new GetAuctionResponse(auction);
+        return cachedList(ALL_USERS_CACHE_KEY, GetUserResponse.class)
+                .map(Mono::just)
+                .orElseGet(() -> userRepository.getAll()
+                        .map(GetUserResponse::new)
+                        .collectList()
+                        .doOnNext(list -> cacheManager.put(ALL_USERS_CACHE_KEY, list)));
     }
 
     public Mono<Void> deleteUser(String id, String deleterID, Set<Role> deleterRoles){
@@ -98,18 +80,20 @@ public class UserManager {
         return userRepository.newUser(user)
                 .onErrorResume(DuplicateKeyException ->
                         Mono.error(new IllegalStateException("user already exists")))
-                .doOnNext(v -> {
+                .then(Mono.fromRunnable(() -> {
                     cacheManager.put(user.getId(), user);
                     cacheManager.put(addNameCachePrefix(user.getUsername()), user);
-                });
+                    cacheManager.delete(ALL_USERS_CACHE_KEY);
+                }));
     }
 
     public Mono<Void> updateUser(User user){
         return userRepository.saveUser(user)
-                .doOnNext(v -> {
+                .then(Mono.fromRunnable(() -> {
                     cacheManager.put(user.getId(), user);
                     cacheManager.put(addNameCachePrefix(user.getUsername()), user);
-                });
+                    cacheManager.delete(ALL_USERS_CACHE_KEY);
+                }));
     }
 
     public Mono<Void> elevateUser(String id){
@@ -144,5 +128,11 @@ public class UserManager {
         return this.getUserByID(targetUserId)
                 .flatMap(user -> userRepository.unbanByID(targetUserId)
                         .then(Mono.fromRunnable(() -> evictUserCache(user))));
+    }
+
+    private <T> java.util.Optional<List<T>> cachedList(String key, Class<T> itemType) {
+        return cacheManager.getAs(key, List.class)
+                .filter(list -> list.stream().allMatch(itemType::isInstance))
+                .map(list -> list.stream().map(itemType::cast).toList());
     }
 }

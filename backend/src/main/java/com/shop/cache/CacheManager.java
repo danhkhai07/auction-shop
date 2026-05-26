@@ -4,6 +4,7 @@ import jakarta.annotation.PreDestroy;
 import jakarta.annotation.PostConstruct;
 
 import java.util.Objects;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import java.util.concurrent.Executors;
@@ -14,13 +15,13 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class CacheManager<K, V> {
     // Gia tri mac dinh cho truong hop chi can boc mot in-memory cache don gian.
-    private static final long DEFAULT_MANAGER_EXPIRATION_SECONDS = 8 * 3600L;
-    private static final long DEFAULT_CLEANUP_INTERVAL_SECONDS = 10 * 60L;
+    private static final long DEFAULT_MANAGER_EXPIRATION_SECONDS = 15 * 60L;
+    private static final long DEFAULT_CLEANUP_INTERVAL_SECONDS = 5 * 60L;
 
     // Cac gia tri ma cache hien tai su dung.
-    private final long instanceExpiration;
-    private final long cleanUpInterval;
     private final CacheStore<K, V> cacheStore;
+    private final long defaultExpirationSeconds;
+    private final long cleanupIntervalSeconds;
 
     // Khoa de tranh nhieu luong cung start/stop cleanup task mot luc.
     private final Object schedulerLock = new Object();
@@ -30,17 +31,21 @@ public class CacheManager<K, V> {
 
     public CacheManager(
             CacheStore<K, V> cacheStore,
-            @Value("${cache.instance-expiration:28800}") long instanceExpiration,
-            @Value("${cache.cleanup-interval:600}") long cleanUpInterval
+            @Value("${cache.default-expiration-seconds:900}") long defaultExpirationSeconds,
+            @Value("${cache.cleanup-interval-seconds:300}") long cleanupIntervalSeconds
     ) {
         this.cacheStore = Objects.requireNonNull(cacheStore, "cacheStore nullError");
-        this.instanceExpiration = instanceExpiration;
-        this.cleanUpInterval = cleanUpInterval;
+        this.defaultExpirationSeconds = defaultExpirationSeconds > 0
+                ? defaultExpirationSeconds
+                : DEFAULT_MANAGER_EXPIRATION_SECONDS;
+        this.cleanupIntervalSeconds = cleanupIntervalSeconds > 0
+                ? cleanupIntervalSeconds
+                : DEFAULT_CLEANUP_INTERVAL_SECONDS;
     }
 
     // Luu vao cache voi TTL mac dinh khi caller khong truyen ttl rieng.
     public void put(K key, V value) {
-        cacheStore.put(key, value, instanceExpiration);
+        cacheStore.put(key, value, defaultExpirationSeconds);
     }
 
     public void put(K key, V value, long ttl) {
@@ -54,6 +59,14 @@ public class CacheManager<K, V> {
         return cacheStore.get(key);
     }
 
+    public <T> Optional<T> getAs(K key, Class<T> type) {
+        Object value = cacheStore.get(key);
+        if (type.isInstance(value)) {
+            return Optional.of(type.cast(value));
+        }
+        return Optional.empty();
+    }
+
     public void delete(K key) {
         cacheStore.delete(key);
     }
@@ -63,15 +76,7 @@ public class CacheManager<K, V> {
     }
 
     public long getInstanceExpiration() {
-        return instanceExpiration;
-    }
-
-    public long getDefaultExpiration() {
-        return getInstanceExpiration();
-    }
-
-    public long getCleanUpInterval() {
-        return cleanUpInterval;
+        return defaultExpirationSeconds;
     }
 
     //Dam bao an toan cho Scheduler
@@ -79,7 +84,7 @@ public class CacheManager<K, V> {
         try {
             cacheStore.cleanExpiredEntries();
         } catch (RuntimeException exception) {
-            System.err.println("Cache cleanup bi loi: " + exception.getMessage());
+            System.err.println("Cache cleanup failed: " + exception.getMessage());
         }
     }
 
@@ -93,8 +98,8 @@ public class CacheManager<K, V> {
             cleanupExecutor = Executors.newSingleThreadScheduledExecutor(new CleanupThreadFactory());
             cleanupExecutor.scheduleAtFixedRate(
                     this::cleanExpiredEntriesSafely,
-                    cleanUpInterval,
-                    cleanUpInterval,
+                    cleanupIntervalSeconds,
+                    cleanupIntervalSeconds,
                     TimeUnit.SECONDS
             );
         }
