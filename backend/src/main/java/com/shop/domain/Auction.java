@@ -148,8 +148,7 @@ public class Auction {
 
     public boolean isClosed() {
         return this.status == AuctionStatus.FINISHED
-                || this.status == AuctionStatus.CANCELLED
-                || this.status == AuctionStatus.PAID;
+                || this.status == AuctionStatus.CANCELLED;
     }
 
     public boolean isCancelled() {
