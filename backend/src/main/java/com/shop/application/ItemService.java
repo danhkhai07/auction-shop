@@ -3,6 +3,7 @@ package com.shop.application;
 import com.shop.cache.CacheManager;
 import com.shop.domain.Item;
 import com.shop.domain.Role;
+import com.shop.domain.User;
 import com.shop.dto.request.UploadItemRequest;
 import com.shop.dto.response.GetAuctionResponse;
 import com.shop.dto.response.GetItemResponse;
@@ -121,5 +122,25 @@ public class ItemService {
                     return itemRepository.saveItem(item);
                 })
                 .switchIfEmpty(Mono.error(new IllegalStateException("item does not exists")));
+    }
+
+    public Mono<Void> transferItemToUser(Item item, User newOwner) {
+        if (item == null || newOwner == null) {
+            return Mono.error(new IllegalArgumentException("item and new owner are required"));
+        }
+
+        Item transferredItem = new Item(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                newOwner
+        );
+
+        return itemRepository.saveItem(transferredItem)
+                .then(Mono.fromRunnable(() -> {
+                    cacheManager.put(transferredItem.getId(), transferredItem);
+                    cacheManager.delete(item.getSeller().getId());
+                    cacheManager.delete(newOwner.getId());
+                }));
     }
 }

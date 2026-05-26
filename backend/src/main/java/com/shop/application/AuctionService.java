@@ -143,4 +143,15 @@ public class AuctionService {
         return auctionRepository.saveAuction(auction)
                 .then(Mono.fromRunnable(() -> cacheManager.put(auction.getId(), auction)));
     }
+
+    public Mono<Void> finishAuction(Auction auction) {
+        return auctionRepository.saveAuction(auction)
+                .then(Mono.defer(() -> {
+                    if (!auction.hasWinner()) {
+                        return Mono.empty();
+                    }
+                    return itemService.transferItemToUser(auction.getItem(), auction.getCurrentHighestBidder());
+                }))
+                .then(Mono.fromRunnable(() -> cacheManager.delete(auction.getId())));
+    }
 }
