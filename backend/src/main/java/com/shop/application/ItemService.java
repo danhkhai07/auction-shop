@@ -19,23 +19,19 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class ItemService {
+    private static final String ALL_ITEMS_CACHE_KEY = "items$all";
+
     private final ItemRepository itemRepository;
     private final UserManager userManager;
-    private final CacheManager cacheManager;
+    private final CacheManager<Object, Object> cacheManager;
     private final ULID ulid;
 
     public Mono<Item> getItemByID(String id) {
-        Mono<Item> stream;
-        if (cacheManager.contains(id)) {
-            stream = Mono.just(cacheManager.get(id))
-                    .filter(obj -> obj instanceof Item)
-                    .cast(Item.class);
-        } else {
-            stream = itemRepository.getByID(id)
-                    .doOnNext(item -> cacheManager.put(id, item));
-        }
-
-        return stream.switchIfEmpty(Mono.error(new IllegalAccessException("item not found")));
+        return cacheManager.getAs(id, Item.class)
+                .map(Mono::just)
+                .orElseGet(() -> itemRepository.getByID(id)
+                        .doOnNext(item -> cacheManager.put(id, item)))
+                .switchIfEmpty(Mono.error(new IllegalAccessException("item not found")));
     }
 
     public Mono<GetItemResponse> getItemResponseByID(String id) {
@@ -45,9 +41,12 @@ public class ItemService {
     }
 
     public Mono<List<GetItemResponse>> getAllItems(){
-        return itemRepository.getAll()
-                .map(GetItemResponse::new)
-                .collectList();
+        return cachedList(ALL_ITEMS_CACHE_KEY, GetItemResponse.class)
+                .map(Mono::just)
+                .orElseGet(() -> itemRepository.getAll()
+                        .map(GetItemResponse::new)
+                        .collectList()
+                        .doOnNext(list -> cacheManager.put(ALL_ITEMS_CACHE_KEY, list)));
     }
 
     private GetItemResponse toResponse(Item item) {
@@ -66,21 +65,17 @@ public class ItemService {
         boolean deleterIsUser = deleterRoles.contains(Role.USER);
         if (!deleterIsUser && !deleterIsAdmin) return Mono.error(new IllegalAccessException("unauthorized"));
 
-        Mono<Item> stream;
-        if (cacheManager.contains(id)) {
-            stream = Mono.just(cacheManager.get(id))
-                    .filter(obj -> obj instanceof Item)
-                    .cast(Item.class);
-        } else {
-            stream = itemRepository.getByID(id);
-        }
-
-        return stream
+        return cacheManager.getAs(id, Item.class)
+                .map(Mono::just)
+                .orElseGet(() -> itemRepository.getByID(id))
                 .switchIfEmpty(Mono.error(new IllegalStateException("item does not exist")))
                 .filter(item -> (item.getSeller().getId().equals(deleterID) || deleterIsAdmin))
                 .switchIfEmpty(Mono.error(new IllegalAccessException("unauthorized")))
                 .flatMap(b -> itemRepository.deleteByID(id))
-                .then(Mono.fromRunnable(() -> cacheManager.delete(id)));
+                .then(Mono.fromRunnable(() -> {
+                    cacheManager.delete(id);
+                    cacheManager.delete(ALL_ITEMS_CACHE_KEY);
+                }));
     }
 
     public Mono<IDResponse> newItem(String posterID, UploadItemRequest request) {
@@ -96,8 +91,9 @@ public class ItemService {
                             owner
                     );
                     return itemRepository.newItem(item)
-                            .then(Mono.fromRunnable(() -> {
+                            .then(Mono.<Void>fromRunnable(() -> {
                                 cacheManager.put(item.getId(), item);
+                                cacheManager.delete(ALL_ITEMS_CACHE_KEY);
                                 owner.addItem(item);
                             }))
                             .then(userManager.updateUser(owner));
@@ -116,12 +112,12 @@ public class ItemService {
                             request.description(),
                             owner
                     );
-                    if (cacheManager.contains(id)) {
-                        cacheManager.put(id, item);
-                    }
-                    return itemRepository.saveItem(item);
-                })
-                .switchIfEmpty(Mono.error(new IllegalStateException("item does not exists")));
+                    return itemRepository.saveItem(item)
+                            .then(Mono.fromRunnable(() -> {
+                                cacheManager.put(id, item);
+                                cacheManager.delete(ALL_ITEMS_CACHE_KEY);
+                            }));
+                });
     }
 
     public Mono<Void> transferItemToUser(Item item, User newOwner) {
@@ -139,8 +135,15 @@ public class ItemService {
         return itemRepository.saveItem(transferredItem)
                 .then(Mono.fromRunnable(() -> {
                     cacheManager.put(transferredItem.getId(), transferredItem);
+                    cacheManager.delete(ALL_ITEMS_CACHE_KEY);
                     cacheManager.delete(item.getSeller().getId());
                     cacheManager.delete(newOwner.getId());
                 }));
+    }
+
+    private <T> java.util.Optional<List<T>> cachedList(String key, Class<T> itemType) {
+        return cacheManager.getAs(key, List.class)
+                .filter(list -> list.stream().allMatch(itemType::isInstance))
+                .map(list -> list.stream().map(itemType::cast).toList());
     }
 }

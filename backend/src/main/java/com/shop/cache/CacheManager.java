@@ -4,6 +4,7 @@ import jakarta.annotation.PreDestroy;
 import jakarta.annotation.PostConstruct;
 
 import java.util.Objects;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import java.util.concurrent.Executors;
@@ -56,6 +57,14 @@ public class CacheManager<K, V> {
 
     public V get(K key) {
         return cacheStore.get(key);
+    }
+
+    public <T> Optional<T> getAs(K key, Class<T> type) {
+        Object value = cacheStore.get(key);
+        if (type.isInstance(value)) {
+            return Optional.of(type.cast(value));
+        }
+        return Optional.empty();
     }
 
     public void delete(K key) {
