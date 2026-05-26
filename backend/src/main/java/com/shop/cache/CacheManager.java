@@ -14,11 +14,13 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class CacheManager<K, V> {
     // Gia tri mac dinh cho truong hop chi can boc mot in-memory cache don gian.
-    private static final long DEFAULT_MANAGER_EXPIRATION_SECONDS = 3 * 60L;
-    private static final long DEFAULT_CLEANUP_INTERVAL_SECONDS = 10 * 60L;
+    private static final long DEFAULT_MANAGER_EXPIRATION_SECONDS = 15 * 60L;
+    private static final long DEFAULT_CLEANUP_INTERVAL_SECONDS = 5 * 60L;
 
     // Cac gia tri ma cache hien tai su dung.
     private final CacheStore<K, V> cacheStore;
+    private final long defaultExpirationSeconds;
+    private final long cleanupIntervalSeconds;
 
     // Khoa de tranh nhieu luong cung start/stop cleanup task mot luc.
     private final Object schedulerLock = new Object();
@@ -27,14 +29,22 @@ public class CacheManager<K, V> {
     private volatile ScheduledExecutorService cleanupExecutor;
 
     public CacheManager(
-            CacheStore<K, V> cacheStore
+            CacheStore<K, V> cacheStore,
+            @Value("${cache.default-expiration-seconds:900}") long defaultExpirationSeconds,
+            @Value("${cache.cleanup-interval-seconds:300}") long cleanupIntervalSeconds
     ) {
         this.cacheStore = Objects.requireNonNull(cacheStore, "cacheStore nullError");
+        this.defaultExpirationSeconds = defaultExpirationSeconds > 0
+                ? defaultExpirationSeconds
+                : DEFAULT_MANAGER_EXPIRATION_SECONDS;
+        this.cleanupIntervalSeconds = cleanupIntervalSeconds > 0
+                ? cleanupIntervalSeconds
+                : DEFAULT_CLEANUP_INTERVAL_SECONDS;
     }
 
     // Luu vao cache voi TTL mac dinh khi caller khong truyen ttl rieng.
     public void put(K key, V value) {
-        cacheStore.put(key, value, DEFAULT_MANAGER_EXPIRATION_SECONDS);
+        cacheStore.put(key, value, defaultExpirationSeconds);
     }
 
     public void put(K key, V value, long ttl) {
@@ -57,7 +67,7 @@ public class CacheManager<K, V> {
     }
 
     public long getInstanceExpiration() {
-        return DEFAULT_MANAGER_EXPIRATION_SECONDS;
+        return defaultExpirationSeconds;
     }
 
     //Dam bao an toan cho Scheduler
@@ -79,8 +89,8 @@ public class CacheManager<K, V> {
             cleanupExecutor = Executors.newSingleThreadScheduledExecutor(new CleanupThreadFactory());
             cleanupExecutor.scheduleAtFixedRate(
                     this::cleanExpiredEntriesSafely,
-                    DEFAULT_CLEANUP_INTERVAL_SECONDS,
-                    DEFAULT_CLEANUP_INTERVAL_SECONDS,
+                    cleanupIntervalSeconds,
+                    cleanupIntervalSeconds,
                     TimeUnit.SECONDS
             );
         }

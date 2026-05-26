@@ -98,18 +98,18 @@ public class UserManager {
         return userRepository.newUser(user)
                 .onErrorResume(DuplicateKeyException ->
                         Mono.error(new IllegalStateException("user already exists")))
-                .doOnNext(v -> {
+                .then(Mono.fromRunnable(() -> {
                     cacheManager.put(user.getId(), user);
                     cacheManager.put(addNameCachePrefix(user.getUsername()), user);
-                });
+                }));
     }
 
     public Mono<Void> updateUser(User user){
         return userRepository.saveUser(user)
-                .doOnNext(v -> {
+                .then(Mono.fromRunnable(() -> {
                     cacheManager.put(user.getId(), user);
                     cacheManager.put(addNameCachePrefix(user.getUsername()), user);
-                });
+                }));
     }
 
     public Mono<Void> elevateUser(String id){
