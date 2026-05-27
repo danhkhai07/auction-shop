@@ -10,6 +10,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+import javafx.scene.image.Image;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Objects;
@@ -37,6 +38,19 @@ public class AuctionShopApplication extends Application {
             }
         });
 
+        try {
+            java.net.URL logoUrl = getClass().getResource("/images/logo.jpg");
+            if (logoUrl != null) {
+                Image applicationIcon = new Image(logoUrl.toExternalForm());
+                // 2. Set icon cho Stage (Cửa sổ ứng dụng)
+                stage.getIcons().add(applicationIcon);
+            } else {
+                System.err.println("Cannot find logo image at /images/logo.jpg");
+            }
+        } catch (Exception e) {
+            System.err.println("Cannot load application icon.");
+            e.printStackTrace();
+        }
         javafx.geometry.Rectangle2D visualBounds = javafx.stage.Screen.getPrimary().getVisualBounds();
         Scene scene = AppWindow.createScene(loader.load());
         stage.setTitle("Auction Shop");
