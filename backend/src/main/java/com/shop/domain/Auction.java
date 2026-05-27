@@ -10,9 +10,12 @@ import java.util.List;
 import java.util.UUID;
 
 public class Auction {
+    private static final BigDecimal DEFAULT_MIN_BID_INCREMENT = new BigDecimal("1.00");
+
     private final String id;
     private final Item item;
     private final BigDecimal startingPrice;
+    private final BigDecimal minBidIncrement;
     private BigDecimal currentHighestPrice;
     private User currentHighestBidder;
     private BigDecimal finalPrice;
@@ -22,16 +25,30 @@ public class Auction {
     private final List<BidTransaction> bidHistory = new ArrayList<>();
 
     public Auction(String id, Item item, BigDecimal startingPrice, LocalDateTime startTime, LocalDateTime endTime) {
+        this(id, item, startingPrice, DEFAULT_MIN_BID_INCREMENT, startTime, endTime);
+    }
+
+    public Auction(
+            String id,
+            Item item,
+            BigDecimal startingPrice,
+            BigDecimal minBidIncrement,
+            LocalDateTime startTime,
+            LocalDateTime endTime
+    ) {
         if (id == null) throw new IllegalArgumentException("Invalid auction ID.");
         if (item == null) throw new IllegalArgumentException("Auction item cannot be null.");
         if (startingPrice == null || startingPrice.compareTo(BigDecimal.ZERO) < 0)
             throw new IllegalArgumentException("Starting price must be greater than or equal to 0.");
+        if (minBidIncrement == null || minBidIncrement.compareTo(BigDecimal.ZERO) <= 0)
+            throw new IllegalArgumentException("Minimum bid increment must be greater than 0.");
         if (startTime == null || endTime == null || !startTime.isBefore(endTime))
             throw new IllegalArgumentException("Invalid start and end times.");
 
         this.id = id;
         this.item = item;
         this.startingPrice = startingPrice;
+        this.minBidIncrement = minBidIncrement;
         this.currentHighestPrice = startingPrice;
         this.startTime = startTime;
         this.endTime = endTime;
@@ -52,8 +69,12 @@ public class Auction {
 
     public void placeBid(User bidder, BigDecimal bidAmount) {
         //1. Kiểm tra trạng thái phiên đấu giá
-        if (bidAmount == null || bidAmount.compareTo(currentHighestPrice) <= 0) {
-            throw new IllegalArgumentException("Bid amount must be higher than the current price (" + currentHighestPrice + ").");
+        BigDecimal minimumAcceptedBid = currentHighestPrice.add(minBidIncrement);
+        if (bidAmount == null || bidAmount.compareTo(minimumAcceptedBid) < 0) {
+            throw new IllegalArgumentException(
+                    "Bid amount must be at least " + minBidIncrement + " higher than the current price. Minimum accepted: "
+                            + minimumAcceptedBid + "."
+            );
         }
 
         //2. Kiểm tra thời gian
@@ -193,6 +214,10 @@ public class Auction {
 
     public BigDecimal getStartingPrice() {
         return startingPrice;
+    }
+
+    public BigDecimal getMinBidIncrement() {
+        return minBidIncrement;
     }
 
     public BigDecimal getCurrentHighestPrice() {

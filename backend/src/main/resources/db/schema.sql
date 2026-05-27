@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS auctions (
     current_highest_bidder_id VARCHAR(64) REFERENCES users(id) ON DELETE SET NULL,
     status VARCHAR(32) NOT NULL DEFAULT 'OPEN',
     starting_price NUMERIC(19, 2) NOT NULL DEFAULT 0,
+    min_bid_increment NUMERIC(19, 2) NOT NULL DEFAULT 1.00,
     current_highest_price NUMERIC(19, 2) NOT NULL DEFAULT 0,
     final_price NUMERIC(19, 2),
     start_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -79,6 +80,9 @@ ALTER TABLE auctions
 
 ALTER TABLE auctions
     ADD COLUMN IF NOT EXISTS starting_price NUMERIC(19, 2) NOT NULL DEFAULT 0;
+
+ALTER TABLE auctions
+    ADD COLUMN IF NOT EXISTS min_bid_increment NUMERIC(19, 2) NOT NULL DEFAULT 1.00;
 
 ALTER TABLE auctions
     ADD COLUMN IF NOT EXISTS current_highest_price NUMERIC(19, 2) NOT NULL DEFAULT 0;
@@ -114,7 +118,7 @@ ALTER TABLE auctions
 
 ALTER TABLE auctions
     ADD CONSTRAINT chk_auctions_price_non_negative
-        CHECK (starting_price >= 0 AND current_highest_price >= 0);
+        CHECK (starting_price >= 0 AND min_bid_increment > 0 AND current_highest_price >= 0);
 
 ALTER TABLE auctions
     DROP CONSTRAINT IF EXISTS chk_auctions_end_after_start;

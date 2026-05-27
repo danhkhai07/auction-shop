@@ -93,7 +93,7 @@ public class PostgresUserRepo implements UserRepository {
                     "ORDER BY i.numeric_id";
 
     private static final String SELECT_AUCTIONS_BY_USER_ID =
-            "SELECT a.id as a_id, a.starting_price, a.current_highest_price, a.final_price, a.start_time, a.end_time, a.status, " +
+            "SELECT a.id as a_id, a.starting_price, a.min_bid_increment, a.current_highest_price, a.final_price, a.start_time, a.end_time, a.status, " +
                     "i.id as i_id, i.name as i_name, i.description as i_description, " +
                     "b.id as b_id, b.username as b_username " +
                     "FROM auctions a " +
@@ -368,6 +368,7 @@ public class PostgresUserRepo implements UserRepository {
                 row.get("a_id", String.class),
                 item,
                 row.get("starting_price", BigDecimal.class),
+                row.get("min_bid_increment", BigDecimal.class),
                 row.get("start_time", LocalDateTime.class),
                 row.get("end_time", LocalDateTime.class)
         );

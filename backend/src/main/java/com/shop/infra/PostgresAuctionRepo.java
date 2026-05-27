@@ -31,7 +31,7 @@ public class PostgresAuctionRepo implements AuctionRepository {
     // Câu truy vấn gộp lấy thông tin Auction, Item (sản phẩm), Seller (người bán) và Highest Bidder (người trả giá cao nhất).
     // Sử dụng LEFT JOIN cho Highest Bidder vì lúc mới mở đấu giá có thể chưa có ai đặt giá.
     private static final String SELECT_AUCTION =
-            "SELECT a.id as a_id, a.starting_price, a.current_highest_price, a.final_price, a.start_time, a.end_time, a.status, " +
+            "SELECT a.id as a_id, a.starting_price, a.min_bid_increment, a.current_highest_price, a.final_price, a.start_time, a.end_time, a.status, " +
             "i.id as i_id, i.name as i_name, i.description as i_description, " +
             "s.id as s_id, s.username as s_username, " +
             "b.id as b_id, b.username as b_username " +
@@ -65,13 +65,14 @@ public class PostgresAuctionRepo implements AuctionRepository {
             "SET current_highest_price = :currentHighestPrice, " +
             "    current_highest_bidder_id = :currentHighestBidderId, " +
             "    final_price = :finalPrice, " +
+            "    min_bid_increment = :minBidIncrement, " +
             "    status = :status, " +
             "    updated_at = CURRENT_TIMESTAMP " +
             "WHERE id = :id";
 
     private static final String INSERT_AUCTION_SQL =
-            "INSERT INTO auctions (id, item_id, starting_price, current_highest_price, start_time, end_time, status) " +
-            "VALUES (:id, :itemId, :startingPrice, :currentHighestPrice, :startTime, :endTime, :status)";
+            "INSERT INTO auctions (id, item_id, starting_price, min_bid_increment, current_highest_price, start_time, end_time, status) " +
+            "VALUES (:id, :itemId, :startingPrice, :minBidIncrement, :currentHighestPrice, :startTime, :endTime, :status)";
 
     private static final String DELETE_AUCTION_SQL = "DELETE FROM auctions WHERE id = :id";
 
@@ -133,6 +134,7 @@ public class PostgresAuctionRepo implements AuctionRepository {
         DatabaseClient.GenericExecuteSpec spec = databaseClient.sql(UPDATE_AUCTION_SQL)
                 .bind("id", auction.getId())
                 .bind("currentHighestPrice", auction.getCurrentHighestPrice() != null ? auction.getCurrentHighestPrice() : auction.getStartingPrice())
+                .bind("minBidIncrement", auction.getMinBidIncrement())
                 .bind("status", auction.getStatus().name());
 
         if (bidderId != null) {
@@ -203,6 +205,7 @@ public class PostgresAuctionRepo implements AuctionRepository {
                 .bind("id", auction.getId())
                 .bind("itemId", auction.getItem().getId())
                 .bind("startingPrice", auction.getStartingPrice())
+                .bind("minBidIncrement", auction.getMinBidIncrement())
                 .bind("currentHighestPrice", auction.getCurrentHighestPrice() != null ? auction.getCurrentHighestPrice() : auction.getStartingPrice())
                 .bind("startTime", auction.getStartTime())
                 .bind("endTime", auction.getEndTime())
@@ -277,6 +280,7 @@ public class PostgresAuctionRepo implements AuctionRepository {
                 row.get("a_id", String.class),
                 item,
                 row.get("starting_price", BigDecimal.class),
+                row.get("min_bid_increment", BigDecimal.class),
                 row.get("start_time", LocalDateTime.class),
                 row.get("end_time", LocalDateTime.class)
         );

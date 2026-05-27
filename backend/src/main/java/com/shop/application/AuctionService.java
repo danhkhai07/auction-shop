@@ -23,6 +23,7 @@ import java.util.Set;
 public class AuctionService {
     private static final String ALL_AUCTIONS_CACHE_KEY = "auctions$all";
     private static final String ACTIVE_AUCTIONS_CACHE_KEY = "auctions$active";
+    private static final java.math.BigDecimal DEFAULT_MIN_BID_INCREMENT = new java.math.BigDecimal("1.00");
 
     private final AuctionRepository auctionRepository;
     private final ItemService itemService;
@@ -112,6 +113,7 @@ public class AuctionService {
                             id,
                             item,
                             request.startingPrice(),
+                            request.minBidIncrement() != null ? request.minBidIncrement() : DEFAULT_MIN_BID_INCREMENT,
                             request.startTime(),
                             request.endTime()
                     );
@@ -137,6 +139,7 @@ public class AuctionService {
                             id,
                             item,
                             request.startingPrice(),
+                            request.minBidIncrement() != null ? request.minBidIncrement() : DEFAULT_MIN_BID_INCREMENT,
                             request.startTime(),
                             request.endTime()
                     );
