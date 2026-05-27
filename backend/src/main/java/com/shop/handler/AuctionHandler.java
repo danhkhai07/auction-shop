@@ -147,7 +147,7 @@ public class AuctionHandler {
                         .switchIfEmpty(Mono.error(new IllegalStateException("unauthorized")))
                         .flatMap(auction -> {
                             auction.finishAuction();
-                            return auctionService.updateAuctionStatus(auction)
+                            return auctionService.finishAuction(auction)
                                     .doOnSuccess(v -> {
                                         stream.publish(auctionID,
                                                 new AuctionEvent("AUCTION_FINISHED", auction));

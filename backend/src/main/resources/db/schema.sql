@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS auctions (
     end_time TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT chk_auctions_status CHECK (status IN ('OPEN', 'RUNNING', 'PAUSED', 'FINISHED', 'PAID', 'CANCELLED')),
+    CONSTRAINT chk_auctions_status CHECK (status IN ('OPEN', 'RUNNING', 'PAUSED', 'FINISHED', 'CANCELLED')),
     CONSTRAINT chk_auctions_price_non_negative CHECK (starting_price >= 0 AND current_highest_price >= 0),
     CONSTRAINT chk_auctions_end_after_start CHECK (end_time IS NULL OR end_time >= start_time)
 );
@@ -93,16 +93,17 @@ SET status = CASE status
     WHEN 'DRAFT' THEN 'OPEN'
     WHEN 'ACTIVE' THEN 'RUNNING'
     WHEN 'ENDED' THEN 'FINISHED'
+    WHEN 'PAID' THEN 'FINISHED'
     ELSE status
 END
-WHERE status IN ('DRAFT', 'ACTIVE', 'ENDED');
+WHERE status IN ('DRAFT', 'ACTIVE', 'ENDED', 'PAID');
 
 ALTER TABLE auctions
     DROP CONSTRAINT IF EXISTS chk_auctions_status;
 
 ALTER TABLE auctions
     ADD CONSTRAINT chk_auctions_status
-        CHECK (status IN ('OPEN', 'RUNNING', 'PAUSED', 'FINISHED', 'PAID', 'CANCELLED', 'DRAFT', 'ACTIVE', 'ENDED'));
+        CHECK (status IN ('OPEN', 'RUNNING', 'PAUSED', 'FINISHED', 'CANCELLED', 'DRAFT', 'ACTIVE', 'ENDED'));
 
 ALTER TABLE auctions
     DROP CONSTRAINT IF EXISTS chk_auctions_price_non_negative;
@@ -120,6 +121,7 @@ ALTER TABLE auctions
 
 CREATE INDEX IF NOT EXISTS idx_auctions_status_end_time ON auctions(status, end_time);
 CREATE INDEX IF NOT EXISTS idx_auctions_item_id ON auctions(item_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_auctions_unique_item_id ON auctions(item_id);
 CREATE INDEX IF NOT EXISTS idx_auctions_current_highest_bidder_id ON auctions(current_highest_bidder_id);
 
 CREATE TABLE IF NOT EXISTS bid_transactions (
