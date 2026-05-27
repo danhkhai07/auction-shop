@@ -54,8 +54,8 @@ public class SellerControlPanelController extends LiveAuctionController {
         }
         userProfileService.pauseAuction(currentAuctionId)
                 .thenAccept(ignored -> Platform.runLater(() -> {
-                    showSuccess("Auction paused.");
                     stopCountdown();
+                    showSuccess("Auction paused.");
                 }))
                 .exceptionally(exception -> {
                     Platform.runLater(() -> showError("Failed to pause: " + exception.getMessage()));
@@ -71,8 +71,8 @@ public class SellerControlPanelController extends LiveAuctionController {
         }
         userProfileService.unpauseAuction(currentAuctionId)
                 .thenAccept(ignored -> Platform.runLater(() -> {
-                    showSuccess("Auction unpaused.");
                     loadAuctionData();
+                    showSuccess("Auction unpaused.");
                 }))
                 .exceptionally(exception -> {
                     Platform.runLater(() -> showError("Failed to unpause: " + exception.getMessage()));
@@ -98,8 +98,8 @@ public class SellerControlPanelController extends LiveAuctionController {
             
             userProfileService.extendAuctionTime(currentAuctionId, newEndTimeStr)
                     .thenAccept(ignored -> Platform.runLater(() -> {
-                        showSuccess("Auction time extended.");
                         loadAuctionData();
+                        showSuccess("Auction time extended.");
                     }))
                     .exceptionally(exception -> {
                         Platform.runLater(() -> showError("Failed to extend time: " + exception.getMessage()));
@@ -118,6 +118,7 @@ public class SellerControlPanelController extends LiveAuctionController {
         }
         userProfileService.endAuction(currentAuctionId)
                 .thenAccept(ignored -> Platform.runLater(() -> {
+                    stopCountdown();
                     showSuccess("Auction ended early. Status will be changed to FINISHED.");
                     handleBackToDashboard(event);
                 }))
@@ -135,6 +136,7 @@ public class SellerControlPanelController extends LiveAuctionController {
         }
         userProfileService.cancelAuction(currentAuctionId)
                 .thenAccept(ignored -> Platform.runLater(() -> {
+                    stopCountdown();
                     showSuccess("Auction cancelled.");
                     handleBackToDashboard(event);
                 }))
