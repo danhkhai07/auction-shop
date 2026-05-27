@@ -6,6 +6,9 @@
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
@@ -17,10 +20,31 @@
       <HBox VBox.vgrow="ALWAYS">
          <children>
             <!-- Left side for decoration -->
-            <StackPane HBox.hgrow="ALWAYS" />
+            <AnchorPane HBox.hgrow="ALWAYS" style="-fx-background-image: url('/images/background.jpg'); -fx-background-size: 100% 100%; -fx-background-position: center;">
+               <children>
+                  <!-- Floating elements -->
+                  <ImageView fx:id="hammerImage" fitHeight="180.0" fitWidth="180.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="120.0" AnchorPane.topAnchor="150.0">
+                     <image>
+                        <Image url="@../../images/auction-hammer.png" />
+                     </image>
+                  </ImageView>
+                  
+                  <ImageView fx:id="diamondImage" fitHeight="160.0" fitWidth="160.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="60.0" AnchorPane.bottomAnchor="120.0">
+                     <image>
+                        <Image url="@../../images/diamond.png" />
+                     </image>
+                  </ImageView>
+                  
+                  <ImageView fx:id="clockImage" fitHeight="140.0" fitWidth="140.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="220.0">
+                     <image>
+                        <Image url="@../../images/clock.png" />
+                     </image>
+                  </ImageView>
+               </children>
+            </AnchorPane>
             
             <!-- Right side for signup form -->
-            <StackPane prefWidth="500.0" minWidth="500.0" alignment="CENTER_RIGHT">
+            <StackPane alignment="CENTER" minWidth="420.0" prefWidth="420.0">
                <children>
                   <VBox alignment="CENTER" maxWidth="420.0" spacing="0.0" style="-fx-background-color: #ffffff; -fx-background-radius: 16; -fx-border-color: #e5e5e5; -fx-border-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 4);">
                <padding>
