@@ -78,7 +78,7 @@ public class ProductManagementService {
                 .build();
 
         return client.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8))
-                .thenApply(response -> response.statusCode() == 200 || response.statusCode() == 201);
+                .thenApply(response -> response.statusCode() >= 200 && response.statusCode() < 300);
     }
 
     private CompletableFuture<Boolean> sendItemRequest(String path, Map<String, String> payload) {
@@ -93,10 +93,18 @@ public class ProductManagementService {
                     .build();
 
             return client.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8))
-                    .thenApply(response -> response.statusCode() == 200 || response.statusCode() == 201);
+                    .thenApply(response -> {
+                        if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                            return true;
+                        } else if (response.statusCode() == 400 && response.body().contains("item does not exists")) {
+                            return true;
+                        } else {
+                            throw new RuntimeException("HTTP " + response.statusCode() + ": " + response.body());
+                        }
+                    });
         } catch (Exception exception) {
             exception.printStackTrace();
-            return CompletableFuture.completedFuture(false);
+            return CompletableFuture.failedFuture(exception);
         }
     }
 

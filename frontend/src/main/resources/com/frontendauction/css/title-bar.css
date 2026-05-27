@@ -1,0 +1,18 @@
+.title-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #b0b0b0;
+    -fx-background-radius: 0;
+    -fx-cursor: hand;
+    -fx-pref-width: 44px;
+    -fx-pref-height: 36px;
+}
+
+.title-btn:hover {
+    -fx-background-color: #333333;
+    -fx-text-fill: #ffffff;
+}
+
+.close-btn:hover {
+    -fx-background-color: #e53238;
+    -fx-text-fill: white;
+}

@@ -16,14 +16,15 @@
         <fx:include source="title-bar.fxml" />
         <StackPane VBox.vgrow="ALWAYS">
             <!-- Main content layer -->
-            <VBox style="-fx-background-color: #f0f4f8;">
-                <!-- Top bar with hamburger button -->
-                <HBox alignment="CENTER_LEFT" prefHeight="56.0" spacing="16.0" style="-fx-background-color: #ffffff; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0; -fx-padding: 0 24;">
+            <VBox style="-fx-background-color: #f7f7f7;">
+
+                <!-- Top navigation bar -->
+                <HBox alignment="CENTER_LEFT" prefHeight="52.0" spacing="16.0" style="-fx-background-color: #ffffff; -fx-border-color: #e5e5e5; -fx-border-width: 0 0 1 0; -fx-padding: 0 28;">
                     <children>
                         <Button fx:id="btnHamburger" mnemonicParsing="false" onAction="#toggleMenu" styleClass="hamburger-btn" text="☰" />
-                        <Label text="Auction feed" textFill="#1e3a8a">
+                        <Label text="Auction Feed" textFill="#191919">
                             <font>
-                                <Font name="System Bold" size="18.0" />
+                                <Font name="System Bold" size="17.0" />
                             </font>
                         </Label>
                         <Region HBox.hgrow="ALWAYS" />
@@ -31,33 +32,55 @@
                 </HBox>
 
                 <!-- Dashboard content -->
-                <VBox spacing="24.0" style="-fx-padding: 32 36 32 36;" VBox.vgrow="ALWAYS">
+                <VBox spacing="20.0" style="-fx-padding: 28 36;" VBox.vgrow="ALWAYS">
                     <children>
-                        <VBox spacing="10.0" style="-fx-background-color: #ffffff; -fx-background-radius: 8; -fx-padding: 28; -fx-border-color: #e2e8f0; -fx-border-radius: 8;">
+
+                        <!-- Welcome hero card -->
+                        <VBox spacing="8.0" style="-fx-background-color: #ffffff; -fx-background-radius: 12; -fx-padding: 28 32; -fx-border-color: #e5e5e5; -fx-border-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2);">
                             <children>
-                                <Label text="HOME" textFill="#1e3a8a">
+                                <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                    <children>
+                                        <Label text="🏠" style="-fx-font-size: 20px;" />
+                                        <Label text="HOME" textFill="#191919">
+                                            <font>
+                                                <Font name="System Bold" size="22.0" />
+                                            </font>
+                                        </Label>
+                                    </children>
+                                </HBox>
+                                <Label fx:id="lblWelcome" text="Loading user..." textFill="#191919">
                                     <font>
-                                        <Font name="System Bold" size="28.0" />
+                                        <Font name="System Bold" size="18.0" />
                                     </font>
                                 </Label>
-                                <Label fx:id="lblWelcome" text="Loading user..." textFill="#0f172a">
+                                <Label fx:id="lblSummary" text="Loading dashboard data..." textFill="#707070" wrapText="true">
                                     <font>
-                                        <Font name="System Bold" size="22.0" />
+                                        <Font size="13.0" />
                                     </font>
                                 </Label>
-                                <Label fx:id="lblSummary" text="Loading dashboard data..." textFill="#475569" wrapText="true" />
                             </children>
                         </VBox>
 
-                        <Label text="Live auctions :" textFill="#1e3a8a">
-                            <font>
-                                <Font name="System Bold" size="20.0" />
-                            </font>
-                        </Label>
+                        <!-- Auctions section header -->
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                            <children>
+                                <Label text="🔴" style="-fx-font-size: 14px;" />
+                                <Label text="Live Auctions" textFill="#191919">
+                                    <font>
+                                        <Font name="System Bold" size="18.0" />
+                                    </font>
+                                </Label>
+                                <Region HBox.hgrow="ALWAYS" />
+                            </children>
+                            <padding>
+                                <Insets top="4.0" bottom="4.0" />
+                            </padding>
+                        </HBox>
 
+                        <!-- Auction list -->
                         <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0;" VBox.vgrow="ALWAYS">
                             <content>
-                                <VBox fx:id="auctionListContainer" spacing="20.0" />
+                                <VBox fx:id="auctionListContainer" spacing="14.0" />
                             </content>
                         </ScrollPane>
                     </children>
@@ -67,35 +90,41 @@
             <!-- Overlay layer (menu) — initially hidden -->
             <AnchorPane fx:id="menuOverlay" onMouseClicked="#closeMenu" styleClass="menu-overlay" visible="false">
                 <!-- Side menu panel -->
-                <VBox fx:id="sideMenu" prefWidth="260.0" styleClass="side-menu" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <VBox fx:id="sideMenu" prefWidth="280.0" styleClass="side-menu" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <padding>
-                        <Insets bottom="30.0" left="20.0" right="20.0" top="24.0" />
+                        <Insets bottom="24.0" left="24.0" right="24.0" top="28.0" />
                     </padding>
                     <children>
-                        <Label text="MENU" textFill="#1e3a8a">
-                            <font>
-                                <Font name="System Bold" size="18.0" />
-                            </font>
-                            <VBox.margin>
-                                <Insets bottom="24.0" />
-                            </VBox.margin>
-                        </Label>
-
-                        <VBox spacing="8.0">
+                        <!-- Menu header -->
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
                             <children>
-                                <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#goToProfile" prefHeight="45.0" styleClass="menu-item" text="👤  Profile">
+                                <Label text="🏪" style="-fx-font-size: 18px;" />
+                                <Label text="AUCTION SHOP" textFill="#191919">
+                                    <font>
+                                        <Font name="System Bold" size="16.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                            <VBox.margin>
+                                <Insets bottom="20.0" />
+                            </VBox.margin>
+                        </HBox>
+
+                        <VBox spacing="6.0">
+                            <children>
+                                <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#goToProfile" prefHeight="44.0" styleClass="menu-item" text="👤  Profile">
                                     <padding>
-                                        <Insets left="15.0" />
+                                        <Insets left="16.0" />
                                     </padding>
                                 </Button>
-                                <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#goToLiveAuction" prefHeight="45.0" styleClass="menu-item" text="🔴  Live Auction">
+                                <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#goToLiveAuction" prefHeight="44.0" styleClass="menu-item-active" text="🔴  Live Auctions">
                                     <padding>
-                                        <Insets left="15.0" />
+                                        <Insets left="16.0" />
                                     </padding>
                                 </Button>
-                                <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#goToProductManagement" prefHeight="45.0" styleClass="menu-item" text="📦  Products">
+                                <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#goToProductManagement" prefHeight="44.0" styleClass="menu-item" text="📦  Products">
                                     <padding>
-                                        <Insets left="15.0" />
+                                        <Insets left="16.0" />
                                     </padding>
                                 </Button>
                             </children>
@@ -103,9 +132,9 @@
 
                         <Region VBox.vgrow="ALWAYS" />
 
-                        <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#logout" prefHeight="45.0" styleClass="menu-item-logout" text="🚪  Log out">
+                        <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#logout" prefHeight="44.0" styleClass="menu-item-logout" text="🚪  Log out">
                             <padding>
-                                <Insets left="15.0" />
+                                <Insets left="16.0" />
                             </padding>
                         </Button>
                     </children>

@@ -55,6 +55,6 @@ public class UploadHandler {
                         request.pathVariable("id"),
                         (String) request.attributes().get("userID"),
                         req))
-                .flatMap(v -> ServerResponse.status(201).build());
+                .then(ServerResponse.status(201).build());
     }
 }

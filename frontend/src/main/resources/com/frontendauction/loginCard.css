@@ -1,8 +1,0 @@
-.login-card {
-    -fx-background-color: #ffffff; /* Nền trắng phẳng hiện đại */
-    -fx-background-radius: 16px;   /* Bo góc mạnh mẽ, mềm mại */
-    -fx-padding: 40px;             /* Tạo khoảng trống từ viền vào trong cho các nút dễ thở */
-
-    /* Hiệu ứng đổ bóng mờ giúp tấm thẻ tách biệt hoàn toàn khỏi nền xanh */
-    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 20, 0, 0, 10);
-}
