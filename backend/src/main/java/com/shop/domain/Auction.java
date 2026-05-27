@@ -81,17 +81,29 @@ public class Auction {
         this.currentHighestBidder = bidder;
     }
 
+    private LocalDateTime pausedAt;
+
     public void pauseAuction() {
         if (!this.status.canTransitionTo(AuctionStatus.PAUSED)) {
             throw new IllegalStateException("Cannot finish the auction from status: " + this.status);
         }
         this.status = AuctionStatus.PAUSED;
+        this.pausedAt = LocalDateTime.now();
     }
 
     public void unpauseAuction() {
         if (this.status != AuctionStatus.PAUSED) {
             throw new IllegalStateException("Cannot unpause an auction that is not paused.");
         }
+        
+        if (this.pausedAt != null) {
+            long pausedSeconds = java.time.temporal.ChronoUnit.SECONDS.between(this.pausedAt, LocalDateTime.now());
+            if (pausedSeconds > 0) {
+                this.endTime = this.endTime.plusSeconds(pausedSeconds);
+            }
+            this.pausedAt = null;
+        }
+
         if (isExpired()) {
             this.status = AuctionStatus.FINISHED;
             return;

@@ -50,15 +50,41 @@ public class AuctionCardController {
             return;
         }
         
-        FXMLLoader loader = new FXMLLoader(
-                Objects.requireNonNull(getClass().getResource("/com/frontendauction/live-auction.fxml")));
-        Parent root = loader.load();
+        Node source = (Node) event.getSource();
+        source.setDisable(true);
 
-        LiveAuctionController controller = loader.getController();
-        controller.setAuctionId(auction.getId());
+        new com.frontendauction.service.UserProfileService().getCurrentUser()
+                .thenAccept(user -> {
+                    javafx.application.Platform.runLater(() -> {
+                        source.setDisable(false);
+                        boolean isSeller = user != null && user.getAuctionList() != null && user.getAuctionList().contains(auction.getId());
+                        navigateToAuction(event, isSeller);
+                    });
+                })
+                .exceptionally(ex -> {
+                    javafx.application.Platform.runLater(() -> {
+                        source.setDisable(false);
+                        navigateToAuction(event, false);
+                    });
+                    return null;
+                });
+    }
 
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        AppWindow.applyScene(stage, root);
-        stage.show();
+    private void navigateToAuction(MouseEvent event, boolean isSeller) {
+        try {
+            String fxmlFile = isSeller ? "/com/frontendauction/seller-controlpanel.fxml" : "/com/frontendauction/live-auction.fxml";
+            FXMLLoader loader = new FXMLLoader(
+                    Objects.requireNonNull(getClass().getResource(fxmlFile)));
+            Parent root = loader.load();
+
+            LiveAuctionController controller = loader.getController();
+            controller.setAuctionId(auction.getId());
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            AppWindow.applyScene(stage, root);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

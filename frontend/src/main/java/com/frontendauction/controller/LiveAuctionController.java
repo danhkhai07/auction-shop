@@ -62,6 +62,14 @@ public class LiveAuctionController {
     private long timeLeftSeconds;
     private Timeline countdownTimeline;
 
+    protected String getCurrentAuctionId() {
+        return currentAuctionId;
+    }
+
+    protected long getTimeLeftSeconds() {
+        return timeLeftSeconds;
+    }
+
     @FXML
     public void initialize() {
         if (txtMaxAutoBid != null && chkAutoBid != null) {
@@ -93,7 +101,7 @@ public class LiveAuctionController {
         }
     }
 
-    private void loadAuctionData() {
+    protected void loadAuctionData() {
         initialLoadDone = true;
         setLoadingState(true);
 
@@ -360,7 +368,7 @@ public class LiveAuctionController {
         showError(result.errorMessage());
     }
 
-    private void startCountdown() {
+    protected void startCountdown() {
         stopCountdown();
 
         countdownTimeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
@@ -379,7 +387,7 @@ public class LiveAuctionController {
         updateTimeLabel();
     }
 
-    private void stopCountdown() {
+    protected void stopCountdown() {
         if (countdownTimeline != null) {
             countdownTimeline.stop();
         }

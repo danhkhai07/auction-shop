@@ -200,17 +200,60 @@ public class UserProfileService {
     }
 
     public CompletableFuture<Void> startAuction(String auctionId) {
-        HttpRequest request = authorizedRequest("/auction/" + auctionId + "/start")
+        return sendAction(auctionId, "start");
+    }
+
+    public CompletableFuture<Void> pauseAuction(String auctionId) {
+        return sendAction(auctionId, "pause");
+    }
+
+    public CompletableFuture<Void> unpauseAuction(String auctionId) {
+        return sendAction(auctionId, "unpause");
+    }
+
+    public CompletableFuture<Void> cancelAuction(String auctionId) {
+        return sendAction(auctionId, "cancel");
+    }
+
+    public CompletableFuture<Void> endAuction(String auctionId) {
+        return sendAction(auctionId, "end");
+    }
+
+    public CompletableFuture<Void> extendAuctionTime(String auctionId, String newEndTimeStr) {
+        try {
+            // we assume newEndTimeStr is a valid ISO-8601 string that backend can parse as LocalDateTime
+            String payload = "{\"newEndTime\":\"" + newEndTimeStr + "\"}";
+            HttpRequest request = authorizedRequest("/auction/" + auctionId + "/extend/endtime")
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(payload, StandardCharsets.UTF_8))
+                    .build();
+
+            return client.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8))
+                    .thenCompose(response -> {
+                        if (response.statusCode() == 200 || response.statusCode() == 201 || response.statusCode() == 204) {
+                            return CompletableFuture.completedFuture(null);
+                        }
+                        return CompletableFuture.failedFuture(
+                                new IllegalStateException(readError(response.body(), "Unable to extend time"))
+                        );
+                    });
+        } catch (Exception e) {
+            return CompletableFuture.failedFuture(e);
+        }
+    }
+
+    private CompletableFuture<Void> sendAction(String auctionId, String action) {
+        HttpRequest request = authorizedRequest("/auction/" + auctionId + "/" + action)
                 .POST(HttpRequest.BodyPublishers.noBody())
                 .build();
 
         return client.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8))
                 .thenCompose(response -> {
-                    if (response.statusCode() == 200 || response.statusCode() == 204) {
+                    if (response.statusCode() == 200 || response.statusCode() == 201 || response.statusCode() == 204) {
                         return CompletableFuture.completedFuture(null);
                     }
                     return CompletableFuture.failedFuture(
-                            new IllegalStateException(readError(response.body(), "Unable to start auction"))
+                            new IllegalStateException(readError(response.body(), "Unable to " + action + " auction"))
                     );
                 });
     }
