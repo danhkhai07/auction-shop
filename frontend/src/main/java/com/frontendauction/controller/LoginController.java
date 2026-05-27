@@ -10,7 +10,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;//Nap file FXML thanh giao dien JavaFx
 import javafx.scene.Parent;
 import javafx.scene.Scene;//Tao Scene moi cho cua so
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;//Dieu khien cua so hien tai
 import javafx.scene.control.Button;
@@ -35,7 +35,7 @@ public class LoginController {
     @FXML
     private StackPane loginContainer;
     @FXML
-    private AnchorPane loginForm;
+    private VBox loginForm;
     @FXML
     private TextField usernameField;
     @FXML

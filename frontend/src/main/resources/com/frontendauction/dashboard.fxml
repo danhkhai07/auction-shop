@@ -117,7 +117,7 @@
                                         <Insets left="16.0" />
                                     </padding>
                                 </Button>
-                                <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#goToLiveAuction" prefHeight="44.0" styleClass="menu-item-active" text="🔴  Live Auctions">
+                                <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#goToLiveAuction" prefHeight="44.0" styleClass="menu-item" text="🔴  Live Auctions">
                                     <padding>
                                         <Insets left="16.0" />
                                     </padding>

@@ -17,10 +17,15 @@
 
       <fx:include source="title-bar.fxml" />
 
-      <StackPane fx:id="loginContainer" VBox.vgrow="ALWAYS">
+      <HBox VBox.vgrow="ALWAYS">
          <children>
-
-            <VBox alignment="CENTER" maxWidth="420.0" spacing="0.0" style="-fx-background-color: #ffffff; -fx-background-radius: 16; -fx-border-color: #e5e5e5; -fx-border-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 4);">
+            <!-- Left side for decoration -->
+            <StackPane HBox.hgrow="ALWAYS" />
+            
+            <!-- Right side for login form -->
+            <StackPane fx:id="loginContainer" prefWidth="500.0" minWidth="500.0" alignment="CENTER_RIGHT">
+               <children>
+                  <VBox fx:id="loginForm" alignment="CENTER" maxWidth="420.0" spacing="0.0" style="-fx-background-color: #ffffff; -fx-background-radius: 16; -fx-border-color: #e5e5e5; -fx-border-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 4);">
                <padding>
                   <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
                </padding>
@@ -99,8 +104,10 @@
                </children>
             </VBox>
 
+               </children>
+            </StackPane>
          </children>
-      </StackPane>
+      </HBox>
 
    </children>
 </VBox>
