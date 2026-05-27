@@ -1,5 +1,6 @@
 package com.shop.domain;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -11,6 +12,7 @@ public class User {
     private final String id;
     private String username;
     private String passwordHash;
+    private BigDecimal balance = BigDecimal.ZERO;
     private boolean banned;
     private String bannedReason;
     private LocalDateTime bannedAt;
@@ -24,6 +26,7 @@ public class User {
         this.id = id;
         this.username = username;
         this.passwordHash = passwordHash;
+        this.balance = BigDecimal.ZERO;
         this.roles.add(Role.USER);
     }
 
@@ -47,6 +50,35 @@ public class User {
         if (role != null) {
             this.roles.add(role);
         }
+    }
+
+    public void deposit(BigDecimal amount) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Deposit amount must be greater than zero");
+        }
+        this.balance = this.balance.add(amount);
+    }
+
+    public void withdraw(BigDecimal amount) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Withdrawal amount must be greater than zero");
+        }
+        if (this.balance.compareTo(amount) < 0) {
+            throw new IllegalArgumentException("Insufficient balance. Available: " + this.balance + ", Requested: " + amount);
+        }
+        this.balance = this.balance.subtract(amount);
+    }
+
+    public void deductFromBalance(BigDecimal amount) {
+        withdraw(amount);
+    }
+
+    public void addToBalance(BigDecimal amount) {
+        deposit(amount);
+    }
+
+    public boolean hasEnoughBalance(BigDecimal amount) {
+        return this.balance.compareTo(amount) >= 0;
     }
 
     public boolean hasPermission(Permission permission) {
@@ -118,6 +150,10 @@ public class User {
         return passwordHash;
     }
 
+    public BigDecimal getBalance() {
+        return balance;
+    }
+
     public Set<Permission> getPermissions() {
         Set<Permission> perms = new HashSet<>();
         for (Role role : roles) {
@@ -174,6 +210,13 @@ public class User {
             throw new IllegalArgumentException("Password hash cannot be blank");
         }
         this.passwordHash = passwordHash;
+    }
+
+    public void setBalance(BigDecimal balance) {
+        if (balance == null || balance.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Balance cannot be negative");
+        }
+        this.balance = balance;
     }
 
     public void setRoles(Set<Role> roles) {
