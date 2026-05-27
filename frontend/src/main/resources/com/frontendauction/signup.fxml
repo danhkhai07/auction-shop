@@ -20,7 +20,7 @@
       <HBox VBox.vgrow="ALWAYS">
          <children>
             <!-- Left side for decoration -->
-            <AnchorPane HBox.hgrow="ALWAYS" style="-fx-background-image: url('/images/background.jpg'); -fx-background-size: 100% 100%; -fx-background-position: center;">
+            <AnchorPane HBox.hgrow="ALWAYS" style="-fx-background-image: url('../../images/background.jpg'); -fx-background-size: 100% 100%; -fx-background-position: center;">
                <children>
                   <!-- Floating elements -->
                   <ImageView fx:id="hammerImage" fitHeight="180.0" fitWidth="180.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="120.0" AnchorPane.topAnchor="150.0">
