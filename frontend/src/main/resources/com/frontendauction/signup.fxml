@@ -20,22 +20,22 @@
       <HBox VBox.vgrow="ALWAYS">
          <children>
             <!-- Left side for decoration -->
-            <AnchorPane HBox.hgrow="ALWAYS" style="-fx-background-image: url('../../images/background.jpg'); -fx-background-size: 100% 100%; -fx-background-position: center;">
+            <AnchorPane styleClass="auth-background" HBox.hgrow="ALWAYS">
                <children>
                   <!-- Floating elements -->
-                  <ImageView fx:id="hammerImage" fitHeight="180.0" fitWidth="180.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="120.0" AnchorPane.topAnchor="150.0">
+                  <ImageView fx:id="hammerImage" fitHeight="105.0" fitWidth="146.0" layoutX="178.0" layoutY="450.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="178.0" AnchorPane.topAnchor="450.0">
                      <image>
                         <Image url="@../../images/auction-hammer.png" />
                      </image>
                   </ImageView>
                   
-                  <ImageView fx:id="diamondImage" fitHeight="160.0" fitWidth="160.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="60.0" AnchorPane.bottomAnchor="120.0">
+                  <ImageView fx:id="diamondImage" fitHeight="121.0" fitWidth="105.0" layoutX="377.0" layoutY="490.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="88.20000000000005" AnchorPane.rightAnchor="378.0">
                      <image>
                         <Image url="@../../images/diamond.png" />
                      </image>
                   </ImageView>
                   
-                  <ImageView fx:id="clockImage" fitHeight="140.0" fitWidth="140.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="220.0">
+                  <ImageView fx:id="clockImage" fitHeight="88.0" fitWidth="52.0" layoutX="582.0" layoutY="454.4" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="226.0" AnchorPane.topAnchor="454.0">
                      <image>
                         <Image url="@../../images/clock.png" />
                      </image>
@@ -52,7 +52,7 @@
                </padding>
                <children>
                   <!-- Logo & Title -->
-                  <Label text="🏪" style="-fx-font-size: 32px;">
+                  <Label style="-fx-font-size: 32px;" text="🏪">
                      <VBox.margin>
                         <Insets bottom="8.0" />
                      </VBox.margin>
@@ -72,7 +72,7 @@
                   </Label>
 
                   <!-- Username field -->
-                  <Label text="Username" textFill="#333333" style="-fx-font-weight: bold; -fx-font-size: 13px;">
+                  <Label style="-fx-font-weight: bold; -fx-font-size: 13px;" text="Username" textFill="#333333">
                      <VBox.margin>
                         <Insets bottom="6.0" />
                      </VBox.margin>
@@ -84,7 +84,7 @@
                   </TextField>
 
                   <!-- Password field -->
-                  <Label text="Password" textFill="#333333" style="-fx-font-weight: bold; -fx-font-size: 13px;">
+                  <Label style="-fx-font-weight: bold; -fx-font-size: 13px;" text="Password" textFill="#333333">
                      <VBox.margin>
                         <Insets bottom="6.0" />
                      </VBox.margin>
@@ -96,7 +96,7 @@
                   </PasswordField>
 
                   <!-- Confirm Password field -->
-                  <Label text="Confirm Password" textFill="#333333" style="-fx-font-weight: bold; -fx-font-size: 13px;">
+                  <Label style="-fx-font-weight: bold; -fx-font-size: 13px;" text="Confirm Password" textFill="#333333">
                      <VBox.margin>
                         <Insets bottom="6.0" />
                      </VBox.margin>
@@ -108,7 +108,7 @@
                   </PasswordField>
 
                   <!-- Error label -->
-                  <Label fx:id="errorLabel" alignment="CENTER" maxWidth="Infinity" textFill="#e53238" visible="false" wrapText="true" style="-fx-font-size: 12px;">
+                  <Label fx:id="errorLabel" alignment="CENTER" maxWidth="Infinity" style="-fx-font-size: 12px;" textFill="#e53238" visible="false" wrapText="true">
                      <VBox.margin>
                         <Insets bottom="8.0" />
                      </VBox.margin>
@@ -130,8 +130,8 @@
                   <!-- Back to login link -->
                   <HBox alignment="CENTER" spacing="6.0">
                      <children>
-                        <Label text="Already have an account?" textFill="#707070" style="-fx-font-size: 13px;" />
-                        <Button fx:id="backButton" mnemonicParsing="false" onAction="#handleBacktoLogin" styleClass="btn-text-only" text="Sign in" style="-fx-font-size: 13px;" />
+                        <Label style="-fx-font-size: 13px;" text="Already have an account?" textFill="#707070" />
+                        <Button fx:id="backButton" mnemonicParsing="false" onAction="#handleBacktoLogin" style="-fx-font-size: 13px;" styleClass="btn-text-only" text="Sign in" />
                      </children>
                   </HBox>
                </children>

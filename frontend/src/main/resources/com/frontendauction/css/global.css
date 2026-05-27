@@ -16,6 +16,12 @@
     -fx-background-color: linear-gradient(to bottom, #f7f7f7 0%, #eef1f5 100%);
 }
 
+.auth-background {
+    -fx-background-image: url('../../../images/background.jpg');
+    -fx-background-size: 100% 100%;
+    -fx-background-position: center;
+}
+
 /* ======== CARDS & PANELS ======== */
 
 /* Standard card — clean white with subtle border, eBay-style */

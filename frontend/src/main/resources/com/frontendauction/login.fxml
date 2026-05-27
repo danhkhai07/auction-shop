@@ -22,22 +22,22 @@
       <HBox VBox.vgrow="ALWAYS">
          <children>
             <!-- Left side for decoration -->
-            <AnchorPane style="-fx-background-image: url('../../images/background.jpg'); -fx-background-size: 100% 100%; -fx-background-position: center;" HBox.hgrow="ALWAYS">
+            <AnchorPane styleClass="auth-background" HBox.hgrow="ALWAYS">
                <children>
                   <!-- Floating elements -->
-                  <ImageView fx:id="hammerImage" fitHeight="180.0" fitWidth="180.0" layoutX="110.0" layoutY="373.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="110.0" AnchorPane.topAnchor="373.0">
+                  <ImageView fx:id="hammerImage" fitHeight="121.0" fitWidth="121.0" layoutX="189.0" layoutY="475.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="189.0" AnchorPane.topAnchor="475.0">
                      <image>
                         <Image url="@../../images/auction-hammer.png" />
                      </image>
                   </ImageView>
                   
-                  <ImageView fx:id="diamondImage" fitHeight="160.0" fitWidth="160.0" layoutX="350.0" layoutY="361.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="163.0" AnchorPane.rightAnchor="350.0">
+                  <ImageView fx:id="diamondImage" fitHeight="134.0" fitWidth="113.0" layoutX="374.0" layoutY="501.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="70.0" AnchorPane.rightAnchor="373.0">
                      <image>
                         <Image url="@../../images/diamond.png" />
                      </image>
                   </ImageView>
                   
-                  <ImageView fx:id="clockImage" fitHeight="140.0" fitWidth="140.0" layoutX="651.0" layoutY="361.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="132.65027618408203" AnchorPane.topAnchor="361.0">
+                  <ImageView fx:id="clockImage" fitHeight="113.0" fitWidth="73.0" layoutX="584.0" layoutY="443.2" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="204.0" AnchorPane.topAnchor="443.0">
                      <image>
                         <Image url="@../../images/clock.png" />
                      </image>
