@@ -15,6 +15,7 @@ public class UserProfileModel {
     private List<String> itemList;
     @JsonAlias({"auctions", "auctionList"})
     private List<String> auctionList;
+    private String status;
 
     public UserProfileModel() {
     }
@@ -57,5 +58,13 @@ public class UserProfileModel {
 
     public void setAuctionList(List<String> auctionList) {
         this.auctionList = auctionList;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
