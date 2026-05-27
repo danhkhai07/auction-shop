@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox prefHeight="720.0" prefWidth="1280.0" stylesheets="@css/global.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.frontendauction.controller.LiveAuctionController">
+    <children>
+        <fx:include source="title-bar.fxml" />
+        <AnchorPane fx:id="rootPane" styleClass="premium-background" VBox.vgrow="ALWAYS">
+            <children>
+                <ScrollPane fitToHeight="true" fitToWidth="true" style="-fx-background: transparent; -fx-background-color: transparent;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <content>
+                        <VBox alignment="TOP_CENTER" spacing="20.0">
+                            <padding>
+                                <Insets bottom="28.0" left="36.0" right="36.0" top="16.0" />
+                            </padding>
+                            <children>
+
+                                <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                    <children>
+                                        <Button fx:id="btnBack" mnemonicParsing="false" onAction="#handleBackToDashboard" styleClass="btn-text-only" text="← Dashboard">
+                                            <font>
+                                                <Font size="13.0" />
+                                            </font>
+                                        </Button>
+                                        <Label text="  /  " textFill="#a0a0a0" />
+                                        <Label text="Live Auctions (Seller View)" textFill="#555555">
+                                            <font>
+                                                <Font name="System Bold" size="13.0" />
+                                            </font>
+                                        </Label>
+                                    </children>
+                                </HBox>
+
+                                <HBox alignment="TOP_CENTER" spacing="24.0" VBox.vgrow="NEVER">
+                                    <children>
+
+                                        <VBox spacing="16.0" styleClass="premium-card" HBox.hgrow="ALWAYS">
+                                            <padding>
+                                                <Insets bottom="24.0" left="28.0" right="28.0" top="24.0" />
+                                            </padding>
+                                            <children>
+                                                <Label fx:id="lblProductName" styleClass="text-primary-dark" text="Loading auction..." wrapText="true">
+                                                    <font>
+                                                        <Font name="System Bold" size="26.0" />
+                                                    </font>
+                                                </Label>
+
+                                                <Label fx:id="lblSeller" text="Fetching auction data..." textFill="#707070">
+                                                    <font>
+                                                        <Font size="13.0" />
+                                                    </font>
+                                                </Label>
+
+                                                <Separator styleClass="separator-custom" />
+
+                                                <VBox spacing="6.0">
+                                                    <children>
+                                                        <Label text="ITEM DESCRIPTION" textFill="#707070">
+                                                            <font>
+                                                                <Font name="System Bold" size="11.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <ScrollPane fitToWidth="true" minHeight="80.0" prefHeight="100.0" styleClass="scroll-pane-custom">
+                                                            <content>
+                                                                <Label fx:id="lblDescription" alignment="TOP_LEFT" text="Loading auction details..." textFill="#333333" wrapText="true">
+                                                                    <font>
+                                                                        <Font size="14.0" />
+                                                                    </font>
+                                                                    <padding>
+                                                                        <Insets bottom="10.0" left="12.0" right="12.0" top="10.0" />
+                                                                    </padding>
+                                                                </Label>
+                                                            </content>
+                                                        </ScrollPane>
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+
+                                        <VBox minWidth="550.0" prefWidth="600.0" spacing="18.0" styleClass="premium-card" HBox.hgrow="NEVER">
+                                            <padding>
+                                                <Insets bottom="24.0" left="28.0" right="28.0" top="24.0" />
+                                            </padding>
+                                            <children>
+
+                                                <HBox alignment="CENTER_LEFT" spacing="30.0">
+                                                    <children>
+                                                        <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                                            <children>
+                                                                <Label text="CURRENT BID" textFill="#707070">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="11.0" />
+                                                                    </font>
+                                                                </Label>
+                                                                <Label fx:id="lblCurrentPrice" styleClass="text-price-highlight" text="-">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="30.0" />
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                        </VBox>
+
+                                                        <VBox alignment="CENTER" spacing="4.0" styleClass="time-box-urgent">
+                                                            <children>
+                                                                <Label text="TIME LEFT" textFill="#e53238">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="11.0" />
+                                                                    </font>
+                                                                </Label>
+                                                                <Label fx:id="lblTimeLeft" text="00:00:00" textFill="#c62828">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="22.0" />
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                        </VBox>
+                                                    </children>
+                                                </HBox>
+
+                                                <Separator styleClass="separator-custom" />
+
+                                                <VBox spacing="14.0">
+                                                    <children>
+                                                        <Label text="Seller Control Panel" textFill="#191919">
+                                                            <font>
+                                                                <Font name="System Bold" size="15.0" />
+                                                            </font>
+                                                        </Label>
+
+                                                        <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                                            <children>
+                                                                <Button fx:id="btnStart" mnemonicParsing="false" prefHeight="44.0" prefWidth="170.0" style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;" styleClass="btn-premium" text="START" />
+                                                                <Button fx:id="btnPause" mnemonicParsing="false" prefHeight="44.0" prefWidth="170.0" style="-fx-background-color: #f1c40f; -fx-text-fill: white; -fx-font-weight: bold;" styleClass="btn-premium" text="PAUSE" />
+                                                                <Button fx:id="btnUnpause" mnemonicParsing="false" prefHeight="44.0" prefWidth="170.0" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;" styleClass="btn-premium" text="UNPAUSE" />
+                                                            </children>
+                                                        </HBox>
+
+                                                        <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                                            <children>
+                                                                <TextField fx:id="txtExtendTime" prefHeight="44.0" promptText="Extend (minutes)..." styleClass="input-field-large" HBox.hgrow="ALWAYS" />
+                                                                <Button fx:id="btnExtend" mnemonicParsing="false" prefHeight="44.0" prefWidth="170.0" styleClass="btn-premium" text="Apply" />
+                                                            </children>
+                                                        </HBox>
+
+                                                        <Separator styleClass="separator-custom" />
+
+                                                        <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                                            <children>
+                                                                <Button fx:id="btnEnd" mnemonicParsing="false" prefHeight="44.0" prefWidth="260.0" style="-fx-background-color: #e67e22; -fx-text-fill: white; -fx-font-weight: bold;" styleClass="btn-premium" text="END EARLY" />
+                                                                <Region HBox.hgrow="ALWAYS" />
+                                                                <Button fx:id="btnCancel" mnemonicParsing="false" prefHeight="44.0" prefWidth="260.0" style="-fx-background-color: #e53238; -fx-text-fill: white; -fx-font-weight: bold;" styleClass="btn-premium" text="CANCEL AUCTION" />
+                                                            </children>
+                                                        </HBox>
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+
+                                <HBox alignment="TOP_CENTER" spacing="24.0" VBox.vgrow="ALWAYS">
+                                    <children>
+
+                                        <VBox minHeight="300.0" styleClass="premium-card" HBox.hgrow="ALWAYS">
+                                            <padding>
+                                                <Insets bottom="16.0" left="20.0" right="20.0" top="20.0" />
+                                            </padding>
+                                            <children>
+                                                <Label text="PRICE HISTORY" textFill="#191919">
+                                                    <font>
+                                                        <Font name="System Bold" size="14.0" />
+                                                    </font>
+                                                    <padding>
+                                                        <Insets bottom="8.0" />
+                                                    </padding>
+                                                </Label>
+                                                <Separator styleClass="separator-custom" />
+                                                <LineChart fx:id="priceChart" prefHeight="260.0" styleClass="premium-chart" VBox.vgrow="ALWAYS">
+                                                    <xAxis>
+                                                        <CategoryAxis label="Time" side="BOTTOM" />
+                                                    </xAxis>
+                                                    <yAxis>
+                                                        <NumberAxis label="Price (VND)" side="LEFT" />
+                                                    </yAxis>
+                                                </LineChart>
+                                            </children>
+                                        </VBox>
+
+                                        <VBox minWidth="360.0" prefWidth="400.0" styleClass="premium-card" HBox.hgrow="NEVER">
+                                            <padding>
+                                                <Insets bottom="16.0" left="20.0" right="20.0" top="20.0" />
+                                            </padding>
+                                            <children>
+                                                <Label text="BID HISTORY" textFill="#191919">
+                                                    <font>
+                                                        <Font name="System Bold" size="14.0" />
+                                                    </font>
+                                                    <padding>
+                                                        <Insets bottom="8.0" />
+                                                    </padding>
+                                                </Label>
+                                                <Separator styleClass="separator-custom" />
+                                                <ListView fx:id="lvBidHistory" prefHeight="260.0" styleClass="list-view-transparent" VBox.vgrow="ALWAYS" />
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+
+                            </children>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+            </children>
+        </AnchorPane>
+    </children>
+</VBox>
