@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class AuctionEventStream {
     private final AuctionRepository auctionRepository;
+    private final WebhookNotifier webhookNotifier;
     private final Map<String, Sinks.Many<AuctionEvent>> sinks
             = new ConcurrentHashMap<>();
 
@@ -46,5 +47,7 @@ public class AuctionEventStream {
         if (sink != null) {
             sink.tryEmitNext(event);
         }
+        // fire-and-forget webhook notification for external server
+        webhookNotifier.notify(event).subscribe();
     }
 }
