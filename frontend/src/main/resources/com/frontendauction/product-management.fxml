@@ -143,15 +143,18 @@
                                         <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
                                         <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
                                         <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
+                                        <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
                                     </rowConstraints>
                                     <children>
                                         <Label styleClass="form-label" text="Starting Price" />
-                                        <Label styleClass="form-label" text="Start Time" GridPane.rowIndex="1" />
-                                        <Label styleClass="form-label" text="End Time" GridPane.rowIndex="2" />
+                                        <Label styleClass="form-label" text="Min Bid Step" GridPane.rowIndex="1" />
+                                        <Label styleClass="form-label" text="Start Time" GridPane.rowIndex="2" />
+                                        <Label styleClass="form-label" text="End Time" GridPane.rowIndex="3" />
 
                                         <TextField fx:id="txtAuctionPrice" prefHeight="38.0" promptText="VD: 100000" styleClass="input-field" GridPane.columnIndex="1" />
-                                        <TextField fx:id="txtStartTime" prefHeight="38.0" promptText="yyyy-MM-ddTHH:mm:ss" styleClass="input-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                        <TextField fx:id="txtEndTime" prefHeight="38.0" promptText="yyyy-MM-ddTHH:mm:ss" styleClass="input-field" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                        <TextField fx:id="txtMinBidStep" prefHeight="38.0" promptText="VD: 10000" styleClass="input-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                        <TextField fx:id="txtStartTime" prefHeight="38.0" promptText="yyyy-MM-ddTHH:mm:ss" styleClass="input-field" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                        <TextField fx:id="txtEndTime" prefHeight="38.0" promptText="yyyy-MM-ddTHH:mm:ss" styleClass="input-field" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                                     </children>
                                 </GridPane>
 

@@ -41,6 +41,7 @@ public class ProductManagementController {
     @FXML private Button btnBack;
     @FXML private Button btnCreateAuction;
     @FXML private TextField txtAuctionPrice;
+    @FXML private TextField txtMinBidStep;
     @FXML private TextField txtStartTime;
     @FXML private TextField txtEndTime;
 
@@ -263,6 +264,9 @@ public class ProductManagementController {
             java.time.LocalDateTime endDefault = java.time.LocalDateTime.now().plusHours(1);
             txtEndTime.setText(endDefault.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
         }
+        if (txtMinBidStep != null) {
+            txtMinBidStep.clear();
+        }
     }
 
     private void handleCreateAuction() {
@@ -275,6 +279,7 @@ public class ProductManagementController {
         if (txtAuctionPrice == null || txtStartTime == null || txtEndTime == null) return;
 
         String priceText = txtAuctionPrice.getText().trim();
+        String minBidStepText = txtMinBidStep != null ? txtMinBidStep.getText().trim() : "";
         String startTime = txtStartTime.getText().trim();
         String endTime = txtEndTime.getText().trim();
 
@@ -295,10 +300,20 @@ public class ProductManagementController {
             return;
         }
 
+        double minBidIncrement = 1.0;
+        if (!minBidStepText.isEmpty()) {
+            try {
+                minBidIncrement = Double.parseDouble(minBidStepText);
+            } catch (NumberFormatException e) {
+                showError("Min Bid Step must be a valid number.");
+                return;
+            }
+        }
+
         btnCreateAuction.setDisable(true);
         btnCreateAuction.setText("Creating...");
 
-        productService.createAuction(selected.getId(), startingPrice, startTime, endTime)
+        productService.createAuction(selected.getId(), startingPrice, minBidIncrement, startTime, endTime)
                 .thenAccept(optionalId -> Platform.runLater(() -> {
                     btnCreateAuction.setDisable(false);
                     btnCreateAuction.setText("Create Auction");
