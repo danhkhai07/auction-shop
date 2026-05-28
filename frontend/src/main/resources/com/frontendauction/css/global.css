@@ -438,6 +438,11 @@
 .premium-chart .axis-minor-tick-mark {
     -fx-stroke: #f0f0f0;
 }
+.premium-chart .axis {
+    -fx-tick-label-fill: #555555;
+    -fx-tick-labels-visible: true;
+    -fx-tick-label-font-size: 11px;
+}
 
 /* ======== BOTTOM BAR ======== */
 

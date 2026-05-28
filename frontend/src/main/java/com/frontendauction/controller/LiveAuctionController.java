@@ -85,6 +85,19 @@ public class LiveAuctionController {
         if (priceChart != null) {
             priceChart.setAnimated(false);
             priceChart.setLegendVisible(false);
+            if (priceChart.getYAxis() instanceof javafx.scene.chart.NumberAxis) {
+                javafx.scene.chart.NumberAxis yAxis = (javafx.scene.chart.NumberAxis) priceChart.getYAxis();
+                yAxis.setTickLabelFormatter(new javafx.util.StringConverter<Number>() {
+                    @Override
+                    public String toString(Number object) {
+                        return String.format(Locale.US, "%,d", object.longValue());
+                    }
+                    @Override
+                    public Number fromString(String string) {
+                        return 0;
+                    }
+                });
+            }
         }
         
 
@@ -167,7 +180,7 @@ public class LiveAuctionController {
         }
 
         timeLeftSeconds = auction.getRemainingSeconds();
-        updateBidHistoryUI(auction.getBidHistory());
+        updateBidHistoryUI(auction);
         updateBidAvailability(auction);
         startCountdown();
         connectSseStream();
@@ -219,7 +232,7 @@ public class LiveAuctionController {
                 if (currentAuctionId != null) {
                     auctionService.getAuctionDetails(currentAuctionId)
                             .thenAccept(auction -> Platform.runLater(() -> {
-                                updateBidHistoryUI(auction.getBidHistory());
+                                updateBidHistoryUI(auction);
                                 updateBidAvailability(auction);
                             }))
                             .exceptionally(ex -> { ex.printStackTrace(); return null; });
@@ -328,7 +341,8 @@ public class LiveAuctionController {
         return builder.toString();
     }
 
-    private void updateBidHistoryUI(List<LiveAuctionModel.BidEntry> bids) {
+    private void updateBidHistoryUI(LiveAuctionModel.AuctionDetail auction) {
+        List<LiveAuctionModel.BidEntry> bids = auction != null ? auction.getBidHistory() : null;
         List<LiveAuctionModel.BidEntry> safeBids = bids == null ? List.of() : bids;
 
         if (lvBidHistory != null) {
@@ -338,11 +352,20 @@ public class LiveAuctionController {
 
         if (priceChart != null) {
             priceChart.getData().clear();
-            if (safeBids.isEmpty()) {
+            if (auction == null && safeBids.isEmpty()) {
                 return;
             }
 
             XYChart.Series<String, Number> series = new XYChart.Series<>();
+
+            if (auction != null && auction.getStartingPrice() != null) {
+                String startTimeStr = formatBidTime(auction.getStartTime());
+                if (startTimeStr.equals("-")) {
+                    startTimeStr = "Start";
+                }
+                series.getData().add(new XYChart.Data<>(startTimeStr, auction.getStartingPrice()));
+            }
+
             for (LiveAuctionModel.BidEntry bid : safeBids) {
                 if (bid.getBidAmount() == null) {
                     continue;
@@ -546,7 +569,7 @@ public class LiveAuctionController {
             lblTimeLeft.setText("00:00:00");
         }
 
-        updateBidHistoryUI(List.of());
+        updateBidHistoryUI(null);
         disableBidControls();
     }
 
