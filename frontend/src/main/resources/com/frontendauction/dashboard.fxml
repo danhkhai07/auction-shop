@@ -49,7 +49,7 @@
                             </children>
                         </VBox>
 
-                        <Label text="Live auctions :" textFill="#1e3a8a">
+                        <Label text="All auctions :" textFill="#1e3a8a">
                             <font>
                                 <Font name="System Bold" size="20.0" />
                             </font>

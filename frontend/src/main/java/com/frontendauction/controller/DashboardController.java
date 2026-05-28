@@ -133,7 +133,6 @@ public class DashboardController {
         
         if (activeAuctions != null) {
             activeAuctions = activeAuctions.stream()
-                    .filter(a -> a.getRemainingSeconds() > 0)
                     .toList();
         }
         
