@@ -144,6 +144,14 @@ public class Auction {
         this.finalPrice = BigDecimal.ZERO;
     }
 
+    public void forceCancel() {
+        if (this.status == AuctionStatus.CANCELLED) {
+            throw new IllegalStateException("Auction is already cancelled.");
+        }
+        this.status = AuctionStatus.CANCELLED;
+        this.finalPrice = BigDecimal.ZERO;
+    }
+
     public void extendEndtime(LocalDateTime newEndtime) {
         if (newEndtime == null || newEndtime.isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("New end time must be in the future.");
