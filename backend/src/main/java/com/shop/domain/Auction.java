@@ -77,9 +77,8 @@ public class Auction {
             );
         }
 
-        //2. Kiểm tra thời gian
-        LocalDateTime now = LocalDateTime.now();
-        if (!isCurrentlyActive() || isClosed()) {
+        //2. Kiểm tra trạng thái phiên
+        if (!isCurrentlyActive()) {
             throw new IllegalStateException("Auction is not currently active or has already closed.");
         }
 
@@ -145,6 +144,14 @@ public class Auction {
         this.finalPrice = BigDecimal.ZERO;
     }
 
+    public void forceCancel() {
+        if (this.status == AuctionStatus.CANCELLED) {
+            throw new IllegalStateException("Auction is already cancelled.");
+        }
+        this.status = AuctionStatus.CANCELLED;
+        this.finalPrice = BigDecimal.ZERO;
+    }
+
     public void extendEndtime(LocalDateTime newEndtime) {
         if (newEndtime == null || newEndtime.isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("New end time must be in the future.");
@@ -157,10 +164,7 @@ public class Auction {
     // =================================================================================================================
 
     public boolean isCurrentlyActive() {
-        LocalDateTime now = LocalDateTime.now();
-        return this.status == AuctionStatus.RUNNING
-                && now.isAfter(startTime)
-                && now.isBefore(endTime);
+        return this.status == AuctionStatus.RUNNING;
     }
 
     public boolean isClosed() {

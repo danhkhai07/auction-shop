@@ -57,6 +57,7 @@ CREATE TABLE IF NOT EXISTS auctions (
     numeric_id INTEGER GENERATED ALWAYS AS IDENTITY UNIQUE,
     id VARCHAR(64) PRIMARY KEY,
     item_id VARCHAR(64) REFERENCES items(id) ON DELETE CASCADE,
+    seller_id VARCHAR(64) REFERENCES users(id) ON DELETE SET NULL,
     current_highest_bidder_id VARCHAR(64) REFERENCES users(id) ON DELETE SET NULL,
     status VARCHAR(32) NOT NULL DEFAULT 'OPEN',
     starting_price NUMERIC(19, 2) NOT NULL DEFAULT 0,
@@ -74,6 +75,15 @@ CREATE TABLE IF NOT EXISTS auctions (
 
 ALTER TABLE auctions
     ADD COLUMN IF NOT EXISTS item_id VARCHAR(64) REFERENCES items(id) ON DELETE CASCADE;
+
+ALTER TABLE auctions
+    ADD COLUMN IF NOT EXISTS seller_id VARCHAR(64) REFERENCES users(id) ON DELETE SET NULL;
+
+UPDATE auctions a
+SET seller_id = i.seller_id
+FROM items i
+WHERE a.item_id = i.id
+  AND a.seller_id IS NULL;
 
 ALTER TABLE auctions
     ADD COLUMN IF NOT EXISTS current_highest_bidder_id VARCHAR(64) REFERENCES users(id) ON DELETE SET NULL;
@@ -129,7 +139,8 @@ ALTER TABLE auctions
 
 CREATE INDEX IF NOT EXISTS idx_auctions_status_end_time ON auctions(status, end_time);
 CREATE INDEX IF NOT EXISTS idx_auctions_item_id ON auctions(item_id);
-CREATE UNIQUE INDEX IF NOT EXISTS idx_auctions_unique_item_id ON auctions(item_id);
+CREATE INDEX IF NOT EXISTS idx_auctions_seller_id ON auctions(seller_id);
+DROP INDEX IF EXISTS idx_auctions_unique_item_id;
 CREATE INDEX IF NOT EXISTS idx_auctions_current_highest_bidder_id ON auctions(current_highest_bidder_id);
 
 CREATE TABLE IF NOT EXISTS bid_transactions (
