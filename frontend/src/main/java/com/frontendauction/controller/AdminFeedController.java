@@ -65,6 +65,9 @@ public class AdminFeedController {
     private Button btnDeleteAuction;
 
     @FXML
+    private Button btnCancelAuction;
+
+    @FXML
     private TableView<LiveAuctionModel.AuctionDetail> auctionTable;
 
     @FXML
@@ -201,6 +204,25 @@ public class AdminFeedController {
                             showAlert("Success", "Auction deleted successfully", Alert.AlertType.INFORMATION);
                         } else {
                             showAlert("Error", "Failed to delete auction: " + result, Alert.AlertType.ERROR);
+                        }
+                    });
+                });
+            } else {
+                showAlert("Warning", "Please select an auction first", Alert.AlertType.WARNING);
+            }
+        });
+
+        btnCancelAuction.setOnAction(e -> {
+            LiveAuctionModel.AuctionDetail selected = auctionTable.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                adminService.cancelAuction(selected.getId()).thenAccept(result -> {
+                    Platform.runLater(() -> {
+                        if ("SUCCESS".equals(result)) {
+                            selected.setStatus("CANCELLED");
+                            auctionTable.refresh();
+                            showAlert("Success", "Auction cancelled successfully", Alert.AlertType.INFORMATION);
+                        } else {
+                            showAlert("Error", "Failed to cancel auction: " + result, Alert.AlertType.ERROR);
                         }
                     });
                 });
