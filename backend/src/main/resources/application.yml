@@ -14,3 +14,7 @@ security:
     issuer: auction-shop
     expiration-ms: 86400000
     secret: ${SECURITY_JWT_SECRET}
+
+cache:
+  default-expiration-seconds: 900
+  cleanup-interval-seconds: 300

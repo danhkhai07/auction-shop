@@ -92,6 +92,12 @@ public class AdminService {
         return sendActionRequest(request);
     }
 
+    public CompletableFuture<String> cancelAuction(String auctionId) {
+        HttpRequest request = authorizedRequest("/admin/cancel/auction/" + auctionId)
+                .POST(HttpRequest.BodyPublishers.noBody()).build();
+        return sendActionRequest(request);
+    }
+
     private <T> CompletableFuture<List<T>> sendListRequest(HttpRequest request, Class<T[]> clazz) {
         return client.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8))
                 .thenApply(response -> {

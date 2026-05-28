@@ -25,6 +25,7 @@ public class RouterConfig {
         UploadHandler uploadHandler,
         AuctionHandler auctionHandler,
         AdminActionsHandler elevateUserHandler,
+        BalanceHandler balanceHandler,
 
         AuthFilter authFilter,
         RoleFilter roleFilter,
@@ -41,6 +42,11 @@ public class RouterConfig {
                 .path("/user", builder -> builder
                         .GET("/{id}", viewHandler::getUser)
                         .POST("/delete/{id}", deleteHandler::deleteUser).filter(roleFilter)
+                )
+                .path("/balance", builder -> builder
+                        .GET("", balanceHandler::getBalance).filter(authFilter)
+                        .POST("/deposit", contentType(MediaType.APPLICATION_JSON), balanceHandler::deposit).filter(authFilter)
+                        .POST("/withdraw", contentType(MediaType.APPLICATION_JSON), balanceHandler::withdraw).filter(authFilter)
                 )
                 .path("/item", builder -> builder
                         .GET("/{id}", viewHandler::getItem)
@@ -75,6 +81,7 @@ public class RouterConfig {
                         .POST("/delete/user/{id}", deleteHandler::deleteUser)
                         .POST("/delete/item/{id}", deleteHandler::deleteItem)
                         .POST("/delete/auction/{id}", deleteHandler::deleteAuction)
+                        .POST("/cancel/auction/{id}", adminActionsHandler::forceCancelAuction)
                         .POST("/ban/user/{id}", contentType(MediaType.APPLICATION_JSON), adminActionsHandler::banUser)
                         .POST("/unban/user/{id}", adminActionsHandler::unbanUser)
                         .GET("/user/all", adminActionsHandler::getAllUsers)

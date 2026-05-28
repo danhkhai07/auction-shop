@@ -27,21 +27,21 @@ import java.util.Set;
 @Repository
 public class PostgresUserRepo implements UserRepository {
     private static final String SELECT_USER_BY_ID =
-            "SELECT u.id, u.username, u.password_hash, u.banned, u.banned_reason, u.banned_at, u.banned_by, ur.role_name " + //lấy id,username,pass,role tu bảng user và userrole
+            "SELECT u.id, u.username, u.password_hash, u.balance, u.banned, u.banned_reason, u.banned_at, u.banned_by, ur.role_name " + //lấy id,username,pass,role tu bảng user và userrole
                     "FROM users u " +
                     "LEFT JOIN user_roles ur ON ur.user_id = u.id " +
                     "WHERE u.id = :id " +
                     "ORDER BY ur.role_name";
 
     private static final String SELECT_USER_BY_NAME =
-            "SELECT u.id, u.username, u.password_hash, u.banned, u.banned_reason, u.banned_at, u.banned_by, ur.role_name " +
+            "SELECT u.id, u.username, u.password_hash, u.balance, u.banned, u.banned_reason, u.banned_at, u.banned_by, ur.role_name " +
                     "FROM users u " +
                     "LEFT JOIN user_roles ur ON ur.user_id = u.id " +
                     "WHERE u.username = :username " +
                     "ORDER BY ur.role_name";
 
     private static final String SELECT_ALL_USER_ROWS =
-            "SELECT u.id, u.username, u.password_hash, u.banned, u.banned_reason, u.banned_at, u.banned_by, ur.role_name " +
+            "SELECT u.id, u.username, u.password_hash, u.balance, u.banned, u.banned_reason, u.banned_at, u.banned_by, ur.role_name " +
                     "FROM users u " +
                     "LEFT JOIN user_roles ur ON ur.user_id = u.id " +
                     "ORDER BY u.id, ur.role_name";
@@ -49,12 +49,13 @@ public class PostgresUserRepo implements UserRepository {
     private static final String UPDATE_USER_SQL =
             "UPDATE users " +
                     "SET username = :username, " +
+                    "    balance = :balance, " +
                     "    updated_at = CURRENT_TIMESTAMP " +
                     "WHERE id = :id";
 
     private static final String INSERT_USER_SQL =
-            "INSERT INTO users (id, username, password_hash) " +
-                    "VALUES (:id, :username, :passwordHash)";
+            "INSERT INTO users (id, username, password_hash, balance) " +
+                    "VALUES (:id, :username, :passwordHash, :balance)";
 
     private static final String UPDATE_PASSWORD_SQL =
             "UPDATE users " +
@@ -92,13 +93,13 @@ public class PostgresUserRepo implements UserRepository {
                     "ORDER BY i.numeric_id";
 
     private static final String SELECT_AUCTIONS_BY_USER_ID =
-            "SELECT a.id as a_id, a.starting_price, a.current_highest_price, a.final_price, a.start_time, a.end_time, a.status, " +
+            "SELECT a.id as a_id, a.starting_price, a.min_bid_increment, a.current_highest_price, a.final_price, a.start_time, a.end_time, a.status, " +
                     "i.id as i_id, i.name as i_name, i.description as i_description, " +
                     "b.id as b_id, b.username as b_username " +
                     "FROM auctions a " +
                     "JOIN items i ON a.item_id = i.id " +
                     "LEFT JOIN users b ON a.current_highest_bidder_id = b.id " +
-                    "WHERE i.seller_id = :userId " +
+                    "WHERE a.seller_id = :userId " +
                     "ORDER BY a.start_time DESC";
 
     private static final String SELECT_BIDS_BY_AUCTION_ID =
@@ -134,6 +135,7 @@ public class PostgresUserRepo implements UserRepository {
                         row.get("id", String.class),
                         row.get("username", String.class),
                         row.get("password_hash", String.class),
+                        row.get("balance", BigDecimal.class),
                         Boolean.TRUE.equals(row.get("banned", Boolean.class)),
                         row.get("banned_reason", String.class),
                         row.get("banned_at", LocalDateTime.class),
@@ -157,6 +159,7 @@ public class PostgresUserRepo implements UserRepository {
                         row.get("id", String.class),
                         row.get("username", String.class),
                         row.get("password_hash", String.class),
+                        row.get("balance", BigDecimal.class),
                         Boolean.TRUE.equals(row.get("banned", Boolean.class)),
                         row.get("banned_reason", String.class),
                         row.get("banned_at", LocalDateTime.class),
@@ -180,6 +183,7 @@ public class PostgresUserRepo implements UserRepository {
                         row.get("id", String.class),
                         row.get("username", String.class),
                         row.get("password_hash", String.class),
+                        row.get("balance", BigDecimal.class),
                         Boolean.TRUE.equals(row.get("banned", Boolean.class)),
                         row.get("banned_reason", String.class),
                         row.get("banned_at", LocalDateTime.class),
@@ -201,6 +205,7 @@ public class PostgresUserRepo implements UserRepository {
         Mono<Void> updateUser = databaseClient.sql(UPDATE_USER_SQL)
                 .bind("id", user.getId())
                 .bind("username", user.getUsername())
+                .bind("balance", user.getBalance())
                 .fetch()
                 .rowsUpdated()
                 .then();
@@ -245,6 +250,7 @@ public class PostgresUserRepo implements UserRepository {
                 .bind("id", user.getId())
                 .bind("username", user.getUsername())
                 .bind("passwordHash", user.getPasswordHash())
+                .bind("balance", user.getBalance())
                 .fetch()
                 .rowsUpdated()
                 .then(insertRoles(user.getId(), rolesToPersist));
@@ -309,6 +315,7 @@ public class PostgresUserRepo implements UserRepository {
         UserRow firstRow = rows.get(0);
         User user = new User(firstRow.id(), firstRow.username(), "");
         user.setPasswordHash(firstRow.passwordHash());
+        user.setBalance(firstRow.balance());
         user.setBanned(firstRow.banned());
         user.setBannedReason(firstRow.bannedReason());
         user.setBannedAt(firstRow.bannedAt());
@@ -361,6 +368,7 @@ public class PostgresUserRepo implements UserRepository {
                 row.get("a_id", String.class),
                 item,
                 row.get("starting_price", BigDecimal.class),
+                row.get("min_bid_increment", BigDecimal.class),
                 row.get("start_time", LocalDateTime.class),
                 row.get("end_time", LocalDateTime.class)
         );
@@ -456,17 +464,19 @@ public class PostgresUserRepo implements UserRepository {
         private final String id;
         private final String username;
         private final String passwordHash;
+        private final BigDecimal balance;
         private final boolean banned;
         private final String bannedReason;
         private final LocalDateTime bannedAt;
         private final String bannedBy;
         private final String roleName;
 
-        private UserRow(String id, String username, String passwordHash, boolean banned, String bannedReason,
+        private UserRow(String id, String username, String passwordHash, BigDecimal balance, boolean banned, String bannedReason,
                         LocalDateTime bannedAt, String bannedBy, String roleName) {
             this.id = id;
             this.username = username;
             this.passwordHash = passwordHash;
+            this.balance = balance != null ? balance : BigDecimal.ZERO;
             this.banned = banned;
             this.bannedReason = bannedReason;
             this.bannedAt = bannedAt;
@@ -484,6 +494,10 @@ public class PostgresUserRepo implements UserRepository {
 
         private String passwordHash() {
             return passwordHash;
+        }
+
+        private BigDecimal balance() {
+            return balance;
         }
 
         private boolean banned() {
