@@ -87,7 +87,8 @@ public class AuctionService {
                     if (auction.getStatus() == AuctionStatus.RUNNING) {
                         return Mono.error(new IllegalStateException("running auction must be cancelled before delete"));
                     }
-                    if (!auction.getBidHistory().isEmpty()) {
+                    if (!auction.getBidHistory().isEmpty()
+                            && auction.getStatus() != AuctionStatus.CANCELLED) {
                         return Mono.error(new IllegalStateException("auction with bids cannot be deleted"));
                     }
                     return auctionRepository.deleteByID(id);
