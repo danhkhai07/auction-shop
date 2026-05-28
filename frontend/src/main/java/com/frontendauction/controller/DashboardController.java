@@ -34,6 +34,7 @@ public class DashboardController {
     @FXML private AnchorPane menuOverlay;
     @FXML private VBox sideMenu;
     @FXML private VBox auctionListContainer;
+    @FXML private Button btnAdminPanel;
 
     private final UserProfileService userProfileService = new UserProfileService();
     private final LiveAuctionService liveAuctionService = new LiveAuctionService();
@@ -106,6 +107,16 @@ public class DashboardController {
         stage.show();
     }
 
+    @FXML
+    public void goToAdminPanel(Event event) throws IOException {
+        FXMLLoader loader = new FXMLLoader(
+                Objects.requireNonNull(getClass().getResource("/com/frontendauction/admin_dashboard.fxml")));
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        Parent root = loader.load();
+        AppWindow.applyScene(stage, root);
+        stage.show();
+    }
+
     private void loadDashboardData() {
         userProfileService.getCurrentUser()
                 .thenCombine(liveAuctionService.getActiveAuctions(), DashboardData::new)
@@ -137,7 +148,12 @@ public class DashboardController {
         if (lblProfileMeta != null) lblProfileMeta.setText(ownedItems + " item(s), " + ownedAuctions + " auction(s)");
         if (lblAuctionMeta != null) lblAuctionMeta.setText(activeCount > 0 ? activeCount + " active auction(s)" : "No active auctions");
         if (lblProductMeta != null) lblProductMeta.setText(ownedItems > 0 ? ownedItems + " product(s) managed" : "No owned products");
-        
+
+        if (btnAdminPanel != null && user.getRoles() != null && user.getRoles().contains("ADMIN")) {
+            btnAdminPanel.setVisible(true);
+            btnAdminPanel.setManaged(true);
+        }
+
         loadAuctionCards(activeAuctions);
     }
 
