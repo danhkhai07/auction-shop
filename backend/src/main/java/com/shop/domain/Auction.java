@@ -77,9 +77,8 @@ public class Auction {
             );
         }
 
-        //2. Kiểm tra thời gian
-        LocalDateTime now = LocalDateTime.now();
-        if (!isCurrentlyActive() || isClosed()) {
+        //2. Kiểm tra trạng thái phiên
+        if (!isCurrentlyActive()) {
             throw new IllegalStateException("Auction is not currently active or has already closed.");
         }
 
@@ -157,10 +156,7 @@ public class Auction {
     // =================================================================================================================
 
     public boolean isCurrentlyActive() {
-        LocalDateTime now = LocalDateTime.now();
-        return this.status == AuctionStatus.RUNNING
-                && now.isAfter(startTime)
-                && now.isBefore(endTime);
+        return this.status == AuctionStatus.RUNNING;
     }
 
     public boolean isClosed() {
