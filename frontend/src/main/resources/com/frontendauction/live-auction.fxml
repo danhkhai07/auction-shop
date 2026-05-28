@@ -218,10 +218,10 @@
                                                 <Separator styleClass="separator-custom" />
                                                 <LineChart fx:id="priceChart" prefHeight="260.0" styleClass="premium-chart" VBox.vgrow="ALWAYS">
                                                     <xAxis>
-                                                        <CategoryAxis label="Time" side="BOTTOM" />
+                                                        <CategoryAxis label="Time" side="BOTTOM" tickLabelsVisible="true" animated="false" />
                                                     </xAxis>
                                                     <yAxis>
-                                                        <NumberAxis label="Price (VND)" side="LEFT" />
+                                                        <NumberAxis label="Price (VND)" side="LEFT" tickLabelsVisible="true" autoRanging="true" forceZeroInRange="false" animated="false" />
                                                     </yAxis>
                                                 </LineChart>
                                             </children>
