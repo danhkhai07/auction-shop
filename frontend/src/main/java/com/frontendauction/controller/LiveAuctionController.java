@@ -60,6 +60,7 @@ public class LiveAuctionController {
     private final com.frontendauction.service.UserProfileService userProfileService = new com.frontendauction.service.UserProfileService();
 
     private String currentAuctionId;
+    private String currentSellerName;
     private boolean initialLoadDone;
     private long timeLeftSeconds;
     private Timeline countdownTimeline;
@@ -166,8 +167,11 @@ public class LiveAuctionController {
             lblProductName.setText(fallback(auction.getName(), "Unnamed auction"));
         }
 
+        currentSellerName = (auction.getSeller() != null && auction.getSeller().getUsername() != null)
+                ? auction.getSeller().getUsername() : "Unknown";
+
         if (lblSeller != null) {
-            lblSeller.setText("Status: " + formatStatus(auction.getStatus())
+            lblSeller.setText("Seller: " + currentSellerName + " | Status: " + formatStatus(auction.getStatus())
                     + " | Auction ID: " + fallback(auction.getId(), "-"));
         }
 
@@ -246,7 +250,7 @@ public class LiveAuctionController {
                 disableBidControls();
                 stopCountdown();
                 if (lblSeller != null) {
-                    lblSeller.setText("Status: " + type.replace("AUCTION_", "") + " | Auction ID: " + fallback(currentAuctionId, "-"));
+                    lblSeller.setText("Seller: " + fallback(currentSellerName, "Unknown") + " | Status: " + type.replace("AUCTION_", "") + " | Auction ID: " + fallback(currentAuctionId, "-"));
                 }
                 
                 if ("AUCTION_FINISHED".equals(type) && event.getCurrentHighestBidder() != null && event.getFinalPrice() != null) {
@@ -282,7 +286,7 @@ public class LiveAuctionController {
             case "AUCTION_PAUSED" -> {
                 disableBidControls();
                 if (lblSeller != null) {
-                    lblSeller.setText("Status: PAUSED | Auction ID: " + fallback(currentAuctionId, "-"));
+                    lblSeller.setText("Seller: " + fallback(currentSellerName, "Unknown") + " | Status: PAUSED | Auction ID: " + fallback(currentAuctionId, "-"));
                 }
             }
         }
