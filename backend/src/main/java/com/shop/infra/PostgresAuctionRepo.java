@@ -44,7 +44,7 @@ public class PostgresAuctionRepo implements AuctionRepository {
     
     private static final String SELECT_ALL_AUCTIONS = SELECT_AUCTION + "ORDER BY a.start_time DESC";
 
-    private static final String SELECT_ACTIVES = SELECT_AUCTION + "WHERE a.status = 'RUNNING'";
+    private static final String SELECT_ACTIVES = SELECT_AUCTION + "WHERE a.status IN ('OPEN', 'RUNNING', 'PAUSED')";
 
     private static final String SELECT_BIDS_BY_AUCTION_ID =
             "SELECT b.id, b.bid_amount, b.timestamp, u.id as u_id, u.username as u_username " +
@@ -117,7 +117,7 @@ public class PostgresAuctionRepo implements AuctionRepository {
                 .map(this::mapRowToAuction)
                 .all()
                 .collectList()
-                .flatMapMany(this::loadBidsForAuctions); // Xử lý bất đồng bộ để load bids cho các Auction đang RUNNING
+                .flatMapMany(this::loadBidsForAuctions);
     }
 
     @Override
