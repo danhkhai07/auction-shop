@@ -96,12 +96,28 @@ public class LiveAuctionModel {
             String bidderName = (bidder != null && bidder.getUsername() != null)
                     ? bidder.getUsername() : "Unknown";
             String time = timestamp != null ? timestamp : "";
-            if (time.contains("T")) {
-                time = time.substring(time.indexOf("T") + 1);
-                if (time.contains(".")) {
-                    time = time.substring(0, time.indexOf("."));
+            
+            try {
+                if (!time.isBlank()) {
+                    String normalized = time.replace("Z", "");
+                    int tzIndex = normalized.lastIndexOf('+');
+                    if (tzIndex > 10) normalized = normalized.substring(0, tzIndex);
+                    int minusTzIndex = normalized.lastIndexOf('-');
+                    if (minusTzIndex > 10) normalized = normalized.substring(0, minusTzIndex);
+                    
+                    java.time.LocalDateTime dt = java.time.LocalDateTime.parse(normalized);
+                    dt = dt.plusHours(7);
+                    time = dt.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss"));
+                }
+            } catch (Exception e) {
+                if (time.contains("T")) {
+                    time = time.substring(time.indexOf("T") + 1);
+                    if (time.contains(".")) {
+                        time = time.substring(0, time.indexOf("."));
+                    }
                 }
             }
+            
             // Tránh NPE nếu bidAmount là null
             String amountStr = bidAmount != null ? String.format("%,.0f VND", bidAmount) : "-";
             return time + " - " + bidderName + ": " + amountStr;

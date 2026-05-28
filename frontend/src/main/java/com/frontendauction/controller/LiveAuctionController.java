@@ -602,13 +602,25 @@ public class LiveAuctionController {
             return "-";
         }
 
-        if (!timestamp.contains("T")) {
-            return timestamp;
+        try {
+            String normalized = timestamp.replace("Z", "");
+            int tzIndex = normalized.lastIndexOf('+');
+            if (tzIndex > 10) normalized = normalized.substring(0, tzIndex);
+            int minusTzIndex = normalized.lastIndexOf('-');
+            if (minusTzIndex > 10) normalized = normalized.substring(0, minusTzIndex);
+            
+            java.time.LocalDateTime dt = java.time.LocalDateTime.parse(normalized);
+            dt = dt.plusHours(7);
+            
+            return dt.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss"));
+        } catch (Exception e) {
+            if (!timestamp.contains("T")) {
+                return timestamp;
+            }
+            String value = timestamp.substring(timestamp.indexOf('T') + 1);
+            int millisIndex = value.indexOf('.');
+            return millisIndex >= 0 ? value.substring(0, millisIndex) : value;
         }
-
-        String value = timestamp.substring(timestamp.indexOf('T') + 1);
-        int millisIndex = value.indexOf('.');
-        return millisIndex >= 0 ? value.substring(0, millisIndex) : value;
     }
 
     private String fallback(String value, String fallback) {
