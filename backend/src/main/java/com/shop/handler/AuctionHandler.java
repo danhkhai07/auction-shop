@@ -45,20 +45,29 @@ public class AuctionHandler {
 
                     return auctionService.getAuctionByID(auctionID)
                             .flatMap(auction -> {
+                                User previousBidder = auction.getCurrentHighestBidder();
+                                java.math.BigDecimal previousPrice = auction.getCurrentHighestPrice();
+
                                 auction.placeBid(bidder, bidRequest.amount());
                                 // Deduct bid amount from user balance
                                 bidder.deductFromBalance(bidRequest.amount());
                                 
+                                Mono<Void> updatePreviousBidder = Mono.empty();
+                                if (previousBidder != null && !previousBidder.getId().equals(bidder.getId())) {
+                                    previousBidder.addToBalance(previousPrice);
+                                    updatePreviousBidder = userManager.updateUser(previousBidder);
+                                }
+
                                 boolean antiSniped = LocalDateTime.now().isAfter(auction.getEndTime().minusMinutes(1));
                                 if (antiSniped) {
                                     auction.extendEndtime(LocalDateTime.now().plusMinutes(1));
                                 }
                                 
-                                // Update user balance and auction status
-                                return Mono.zip(
+                                // Update user balance, previous bidder balance, and auction status
+                                return updatePreviousBidder.then(Mono.zip(
                                     userManager.updateUser(bidder),
                                     auctionService.updateAuctionStatus(auction)
-                                )
+                                ))
                                 .doOnSuccess(v -> {
                                     stream.publish(auctionID,
                                             new AuctionEvent("BID_PLACED", auction));
@@ -160,7 +169,15 @@ public class AuctionHandler {
                         .switchIfEmpty(Mono.error(new IllegalStateException("unauthorized")))
                         .flatMap(auction -> {
                             auction.finishAuction();
-                            return auctionService.finishAuction(auction)
+
+                            Mono<Void> updateSeller = Mono.empty();
+                            if (auction.hasWinner()) {
+                                User seller = auction.getItem().getSeller();
+                                seller.addToBalance(auction.getFinalPrice());
+                                updateSeller = userManager.updateUser(seller);
+                            }
+
+                            return updateSeller.then(auctionService.finishAuction(auction))
                                     .doOnSuccess(v -> {
                                         stream.publish(auctionID,
                                                 new AuctionEvent("AUCTION_FINISHED", auction));

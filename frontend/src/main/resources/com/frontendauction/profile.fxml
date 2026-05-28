@@ -79,6 +79,17 @@
                                 </Label>
                             </children>
                         </VBox>
+                        <VBox spacing="6.0" style="-fx-background-color: #f7f7f7; -fx-background-radius: 10; -fx-padding: 16; -fx-border-color: #e5e5e5; -fx-border-radius: 10;">
+                            <children>
+                                <Label text="Wallet Balance" textFill="#707070" style="-fx-font-size: 12px;" />
+                                <Label fx:id="lblBalance" text="0" textFill="#27ae60" wrapText="true">
+                                    <font>
+                                        <Font name="System Bold" size="24.0" />
+                                    </font>
+                                </Label>
+                                <Button mnemonicParsing="false" onAction="#handleDeposit" prefHeight="35.0" prefWidth="240.0" styleClass="btn-primary" text="Deposit" style="-fx-margin-top: 10px;" />
+                            </children>
+                        </VBox>
                         <Region VBox.vgrow="ALWAYS" />
                     </children>
                 </VBox>

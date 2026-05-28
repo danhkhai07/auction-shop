@@ -34,6 +34,7 @@ public class ProfileController {
     @FXML private Label lblRoles;
     @FXML private Label lblItemCount;
     @FXML private Label lblAuctionCount;
+    @FXML private Label lblBalance;
 
     @FXML private TableView<ProductManagementModel> tvOwnedItems;
     @FXML private TableColumn<ProductManagementModel, String> colOwnedItemId;
@@ -74,6 +75,35 @@ public class ProfileController {
         Parent root = loader.load();
         AppWindow.applyScene(stage, root);
         stage.show();
+    }
+
+    @FXML
+    public void handleDeposit(javafx.event.ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/frontendauction/deposit-popup.fxml"));
+            Parent root = loader.load();
+            
+            DepositController depositController = loader.getController();
+            depositController.setOnSuccessCallback(() -> {
+                loadProfile();
+            });
+
+            Stage stage = new Stage();
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            stage.setTitle("Deposit");
+            
+            Stage owner = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.initOwner(owner);
+
+            javafx.scene.Scene scene = new javafx.scene.Scene(root);
+            stage.setScene(scene);
+            stage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Failed to open deposit window.");
+            alert.showAndWait();
+        }
     }
 
     private void setupTables() {
@@ -139,6 +169,19 @@ public class ProfileController {
                 .thenAccept(data -> Platform.runLater(() -> updateTables(data)))
                 .exceptionally(exception -> {
                     Platform.runLater(() -> showLoadFailure(resolveErrorMessage(exception)));
+                    return null;
+                });
+
+        userProfileService.getBalance()
+                .thenAccept(balanceResponse -> Platform.runLater(() -> {
+                    if (lblBalance != null) {
+                        lblBalance.setText(String.format("%,.0f VND", balanceResponse.getBalance()));
+                    }
+                }))
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> {
+                        if (lblBalance != null) lblBalance.setText("Error");
+                    });
                     return null;
                 });
     }

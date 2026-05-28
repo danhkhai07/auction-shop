@@ -44,6 +44,7 @@ public class LiveAuctionController {
     @FXML private Button btnBack;
     @FXML private Label lblProductName;
     @FXML private Label lblSeller;
+    @FXML private Label lblLiveBalance;
 
     @FXML private Label lblDescription;
     @FXML private Label lblCurrentPrice;
@@ -56,6 +57,7 @@ public class LiveAuctionController {
     @FXML private ListView<LiveAuctionModel.BidEntry> lvBidHistory;
 
     private final LiveAuctionService auctionService = new LiveAuctionService();
+    private final com.frontendauction.service.UserProfileService userProfileService = new com.frontendauction.service.UserProfileService();
 
     private String currentAuctionId;
     private boolean initialLoadDone;
@@ -169,6 +171,26 @@ public class LiveAuctionController {
         updateBidAvailability(auction);
         startCountdown();
         connectSseStream();
+        loadWalletBalance();
+    }
+
+    private void loadWalletBalance() {
+        if (!TokenStore.hasToken()) {
+            if (lblLiveBalance != null) lblLiveBalance.setText("-");
+            return;
+        }
+        userProfileService.getBalance()
+                .thenAccept(balanceResponse -> Platform.runLater(() -> {
+                    if (lblLiveBalance != null) {
+                        lblLiveBalance.setText(formatCurrency(balanceResponse.getBalance()));
+                    }
+                }))
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> {
+                        if (lblLiveBalance != null) lblLiveBalance.setText("Error");
+                    });
+                    return null;
+                });
     }
 
     private void connectSseStream() {
@@ -212,6 +234,14 @@ public class LiveAuctionController {
                 stopCountdown();
                 if (lblSeller != null) {
                     lblSeller.setText("Status: " + type.replace("AUCTION_", "") + " | Auction ID: " + fallback(currentAuctionId, "-"));
+                }
+                
+                if ("AUCTION_FINISHED".equals(type) && event.getCurrentHighestBidder() != null && event.getFinalPrice() != null) {
+                    String winnerName = event.getCurrentHighestBidder().getUsername();
+                    Double finalPrice = event.getFinalPrice();
+                    showSuccess("Phiên đấu giá đã kết thúc!\nNgười chiến thắng: " + winnerName + "\nVới giá: " + formatCurrency(finalPrice));
+                } else if ("AUCTION_FINISHED".equals(type)) {
+                    showSuccess("Phiên đấu giá đã kết thúc!\nKhông có người chiến thắng (Chưa có ai đặt giá).");
                 }
             }
             case "ANTI_SNIPE_AUCTION_EXTENDED", "AUCTION_EXTENDED" -> {
@@ -267,14 +297,26 @@ public class LiveAuctionController {
                     .thenAccept(result -> Platform.runLater(() -> {
                         if (result.success()) {
                             System.out.println("[AutoBid] Success: " + autoBidAmount);
+                            loadWalletBalance();
                         } else {
                             System.out.println("[AutoBid] Failed: " + result.errorMessage());
+                            handleAutoBidError(result.errorMessage());
                         }
                     }))
-                    .exceptionally(ex -> { ex.printStackTrace(); return null; });
+                    .exceptionally(ex -> { 
+                        Platform.runLater(() -> handleAutoBidError(resolveErrorMessage(ex)));
+                        return null; 
+                    });
         } catch (NumberFormatException e) {
             System.err.println("[AutoBid] Invalid max auto bid amount");
         }
+    }
+
+    private void handleAutoBidError(String errorMessage) {
+        if (chkAutoBid != null) {
+            chkAutoBid.setSelected(false);
+        }
+        showError("Auto Bid Failed: " + errorMessage);
     }
 
     private String buildDescription(LiveAuctionModel.AuctionDetail auction) {
@@ -362,6 +404,7 @@ public class LiveAuctionController {
         if (result.success()) {
             showSuccess("Bid placed successfully.");
             loadAuctionData();
+            loadWalletBalance();
             return;
         }
 

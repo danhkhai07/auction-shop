@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" prefWidth="400.0" spacing="20.0" style="-fx-background-color: #ffffff; -fx-padding: 30; -fx-border-color: #e5e5e5; -fx-border-radius: 12; -fx-background-radius: 12;" stylesheets="@css/global.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.frontendauction.controller.DepositController">
+    <children>
+        <Label text="Deposit Information" textFill="#191919">
+            <font>
+                <Font name="System Bold" size="22.0" />
+            </font>
+        </Label>
+        
+        <Separator styleClass="separator-custom" />
+        
+        <VBox alignment="CENTER" spacing="10.0" style="-fx-background-color: #f7f7f7; -fx-background-radius: 8; -fx-padding: 20;">
+            <children>
+                <Label text="Scan the QR code below to deposit" textFill="#707070" />
+                <ImageView fx:id="qrCodeImage" fitHeight="200.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+                    <!-- The image will be loaded in the controller or we can use a placeholder -->
+                    <image>
+                        <Image url="@images/qr_placeholder.png" />
+                    </image>
+                </ImageView>
+            </children>
+        </VBox>
+        
+        <VBox spacing="8.0">
+            <children>
+                <HBox>
+                    <Label prefWidth="120.0" text="Bank:" textFill="#707070">
+                        <font><Font name="System Bold" size="14.0" /></font>
+                    </Label>
+                    <Label text="Vietcombank" textFill="#191919">
+                        <font><Font size="14.0" /></font>
+                    </Label>
+                </HBox>
+                <HBox>
+                    <Label prefWidth="120.0" text="Account Name:" textFill="#707070">
+                        <font><Font name="System Bold" size="14.0" /></font>
+                    </Label>
+                    <Label text="AUCTION SHOP" textFill="#191919">
+                        <font><Font size="14.0" /></font>
+                    </Label>
+                </HBox>
+                <HBox>
+                    <Label prefWidth="120.0" text="Account No:" textFill="#707070">
+                        <font><Font name="System Bold" size="14.0" /></font>
+                    </Label>
+                    <Label text="1010101010" textFill="#191919">
+                        <font><Font size="14.0" /></font>
+                    </Label>
+                </HBox>
+            </children>
+        </VBox>
+        
+        <VBox spacing="10.0">
+            <children>
+                <Label text="Enter amount to deposit:" textFill="#707070">
+                    <font><Font name="System Bold" size="14.0" /></font>
+                </Label>
+                <TextField fx:id="txtDepositAmount" promptText="e.g. 50000" styleClass="text-field-custom" prefHeight="40.0" />
+            </children>
+        </VBox>
+        
+        <Region VBox.vgrow="ALWAYS" />
+        
+        <Button fx:id="btnCheckPayment" mnemonicParsing="false" onAction="#handleCheckPayment" prefHeight="40.0" prefWidth="340.0" styleClass="btn-primary" text="Kiểm tra thanh toán" />
+        <Button mnemonicParsing="false" onAction="#handleClose" prefHeight="40.0" prefWidth="340.0" styleClass="btn-secondary" text="Close" />
+    </children>
+</VBox>

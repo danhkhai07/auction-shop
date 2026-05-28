@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.frontendauction.model.LiveAuctionModel;
 import com.frontendauction.model.ProductManagementModel;
 import com.frontendauction.model.UserProfileModel;
+import com.frontendauction.model.BalanceResponse;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -256,5 +257,65 @@ public class UserProfileService {
                             new IllegalStateException(readError(response.body(), "Unable to " + action + " auction"))
                     );
                 });
+    }
+
+    public CompletableFuture<BalanceResponse> getBalance() {
+        if (!TokenStore.hasToken()) {
+            return CompletableFuture.failedFuture(new IllegalStateException("You must login first."));
+        }
+
+        HttpRequest request = authorizedRequest("/balance")
+                .GET()
+                .build();
+
+        return client.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8))
+                .thenCompose(response -> {
+                    if (response.statusCode() == 200) {
+                        try {
+                            BalanceResponse balanceData = objectMapper.readValue(response.body(), BalanceResponse.class);
+                            return CompletableFuture.completedFuture(balanceData);
+                        } catch (Exception exception) {
+                            return CompletableFuture.failedFuture(
+                                    new IllegalStateException("Invalid balance response", exception)
+                            );
+                        }
+                    }
+                    return CompletableFuture.failedFuture(
+                            new RuntimeException("Failed to get balance. Server returned: " + response.statusCode())
+                    );
+                });
+    }
+
+    public CompletableFuture<BalanceResponse> deposit(double amount) {
+        if (!TokenStore.hasToken()) {
+            return CompletableFuture.failedFuture(new IllegalStateException("You must login first."));
+        }
+
+        try {
+            String jsonPayload = objectMapper.writeValueAsString(Map.of("amount", amount));
+            HttpRequest request = authorizedRequest("/balance/deposit")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                    .header("Content-Type", "application/json")
+                    .build();
+
+            return client.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8))
+                    .thenCompose(response -> {
+                        if (response.statusCode() == 200 || response.statusCode() == 201) {
+                            try {
+                                BalanceResponse balanceData = objectMapper.readValue(response.body(), BalanceResponse.class);
+                                return CompletableFuture.completedFuture(balanceData);
+                            } catch (Exception exception) {
+                                return CompletableFuture.failedFuture(
+                                        new IllegalStateException("Invalid deposit response", exception)
+                                );
+                            }
+                        }
+                        return CompletableFuture.failedFuture(
+                                new RuntimeException("Failed to deposit. Server returned: " + response.statusCode() + " " + response.body())
+                        );
+                    });
+        } catch (Exception e) {
+            return CompletableFuture.failedFuture(e);
+        }
     }
 }

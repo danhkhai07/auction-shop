@@ -36,6 +36,23 @@
                                                 <Font size="14.0" />
                                             </font>
                                         </Button>
+                                        
+                                        <javafx.scene.layout.Region HBox.hgrow="ALWAYS" />
+                                        
+                                        <HBox alignment="CENTER" spacing="8.0">
+                                            <children>
+                                                <Label text="Wallet Balance:" textFill="#707070">
+                                                    <font>
+                                                        <Font name="System Bold" size="14.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label fx:id="lblLiveBalance" text="0 VND" textFill="#00a859">
+                                                    <font>
+                                                        <Font name="System Bold" size="14.0" />
+                                                    </font>
+                                                </Label>
+                                            </children>
+                                        </HBox>
                                     </children>
                                 </HBox>
 
