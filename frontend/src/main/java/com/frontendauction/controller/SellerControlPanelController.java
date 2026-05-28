@@ -19,7 +19,9 @@ public class SellerControlPanelController extends LiveAuctionController {
     @FXML private Button btnExtend;
     @FXML private Button btnEnd;
     @FXML private Button btnCancel;
+    @FXML private javafx.scene.control.CheckBox chkAutoEnd;
 
+    private static final java.util.Map<String, Boolean> autoEndStateMap = new java.util.concurrent.ConcurrentHashMap<>();
     private final UserProfileService userProfileService = new UserProfileService();
 
     @FXML
@@ -41,6 +43,22 @@ public class SellerControlPanelController extends LiveAuctionController {
         }
         if (btnCancel != null) {
             btnCancel.setOnAction(this::handleCancelAuction);
+        }
+        if (chkAutoEnd != null) {
+            chkAutoEnd.selectedProperty().addListener((obs, oldVal, newVal) -> {
+                String auctionId = getCurrentAuctionId();
+                if (auctionId != null) {
+                    autoEndStateMap.put(auctionId, newVal);
+                }
+            });
+        }
+    }
+
+    @Override
+    public void setAuctionId(String auctionId) {
+        super.setAuctionId(auctionId);
+        if (chkAutoEnd != null && getCurrentAuctionId() != null) {
+            chkAutoEnd.setSelected(autoEndStateMap.getOrDefault(getCurrentAuctionId(), false));
         }
     }
 
@@ -160,5 +178,34 @@ public class SellerControlPanelController extends LiveAuctionController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    @Override
+    protected void onTimeExpired() {
+        if (chkAutoEnd != null && chkAutoEnd.isSelected()) {
+            String currentAuctionId = getCurrentAuctionId();
+            if (currentAuctionId == null || currentAuctionId.isBlank()) return;
+
+            userProfileService.endAuction(currentAuctionId)
+                    .thenAccept(ignored -> Platform.runLater(() -> {
+                        showSuccess("Time expired! Auction auto-ended successfully.");
+                        // Navigate back using the scene's window since we don't have an ActionEvent
+                        stopCountdown();
+                        try {
+                            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/frontendauction/dashboard.fxml"));
+                            javafx.scene.Parent root = loader.load();
+                            javafx.stage.Stage stage = (javafx.stage.Stage) chkAutoEnd.getScene().getWindow();
+                            com.frontendauction.AppWindow.applyScene(stage, root);
+                            stage.show();
+                        } catch (java.io.IOException exception) {
+                            exception.printStackTrace();
+                            showError("Failed to return to Dashboard: " + exception.getMessage());
+                        }
+                    }))
+                    .exceptionally(exception -> {
+                        Platform.runLater(() -> showError("Failed to auto-end auction: " + exception.getMessage()));
+                        return null;
+                    });
+        }
     }
 }

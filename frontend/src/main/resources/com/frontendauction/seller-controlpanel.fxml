@@ -149,6 +149,15 @@
 
                                                         <HBox alignment="CENTER_LEFT" spacing="12.0">
                                                             <children>
+                                                                <CheckBox fx:id="chkAutoEnd" mnemonicParsing="false" text="Auto end when time expires" style="-fx-text-fill: #1e293b; -fx-font-weight: bold; -fx-font-size: 14px; -fx-cursor: hand;" />
+                                                            </children>
+                                                            <VBox.margin>
+                                                                <Insets bottom="5.0" />
+                                                            </VBox.margin>
+                                                        </HBox>
+
+                                                        <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                                            <children>
                                                                 <Button fx:id="btnEnd" mnemonicParsing="false" prefHeight="44.0" prefWidth="260.0" style="-fx-background-color: #e67e22; -fx-text-fill: white; -fx-font-weight: bold;" styleClass="btn-premium" text="END EARLY" />
                                                                 <Region HBox.hgrow="ALWAYS" />
                                                                 <Button fx:id="btnCancel" mnemonicParsing="false" prefHeight="44.0" prefWidth="260.0" style="-fx-background-color: #e53238; -fx-text-fill: white; -fx-font-weight: bold;" styleClass="btn-premium" text="CANCEL AUCTION" />

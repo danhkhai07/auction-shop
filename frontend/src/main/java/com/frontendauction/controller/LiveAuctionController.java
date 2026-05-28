@@ -381,10 +381,15 @@ public class LiveAuctionController {
             updateTimeLabel();
             disableBidControls();
             countdownTimeline.stop();
+            onTimeExpired();
         }));
         countdownTimeline.setCycleCount(Animation.INDEFINITE);
         countdownTimeline.play();
         updateTimeLabel();
+    }
+
+    protected void onTimeExpired() {
+        // To be overridden by subclasses
     }
 
     protected void stopCountdown() {
