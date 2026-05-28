@@ -99,10 +99,10 @@ public class AuctionService {
         String id = ulid.nextULID();
         return itemService.getItemByID(request.itemID())
                 .switchIfEmpty(Mono.error(new IllegalStateException("item does not exist")))
-                .flatMap(item -> auctionRepository.existsByItemID(item.getId())
+                .flatMap(item -> auctionRepository.existsRunningByItemID(item.getId())
                         .flatMap(exists -> {
                             if (exists) {
-                                return Mono.error(new IllegalStateException("item already has an auction"));
+                                return Mono.error(new IllegalStateException("item already has a running auction"));
                             }
                             return Mono.just(item);
                         }))

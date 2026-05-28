@@ -182,12 +182,12 @@ public class PostgresAuctionRepo implements AuctionRepository {
     }
 
     @Override
-    public Mono<Boolean> existsByItemID(String itemId) {
+    public Mono<Boolean> existsRunningByItemID(String itemId) {
         if (!StringUtils.hasText(itemId)) {
             return Mono.just(false);
         }
 
-        return databaseClient.sql("SELECT EXISTS (SELECT 1 FROM auctions WHERE item_id = :itemId) AS auction_exists")
+        return databaseClient.sql("SELECT EXISTS (SELECT 1 FROM auctions WHERE item_id = :itemId AND status = 'RUNNING') AS auction_exists")
                 .bind("itemId", itemId)
                 .map((row, metadata) -> Boolean.TRUE.equals(row.get("auction_exists", Boolean.class)))
                 .one()

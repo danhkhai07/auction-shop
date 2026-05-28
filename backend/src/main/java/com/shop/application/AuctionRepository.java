@@ -13,7 +13,7 @@ public interface AuctionRepository {
     Flux<Auction> getActives();
 
     Mono<Boolean> existsByID(String id);
-    Mono<Boolean> existsByItemID(String itemId);
+    Mono<Boolean> existsRunningByItemID(String itemId);
 
     Mono<Void> saveAuction(Auction auction);
     Mono<Void> deleteByID(String id);
