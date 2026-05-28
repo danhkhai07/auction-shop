@@ -4,12 +4,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.shop.domain.Role;
 import com.shop.domain.User;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
 public record GetUserResponse(
     @JsonProperty("id") String id,
     @JsonProperty("username") String username,
+    @JsonProperty("balance") BigDecimal balance,
     @JsonProperty("roles") Set<Role> roles,
     @JsonProperty("banned") boolean banned,
     @JsonProperty("itemList") List<String> itemList,
@@ -18,6 +20,7 @@ public record GetUserResponse(
     public GetUserResponse(User user) {
         this(user.getId(),
             user.getUsername(),
+            user.getBalance(),
             user.getRoles(),
             user.isBanned(),
             user.getOwnedItemIds(),

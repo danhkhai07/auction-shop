@@ -7,7 +7,6 @@ public enum AuctionStatus {
     RUNNING,
     PAUSED,
     FINISHED,
-    PAID,
     CANCELLED;
 
     public boolean canTransitionTo(AuctionStatus next) {
@@ -15,8 +14,7 @@ public enum AuctionStatus {
             case OPEN     -> Set.of(RUNNING, CANCELLED).contains(next);
             case RUNNING  -> Set.of(PAUSED, FINISHED, CANCELLED).contains(next);
             case PAUSED   -> Set.of(RUNNING, FINISHED, CANCELLED).contains(next);
-            case FINISHED -> Set.of(PAID).contains(next);
-            case PAID, CANCELLED -> false;
+            case FINISHED, CANCELLED -> false;
         };
     }
 }

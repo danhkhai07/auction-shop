@@ -8,11 +8,11 @@ public class Item {
 
     public Item(String id, String name, String description, User seller) {
         if (id == null)
-            throw new IllegalArgumentException("ID sản phẩm không được để trống.");
+            throw new IllegalArgumentException("Item ID cannot be blank.");
         if (name == null)
-            throw new IllegalArgumentException("Tên sản phẩm không được để trống.");
+            throw new IllegalArgumentException("Item name cannot be blank.");
         if (seller == null)
-            throw new IllegalArgumentException("Phải có người bán.");
+            throw new IllegalArgumentException("Seller is required.");
         this.id = id;
         this.name = name;
         this.description = description;

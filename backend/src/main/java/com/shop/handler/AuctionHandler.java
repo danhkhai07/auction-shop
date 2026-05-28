@@ -38,22 +38,35 @@ public class AuctionHandler {
                     BidRequest bidRequest = tuple.getT1();
                     User bidder = tuple.getT2();
 
+                    // Check if user has enough balance
+                    if (!bidder.hasEnoughBalance(bidRequest.amount())) {
+                        return Mono.error(new IllegalArgumentException("Insufficient balance. Available: " + bidder.getBalance() + ", Required: " + bidRequest.amount()));
+                    }
+
                     return auctionService.getAuctionByID(auctionID)
                             .flatMap(auction -> {
                                 auction.placeBid(bidder, bidRequest.amount());
+                                // Deduct bid amount from user balance
+                                bidder.deductFromBalance(bidRequest.amount());
+                                
                                 boolean antiSniped = LocalDateTime.now().isAfter(auction.getEndTime().minusMinutes(1));
                                 if (antiSniped) {
                                     auction.extendEndtime(LocalDateTime.now().plusMinutes(1));
                                 }
-                                return auctionService.updateAuctionStatus(auction)
-                                        .doOnSuccess(v -> {
-                                            stream.publish(auctionID,
-                                                    new AuctionEvent("BID_PLACED", auction));
-                                            if (antiSniped) {
-                                                stream.publish(auctionID,
-                                                    new AuctionEvent("ANTI_SNIPE_AUCTION_EXTENDED", auction));
-                                            }
-                                        });
+                                
+                                // Update user balance and auction status
+                                return Mono.zip(
+                                    userManager.updateUser(bidder),
+                                    auctionService.updateAuctionStatus(auction)
+                                )
+                                .doOnSuccess(v -> {
+                                    stream.publish(auctionID,
+                                            new AuctionEvent("BID_PLACED", auction));
+                                    if (antiSniped) {
+                                        stream.publish(auctionID,
+                                            new AuctionEvent("ANTI_SNIPE_AUCTION_EXTENDED", auction));
+                                    }
+                                });
                             });
                 })
                 .flatMap(v -> ServerResponse.status(201).build());
@@ -147,7 +160,7 @@ public class AuctionHandler {
                         .switchIfEmpty(Mono.error(new IllegalStateException("unauthorized")))
                         .flatMap(auction -> {
                             auction.finishAuction();
-                            return auctionService.updateAuctionStatus(auction)
+                            return auctionService.finishAuction(auction)
                                     .doOnSuccess(v -> {
                                         stream.publish(auctionID,
                                                 new AuctionEvent("AUCTION_FINISHED", auction));

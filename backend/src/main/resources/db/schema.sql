@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
     id VARCHAR(64) PRIMARY KEY,
     username VARCHAR(120) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
+    balance NUMERIC(19, 2) NOT NULL DEFAULT 0,
     banned BOOLEAN NOT NULL DEFAULT FALSE,
     banned_reason TEXT,
     banned_at TIMESTAMPTZ,
@@ -11,6 +12,9 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS balance NUMERIC(19, 2) NOT NULL DEFAULT 0;
 
 ALTER TABLE users
     ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255);
@@ -56,13 +60,14 @@ CREATE TABLE IF NOT EXISTS auctions (
     current_highest_bidder_id VARCHAR(64) REFERENCES users(id) ON DELETE SET NULL,
     status VARCHAR(32) NOT NULL DEFAULT 'OPEN',
     starting_price NUMERIC(19, 2) NOT NULL DEFAULT 0,
+    min_bid_increment NUMERIC(19, 2) NOT NULL DEFAULT 1.00,
     current_highest_price NUMERIC(19, 2) NOT NULL DEFAULT 0,
     final_price NUMERIC(19, 2),
     start_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     end_time TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT chk_auctions_status CHECK (status IN ('OPEN', 'RUNNING', 'PAUSED', 'FINISHED', 'PAID', 'CANCELLED')),
+    CONSTRAINT chk_auctions_status CHECK (status IN ('OPEN', 'RUNNING', 'PAUSED', 'FINISHED', 'CANCELLED')),
     CONSTRAINT chk_auctions_price_non_negative CHECK (starting_price >= 0 AND current_highest_price >= 0),
     CONSTRAINT chk_auctions_end_after_start CHECK (end_time IS NULL OR end_time >= start_time)
 );
@@ -75,6 +80,9 @@ ALTER TABLE auctions
 
 ALTER TABLE auctions
     ADD COLUMN IF NOT EXISTS starting_price NUMERIC(19, 2) NOT NULL DEFAULT 0;
+
+ALTER TABLE auctions
+    ADD COLUMN IF NOT EXISTS min_bid_increment NUMERIC(19, 2) NOT NULL DEFAULT 1.00;
 
 ALTER TABLE auctions
     ADD COLUMN IF NOT EXISTS current_highest_price NUMERIC(19, 2) NOT NULL DEFAULT 0;
@@ -93,23 +101,24 @@ SET status = CASE status
     WHEN 'DRAFT' THEN 'OPEN'
     WHEN 'ACTIVE' THEN 'RUNNING'
     WHEN 'ENDED' THEN 'FINISHED'
+    WHEN 'PAID' THEN 'FINISHED'
     ELSE status
 END
-WHERE status IN ('DRAFT', 'ACTIVE', 'ENDED');
+WHERE status IN ('DRAFT', 'ACTIVE', 'ENDED', 'PAID');
 
 ALTER TABLE auctions
     DROP CONSTRAINT IF EXISTS chk_auctions_status;
 
 ALTER TABLE auctions
     ADD CONSTRAINT chk_auctions_status
-        CHECK (status IN ('OPEN', 'RUNNING', 'PAUSED', 'FINISHED', 'PAID', 'CANCELLED', 'DRAFT', 'ACTIVE', 'ENDED'));
+        CHECK (status IN ('OPEN', 'RUNNING', 'PAUSED', 'FINISHED', 'CANCELLED', 'DRAFT', 'ACTIVE', 'ENDED'));
 
 ALTER TABLE auctions
     DROP CONSTRAINT IF EXISTS chk_auctions_price_non_negative;
 
 ALTER TABLE auctions
     ADD CONSTRAINT chk_auctions_price_non_negative
-        CHECK (starting_price >= 0 AND current_highest_price >= 0);
+        CHECK (starting_price >= 0 AND min_bid_increment > 0 AND current_highest_price >= 0);
 
 ALTER TABLE auctions
     DROP CONSTRAINT IF EXISTS chk_auctions_end_after_start;
@@ -120,6 +129,7 @@ ALTER TABLE auctions
 
 CREATE INDEX IF NOT EXISTS idx_auctions_status_end_time ON auctions(status, end_time);
 CREATE INDEX IF NOT EXISTS idx_auctions_item_id ON auctions(item_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_auctions_unique_item_id ON auctions(item_id);
 CREATE INDEX IF NOT EXISTS idx_auctions_current_highest_bidder_id ON auctions(current_highest_bidder_id);
 
 CREATE TABLE IF NOT EXISTS bid_transactions (

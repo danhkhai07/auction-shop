@@ -21,24 +21,22 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class AuctionService {
+    private static final String ALL_AUCTIONS_CACHE_KEY = "auctions$all";
+    private static final String ACTIVE_AUCTIONS_CACHE_KEY = "auctions$active";
+    private static final java.math.BigDecimal DEFAULT_MIN_BID_INCREMENT = new java.math.BigDecimal("1.00");
+
     private final AuctionRepository auctionRepository;
     private final ItemService itemService;
     private final UserManager userManager;
     private final ULID ulid;
-    private final CacheManager cacheManager;
+    private final CacheManager<Object, Object> cacheManager;
 
     public Mono<Auction> getAuctionByID(String id){
-        Mono<Auction> stream;
-        if (cacheManager.contains(id)) {
-            stream = Mono.just(cacheManager.get(id))
-                    .filter(obj -> obj instanceof Auction)
-                    .cast(Auction.class);
-        } else {
-            stream = auctionRepository.getByID(id)
-                    .doOnNext(auction -> cacheManager.put(id, auction));
-        }
-
-        return stream.switchIfEmpty(Mono.error(new IllegalStateException("auction not found")));
+        return cacheManager.getAs(id, Auction.class)
+                .map(Mono::just)
+                .orElseGet(() -> auctionRepository.getByID(id)
+                        .doOnNext(auction -> cacheManager.put(id, auction)))
+                .switchIfEmpty(Mono.error(new IllegalStateException("auction not found")));
     }
 
     public Mono<GetAuctionResponse> getAuctionResponseByID(String id){
@@ -47,15 +45,23 @@ public class AuctionService {
     }
 
     public Mono<List<GetAuctionResponse>> getAllAuctions(){
-        return auctionRepository.getAll()
-                .map(GetAuctionResponse::new)
-                .collectList();
+        return cachedList(ALL_AUCTIONS_CACHE_KEY, GetAuctionResponse.class)
+                .map(Mono::just)
+                .orElseGet(() -> auctionRepository.getAll()
+                        .map(GetAuctionResponse::new)
+                        .collectList()
+                        .doOnNext(list -> cacheManager.put(ALL_AUCTIONS_CACHE_KEY, list)));
     }
 
     public Flux<GetAuctionResponse> getActiveAuctions(){
-        return auctionRepository.getActives()
-                .switchIfEmpty(Mono.error(new IllegalStateException("no auction found")))
-                .map(this::toResponse);
+        return cachedList(ACTIVE_AUCTIONS_CACHE_KEY, GetAuctionResponse.class)
+                .map(Flux::fromIterable)
+                .orElseGet(() -> auctionRepository.getActives()
+                        .map(this::toResponse)
+                        .collectList()
+                        .doOnNext(list -> cacheManager.put(ACTIVE_AUCTIONS_CACHE_KEY, list))
+                        .flatMapMany(Flux::fromIterable))
+                .switchIfEmpty(Mono.error(new IllegalStateException("no auction found")));
     }
 
     private GetAuctionResponse toResponse(Auction auction) {
@@ -69,14 +75,9 @@ public class AuctionService {
         boolean deleterIsUser = deleterRoles.contains(Role.USER);
         if (!deleterIsUser && !deleterIsAdmin) return Mono.error(new IllegalAccessException("unauthorized"));
 
-        Mono<Auction> stream;
-        if (cacheManager.contains(id)) {
-            stream = Mono.just((Auction) cacheManager.get(id));
-        } else {
-            stream = auctionRepository.getByID(id);
-        }
-
-        return stream
+        return cacheManager.getAs(id, Auction.class)
+                .map(Mono::just)
+                .orElseGet(() -> auctionRepository.getByID(id))
                 .switchIfEmpty(Mono.error(new IllegalStateException("auction does not exist")))
                 .filter(auction -> (
                         auction.getItem().getSeller().getId().equals(deleterID) || deleterIsAdmin)
@@ -91,13 +92,20 @@ public class AuctionService {
                     }
                     return auctionRepository.deleteByID(id);
                 })
-                .then(Mono.fromRunnable(() -> cacheManager.delete(id)));
+                .then(Mono.fromRunnable(() -> evictAuctionCaches(id)));
     }
 
     public Mono<IDResponse> newAuction(String posterID, UploadAuctionRequest request) {
         String id = ulid.nextULID();
         return itemService.getItemByID(request.itemID())
                 .switchIfEmpty(Mono.error(new IllegalStateException("item does not exist")))
+                .flatMap(item -> auctionRepository.existsByItemID(item.getId())
+                        .flatMap(exists -> {
+                            if (exists) {
+                                return Mono.error(new IllegalStateException("item already has an auction"));
+                            }
+                            return Mono.just(item);
+                        }))
                 .flatMap(item -> {
                     if (!posterID.equals(item.getSeller().getId()))
                         return Mono.error(new IllegalAccessException("poster is not auction owner"));
@@ -105,6 +113,7 @@ public class AuctionService {
                             id,
                             item,
                             request.startingPrice(),
+                            request.minBidIncrement() != null ? request.minBidIncrement() : DEFAULT_MIN_BID_INCREMENT,
                             request.startTime(),
                             request.endTime()
                     );
@@ -112,6 +121,7 @@ public class AuctionService {
                             .flatMap(owner -> auctionRepository.newAuction(auction)
                                     .then(Mono.fromRunnable(() -> {
                                         cacheManager.put(auction.getId(), auction);
+                                        evictAuctionListCaches();
                                         owner.addAuction(auction);
                                     }))
                                     .then(userManager.updateUser(owner)));
@@ -129,18 +139,50 @@ public class AuctionService {
                             id,
                             item,
                             request.startingPrice(),
+                            request.minBidIncrement() != null ? request.minBidIncrement() : DEFAULT_MIN_BID_INCREMENT,
                             request.startTime(),
                             request.endTime()
                     );
-                    if (cacheManager.contains(id)) {
-                        cacheManager.put(id, auction);
-                    }
-                    return auctionRepository.saveAuction(auction);
+                    return auctionRepository.saveAuction(auction)
+                            .then(Mono.fromRunnable(() -> {
+                                cacheManager.put(id, auction);
+                                evictAuctionListCaches();
+                            }));
                 });
     }
 
     public Mono<Void> updateAuctionStatus(Auction auction) {
         return auctionRepository.saveAuction(auction)
-                .then(Mono.fromRunnable(() -> cacheManager.put(auction.getId(), auction)));
+                .then(Mono.fromRunnable(() -> {
+                    cacheManager.put(auction.getId(), auction);
+                    evictAuctionListCaches();
+                }));
+    }
+
+    public Mono<Void> finishAuction(Auction auction) {
+        return auctionRepository.saveAuction(auction)
+                .then(Mono.defer(() -> {
+                    if (!auction.hasWinner()) {
+                        return Mono.empty();
+                    }
+                    return itemService.transferItemToUser(auction.getItem(), auction.getCurrentHighestBidder());
+                }))
+                .then(Mono.fromRunnable(() -> evictAuctionCaches(auction.getId())));
+    }
+
+    private void evictAuctionCaches(String auctionId) {
+        cacheManager.delete(auctionId);
+        evictAuctionListCaches();
+    }
+
+    private void evictAuctionListCaches() {
+        cacheManager.delete(ALL_AUCTIONS_CACHE_KEY);
+        cacheManager.delete(ACTIVE_AUCTIONS_CACHE_KEY);
+    }
+
+    private <T> java.util.Optional<List<T>> cachedList(String key, Class<T> itemType) {
+        return cacheManager.getAs(key, List.class)
+                .filter(list -> list.stream().allMatch(itemType::isInstance))
+                .map(list -> list.stream().map(itemType::cast).toList());
     }
 }
