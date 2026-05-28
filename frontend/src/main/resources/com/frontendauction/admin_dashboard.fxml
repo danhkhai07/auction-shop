@@ -124,6 +124,7 @@
                         <HBox spacing="10.0">
                            <children>
                               <Button fx:id="btnDeleteAuction" mnemonicParsing="false" prefHeight="30.0" style="-fx-background-color: #FEE2E2; -fx-text-fill: #DC2626; -fx-background-radius: 4; -fx-cursor: hand;" text="Delete Selected Auction" />
+                              <Button fx:id="btnCancelAuction" mnemonicParsing="false" prefHeight="30.0" style="-fx-background-color: #FEF3C7; -fx-text-fill: #D97706; -fx-background-radius: 4; -fx-cursor: hand;" text="Cancel Selected Auction" />
                            </children>
                         </HBox>
 

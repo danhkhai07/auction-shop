@@ -81,6 +81,7 @@ public class RouterConfig {
                         .POST("/delete/user/{id}", deleteHandler::deleteUser)
                         .POST("/delete/item/{id}", deleteHandler::deleteItem)
                         .POST("/delete/auction/{id}", deleteHandler::deleteAuction)
+                        .POST("/cancel/auction/{id}", adminActionsHandler::forceCancelAuction)
                         .POST("/ban/user/{id}", contentType(MediaType.APPLICATION_JSON), adminActionsHandler::banUser)
                         .POST("/unban/user/{id}", adminActionsHandler::unbanUser)
                         .GET("/user/all", adminActionsHandler::getAllUsers)
