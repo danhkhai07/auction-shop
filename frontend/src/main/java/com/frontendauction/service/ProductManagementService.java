@@ -146,7 +146,7 @@ public class ProductManagementService {
      * Tạo auction mới. Body: {"itemID": "...", "startingPrice": ..., "startTime": "...", "endTime": "..."}
      * Endpoint: POST /auction (requires auth)
      */
-    public CompletableFuture<Optional<String>> createAuction(String itemId, double startingPrice,
+    public CompletableFuture<Optional<String>> createAuction(String itemId, double startingPrice, double minBidIncrement,
                                                               String startTime, String endTime) {
         if (!TokenStore.hasToken()) {
             return CompletableFuture.completedFuture(Optional.empty());
@@ -156,6 +156,7 @@ public class ProductManagementService {
             Map<String, Object> payload = Map.of(
                     "itemID", itemId,
                     "startingPrice", startingPrice,
+                    "minBidIncrement", minBidIncrement,
                     "startTime", startTime,
                     "endTime", endTime
             );
