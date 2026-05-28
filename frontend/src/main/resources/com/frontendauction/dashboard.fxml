@@ -2,121 +2,149 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.Pane?>
-<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1920.0" style="-fx-background-color: linear-gradient(to bottom right, #e6effd, #adcce9);" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1">
-   <top>
-      <VBox>
-         <children>
-            <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="49.0" prefWidth="1920.0" style="-fx-background-color: white; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 10, 0.5, 0, 0); -fx-border-radius: 20; -fx-background-radius: 12;">
-               <children>
-                  <Label alignment="CENTER" layoutY="-2.0" prefHeight="102.0" prefWidth="577.0" style="-fx-font-weight: bold; -fx-text-fill: #2196F3;" text="Auction Shop">
-                     <font>
-                        <Font size="51.0" />
-                     </font>
-                  </Label>
-                  <Button fx:id="refreshButton" layoutX="1538.0" layoutY="27.0" mnemonicParsing="false" onAction="#handleRefresh" prefHeight="39.0" prefWidth="113.0" style="-fx-background-color: transparent; -fx-border-color: #2196F3; -fx-border-radius: 5; -fx-text-fill: #2196F3; -fx-font-weight: bold;" text="Refresh">
-                     <font>
-                        <Font size="20.0" />
-                     </font>
-                  </Button>
-                  <Button fx:id="signOutButton" layoutX="1734.0" layoutY="28.0" mnemonicParsing="false" onAction="#handleSignout" prefHeight="39.0" prefWidth="113.0" style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-radius: 5;" text="Sign Out">
-                     <font>
-                        <Font size="20.0" />
-                     </font>
-                  </Button>
-               </children>
+<VBox prefHeight="720.0" prefWidth="1280.0" stylesheets="@css/global.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.frontendauction.controller.DashboardController">
+    <children>
+        <fx:include source="title-bar.fxml" />
+        <StackPane VBox.vgrow="ALWAYS">
+            <!-- Main content layer -->
+            <VBox style="-fx-background-color: #f7f7f7;">
+
+                <!-- Top navigation bar -->
+                <HBox alignment="CENTER_LEFT" prefHeight="52.0" spacing="16.0" style="-fx-background-color: #ffffff; -fx-border-color: #e5e5e5; -fx-border-width: 0 0 1 0; -fx-padding: 0 28;">
+                    <children>
+                        <Button fx:id="btnHamburger" mnemonicParsing="false" onAction="#toggleMenu" styleClass="hamburger-btn" text="☰" />
+                        <Label text="Auction Feed" textFill="#191919">
+                            <font>
+                                <Font name="System Bold" size="17.0" />
+                            </font>
+                        </Label>
+                        <Region HBox.hgrow="ALWAYS" />
+                    </children>
+                </HBox>
+
+                <!-- Dashboard content -->
+                <VBox spacing="20.0" style="-fx-padding: 28 36;" VBox.vgrow="ALWAYS">
+                    <children>
+
+                        <!-- Welcome hero card -->
+                        <VBox spacing="8.0" style="-fx-background-color: #ffffff; -fx-background-radius: 12; -fx-padding: 28 32; -fx-border-color: #e5e5e5; -fx-border-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2);">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                    <children>
+                                        <Label text="🏠" style="-fx-font-size: 20px;" />
+                                        <Label text="HOME" textFill="#191919">
+                                            <font>
+                                                <Font name="System Bold" size="22.0" />
+                                            </font>
+                                        </Label>
+                                    </children>
+                                </HBox>
+                                <Label fx:id="lblWelcome" text="Loading user..." textFill="#191919">
+                                    <font>
+                                        <Font name="System Bold" size="18.0" />
+                                    </font>
+                                </Label>
+                                <Label fx:id="lblSummary" text="Loading dashboard data..." textFill="#707070" wrapText="true">
+                                    <font>
+                                        <Font size="13.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </VBox>
+
+                        <!-- Auctions section header -->
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                            <children>
+                                <Label text="🔴" style="-fx-font-size: 14px;" />
+                                <Label text="Live Auctions" textFill="#191919">
+                                    <font>
+                                        <Font name="System Bold" size="18.0" />
+                                    </font>
+                                </Label>
+                                <Region HBox.hgrow="ALWAYS" />
+                            </children>
+                            <padding>
+                                <Insets top="4.0" bottom="4.0" />
+                            </padding>
+                        </HBox>
+
+                        <!-- Auction list -->
+                        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0;" VBox.vgrow="ALWAYS">
+                            <content>
+                                <VBox fx:id="auctionListContainer" spacing="14.0" />
+                            </content>
+                        </ScrollPane>
+                    </children>
+                </VBox>
+            </VBox>
+
+            <!-- Overlay layer (menu) — initially hidden -->
+            <AnchorPane fx:id="menuOverlay" onMouseClicked="#closeMenu" styleClass="menu-overlay" visible="false">
+                <!-- Side menu panel -->
+                <VBox fx:id="sideMenu" prefWidth="280.0" styleClass="side-menu" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <padding>
+                        <Insets bottom="24.0" left="24.0" right="24.0" top="28.0" />
+                    </padding>
+                    <children>
+                        <!-- Menu header -->
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                            <children>
+                                <Label text="🏪" style="-fx-font-size: 18px;" />
+                                <Label text="AUCTION SHOP" textFill="#191919">
+                                    <font>
+                                        <Font name="System Bold" size="16.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                            <VBox.margin>
+                                <Insets bottom="20.0" />
+                            </VBox.margin>
+                        </HBox>
+
+                        <VBox spacing="6.0">
+                            <children>
+                                <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#goToProfile" prefHeight="44.0" styleClass="menu-item" text="👤  Profile">
+                                    <padding>
+                                        <Insets left="16.0" />
+                                    </padding>
+                                </Button>
+                                <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#goToLiveAuction" prefHeight="44.0" styleClass="menu-item" text="🔴  Live Auctions">
+                                    <padding>
+                                        <Insets left="16.0" />
+                                    </padding>
+                                </Button>
+                                <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#goToProductManagement" prefHeight="44.0" styleClass="menu-item" text="📦  Products">
+                                    <padding>
+                                        <Insets left="16.0" />
+                                    </padding>
+                                </Button>
+                                <Button fx:id="btnAdminPanel" maxWidth="Infinity" mnemonicParsing="false" onAction="#goToAdminPanel" prefHeight="45.0" styleClass="menu-item" text="🛡  Admin Panel" visible="false" managed="false">
+                                    <padding>
+                                        <Insets left="15.0" />
+                                    </padding>
+                                </Button>
+                            </children>
+                        </VBox>
+
+                        <Region VBox.vgrow="ALWAYS" />
+
+                        <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#logout" prefHeight="44.0" styleClass="menu-item-logout" text="🚪  Log out">
+                            <padding>
+                                <Insets left="16.0" />
+                            </padding>
+                        </Button>
+                    </children>
+                </VBox>
             </AnchorPane>
-         </children>
-      </VBox>
-   </top>
-   <left>
-      <VBox maxWidth="300.0" prefHeight="958.0" prefWidth="564.0" BorderPane.alignment="CENTER">
-         <children>
-            <AnchorPane maxWidth="300.0" prefHeight="978.0" prefWidth="539.0" style="-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 10, 0.1, 0, 0); -fx-background-color: white; -fx-border-radius: 20; -fx-background-radius: 20;">
-               <children>
-                  <Label alignment="CENTER" layoutY="4.0" prefHeight="69.0" prefWidth="218.0" style="-fx-font-weight: bold;" text="Active Auctions" textFill="#009dff">
-                     <font>
-                        <Font size="24.0" />
-                     </font>
-                  </Label>
-                  <ScrollPane layoutY="73.5999984741211" maxWidth="500.0" minWidth="10.0" style="-fx-background-color: transparent;">
-                     <content>
-                        <GridPane maxHeight="-Infinity" prefHeight="758.0" prefWidth="711.0">
-                          <columnConstraints>
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="265.4000244140625" minWidth="10.0" prefWidth="219.20003662109374" />
-                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="403.2000457763672" minWidth="10.0" prefWidth="175.19998779296873" />
-                              <ColumnConstraints hgrow="NEVER" maxWidth="403.2000457763672" minWidth="10.0" prefWidth="164.60001220703123" />
-                            <ColumnConstraints hgrow="NEVER" maxWidth="403.2000457763672" minWidth="10.0" prefWidth="152.59995117187498" />
-                          </columnConstraints>
-                          <rowConstraints>
-                            <RowConstraints />
-                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                          </rowConstraints>
-                           <children>
-                              <Label alignment="CENTER" prefHeight="20.0" prefWidth="230.0" style="-fx-background-color: #f4f4f4; -fx-border-color: #cccccc; -fx-border-width: 0 1 1 0; -fx-font-weight: bold;" text="Product">
-                                 <font>
-                                    <Font size="14.0" />
-                                 </font>
-                              </Label>
-                              <ChoiceBox prefHeight="26.0" prefWidth="175.0" GridPane.columnIndex="1" />
-                              <Label alignment="CENTER" layoutX="10.0" layoutY="12.0" prefHeight="20.0" prefWidth="230.0" style="-fx-background-color: #f4f4f4; -fx-border-color: #cccccc; -fx-border-width: 0 1 1 0; -fx-font-weight: bold;" text="Price" GridPane.columnIndex="2">
-                                 <font>
-                                    <Font size="14.0" />
-                                 </font>
-                              </Label>
-                              <Label alignment="CENTER" layoutX="405.0" layoutY="12.0" prefHeight="20.0" prefWidth="230.0" style="-fx-background-color: #f4f4f4; -fx-border-color: #cccccc; -fx-border-width: 0 1 1 0; -fx-font-weight: bold;" text="Time" GridPane.columnIndex="3">
-                                 <font>
-                                    <Font size="14.0" />
-                                 </font>
-                              </Label>
-                           </children>
-                        </GridPane>
-                     </content>
-                  </ScrollPane>
-               </children>
-            </AnchorPane>
-         </children>
-         <BorderPane.margin>
-            <Insets top="5.0" />
-         </BorderPane.margin>
-      </VBox>
-   </left>
-   <center>
-      <VBox prefHeight="200.0" prefWidth="100.0" spacing="10.0" BorderPane.alignment="CENTER">
-         <padding>
-            <Insets top="15.0" />
-         </padding>
-         <children>
-            <Pane prefHeight="964.0" prefWidth="1415.0" style="-fx-background-color: white; -fx-border-radius: 20; -fx-background-radius: 0 20 20 20;">
-               <VBox.margin>
-                  <Insets left="5.0" top="25.0" />
-               </VBox.margin>
-            </Pane>
-         </children>
-      </VBox>
-   </center>
-</BorderPane>
+        </StackPane>
+    </children>
+</VBox>

@@ -1,39 +1,146 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.Group?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" style="-fx-background-color: linear-gradient(to bottom right, #e6effd, #adcce9);" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.frontendauction.controller.LoginController">
+<VBox prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: #f7f7f7;" stylesheets="@css/global.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.frontendauction.controller.LoginController">
    <children>
-      <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0">
+
+      <fx:include source="title-bar.fxml" />
+
+      <HBox VBox.vgrow="ALWAYS">
          <children>
-            <Label layoutX="208.0" layoutY="65.0" text="AUCTION SHOP" textFill="#0ea0f0">
-               <font>
-                  <Font size="26.0" />
-               </font>
-            </Label>
-            <Label layoutX="253.0" layoutY="103.0" text="Login to continue" />
-            <TextField fx:id="usernameField" layoutX="233.0" layoutY="149.0" promptText="Type your Username" />
-            <Label layoutX="161.0" layoutY="153.0" text="Username" />
-            <Label layoutX="161.0" layoutY="204.0" text="Password" />
-            <Label fx:id="errorLabel" alignment="CENTER" layoutX="85.0" layoutY="241.0" prefHeight="18.0" prefWidth="426.0" textFill="#ff1818" visible="false" />
-            <Button fx:id="loginButton" defaultButton="true" layoutX="257.0" layoutY="259.0" mnemonicParsing="false" onAction="#handleLogin" prefHeight="31.0" prefWidth="82.0" text="Login">
-               <font>
-                  <Font size="15.0" />
-               </font>
-            </Button>
-            <PasswordField fx:id="passwordField" layoutX="234.0" layoutY="200.0" promptText="Type your Password" />
-            <Button fx:id="signupButton" layoutX="257.0" layoutY="309.0" mnemonicParsing="false" onAction="#handleSignup" prefHeight="31.0" prefWidth="82.0" text="Sign Up">
-               <font>
-                  <Font size="15.0" />
-               </font>
-            </Button>
+            <!-- Left side for decoration -->
+            <StackPane styleClass="auth-background" HBox.hgrow="ALWAYS">
+               <children>
+                  <!-- Floating elements -->
+                  <Group>
+                     <children>
+                        <Pane prefWidth="860.0" prefHeight="720.0" minWidth="860.0" minHeight="720.0" maxWidth="860.0" maxHeight="720.0">
+                           <children>
+                              <ImageView fx:id="hammerImage" fitHeight="121.0" fitWidth="121.0" layoutX="188.0" layoutY="465.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../../images/auction-hammer.png" />
+                                 </image>
+                              </ImageView>
+                              
+                              <ImageView fx:id="diamondImage" fitHeight="134.0" fitWidth="113.0" layoutX="373.0" layoutY="491.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../../images/diamond.png" />
+                                 </image>
+                              </ImageView>
+                              
+                              <ImageView fx:id="clockImage" fitHeight="91.0" fitWidth="51.0" layoutX="594.0" layoutY="456.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../../images/clock.png" />
+                                 </image>
+                              </ImageView>
+                           </children>
+                        </Pane>
+                     </children>
+                  </Group>
+               </children>
+            </StackPane>
+            
+            <!-- Right side for login form -->
+            <StackPane fx:id="loginContainer" alignment="CENTER" minWidth="420.0" prefWidth="420.0">
+               <children>
+                  <VBox fx:id="loginForm" alignment="CENTER" maxWidth="420.0" spacing="0.0" style="-fx-background-color: #ffffff; -fx-background-radius: 16; -fx-border-color: #e5e5e5; -fx-border-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 4);">
+               <padding>
+                  <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+               </padding>
+               <children>
+                  <!-- Logo & Title -->
+                  <Label style="-fx-font-size: 32px;" text="🏪">
+                     <VBox.margin>
+                        <Insets bottom="8.0" />
+                     </VBox.margin>
+                  </Label>
+                  <Label text="Auction Shop" textFill="#191919">
+                     <font>
+                        <Font name="System Bold" size="24.0" />
+                     </font>
+                  </Label>
+                  <Label text="Sign in to your account" textFill="#707070">
+                     <font>
+                        <Font size="13.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets bottom="24.0" top="4.0" />
+                     </VBox.margin>
+                  </Label>
+
+                  <!-- Username field -->
+                  <Label style="-fx-font-weight: bold; -fx-font-size: 13px;" text="Username" textFill="#333333">
+                     <VBox.margin>
+                        <Insets bottom="6.0" />
+                     </VBox.margin>
+                  </Label>
+                  <TextField fx:id="usernameField" prefHeight="42.0" promptText="Enter your username" styleClass="input-field">
+                     <VBox.margin>
+                        <Insets bottom="16.0" />
+                     </VBox.margin>
+                  </TextField>
+
+                  <!-- Password field -->
+                  <Label style="-fx-font-weight: bold; -fx-font-size: 13px;" text="Password" textFill="#333333">
+                     <VBox.margin>
+                        <Insets bottom="6.0" />
+                     </VBox.margin>
+                  </Label>
+                  <PasswordField fx:id="passwordField" prefHeight="42.0" promptText="Enter your password" styleClass="input-field">
+                     <VBox.margin>
+                        <Insets bottom="8.0" />
+                     </VBox.margin>
+                  </PasswordField>
+
+                  <!-- Error label -->
+                  <Label fx:id="errorLabel" alignment="CENTER" maxWidth="Infinity" style="-fx-font-size: 12px;" textFill="#e53238" visible="false" wrapText="true">
+                     <VBox.margin>
+                        <Insets bottom="8.0" />
+                     </VBox.margin>
+                  </Label>
+
+                  <!-- Login button -->
+                  <Button fx:id="loginButton" defaultButton="true" maxWidth="Infinity" mnemonicParsing="false" onAction="#handleLogin" prefHeight="44.0" styleClass="btn-primary" text="Sign In">
+                     <VBox.margin>
+                        <Insets bottom="16.0" top="8.0" />
+                     </VBox.margin>
+                  </Button>
+
+                  <Separator style="-fx-padding: 4 0;">
+                     <VBox.margin>
+                        <Insets bottom="16.0" />
+                     </VBox.margin>
+                  </Separator>
+
+                  <!-- Sign up link -->
+                  <HBox alignment="CENTER" spacing="6.0">
+                     <children>
+                        <Label style="-fx-font-size: 13px;" text="New to Auction Shop?" textFill="#707070" />
+                        <Button fx:id="signupButton" mnemonicParsing="false" onAction="#handleSignup" style="-fx-font-size: 13px;" styleClass="btn-text-only" text="Create an account" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+
+               </children>
+            </StackPane>
          </children>
-      </AnchorPane>
+      </HBox>
+
    </children>
 </VBox>

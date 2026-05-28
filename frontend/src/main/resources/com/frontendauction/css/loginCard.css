@@ -1,0 +1,8 @@
+.login-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 16px;
+    -fx-padding: 40px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 20, 0, 0, 4);
+    -fx-border-color: #e5e5e5;
+    -fx-border-radius: 16px;
+}

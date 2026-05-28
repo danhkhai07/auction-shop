@@ -1,0 +1,621 @@
+/* ======== ROOT VARIABLES & GLOBAL RESET ======== */
+
+.root {
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    -fx-font-size: 14px;
+}
+
+/* ======== BACKGROUNDS ======== */
+
+/* Main premium background — subtle warm gray like eBay's listing pages */
+.main-background {
+    -fx-background-color: #f7f7f7;
+}
+
+.premium-background {
+    -fx-background-color: linear-gradient(to bottom, #f7f7f7 0%, #eef1f5 100%);
+}
+
+.auth-background {
+    -fx-background-image: url('../../../images/background.jpg');
+    -fx-background-size: 100% 100%;
+    -fx-background-position: center;
+}
+
+/* ======== CARDS & PANELS ======== */
+
+/* Standard card — clean white with subtle border, eBay-style */
+.card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-border-color: #e5e5e5;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.06), 12, 0, 0, 2);
+}
+
+/* Premium card — for key content panels */
+.premium-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 16, 0, 0, 3);
+}
+
+.premium-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.12), 20, 0, 0, 4);
+}
+
+/* ======== SEPARATORS ======== */
+
+.separator-custom > .line {
+    -fx-border-color: transparent transparent #e8e8e8 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+.separator-custom {
+    -fx-background-color: transparent;
+    -fx-padding: 4 0 4 0;
+}
+
+/* ======== SCROLL PANES ======== */
+
+.scroll-pane-custom {
+    -fx-background-color: #fafbfc;
+    -fx-background: #fafbfc;
+    -fx-border-color: #e8e8e8;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.scroll-pane-custom .viewport {
+    -fx-background-color: #fafbfc;
+}
+
+/* ======== IMAGE STYLES ======== */
+
+.image-dropshadow {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.10), 10, 0, 0, 2);
+}
+
+/* ======== TYPOGRAPHY ======== */
+
+.text-primary-dark {
+    -fx-text-fill: #191919;
+}
+
+.text-price-highlight {
+    -fx-text-fill: #e53238; /* eBay red for prices */
+}
+
+.text-secondary {
+    -fx-text-fill: #707070;
+}
+
+.text-accent {
+    -fx-text-fill: #3665f3; /* eBay blue */
+}
+
+/* ======== BUTTONS ======== */
+
+/* Text-only button (back navigation) */
+.btn-text-only {
+    -fx-background-color: transparent;
+    -fx-text-fill: #3665f3;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 6 12;
+}
+
+.btn-text-only:hover {
+    -fx-text-fill: #2a4dc7;
+    -fx-underline: true;
+}
+
+/* Primary action button — eBay blue */
+.btn-primary {
+    -fx-background-color: #3665f3;
+    -fx-text-fill: white;
+    -fx-background-radius: 24;
+    -fx-font-weight: bold;
+    -fx-font-size: 15px;
+    -fx-cursor: hand;
+    -fx-padding: 10 28;
+    -fx-effect: dropshadow(gaussian, rgba(54, 101, 243, 0.25), 8, 0, 0, 2);
+}
+
+.btn-primary:hover {
+    -fx-background-color: #2a4dc7;
+    -fx-effect: dropshadow(gaussian, rgba(54, 101, 243, 0.35), 12, 0, 0, 3);
+}
+
+.btn-primary:pressed {
+    -fx-background-color: #1f3bab;
+}
+
+/* Premium bid button — bold eBay blue */
+.btn-premium {
+    -fx-background-color: #3665f3;
+    -fx-text-fill: white;
+    -fx-background-radius: 24;
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+    -fx-cursor: hand;
+    -fx-padding: 12 32;
+    -fx-effect: dropshadow(gaussian, rgba(54, 101, 243, 0.3), 10, 0, 0, 3);
+}
+
+.btn-premium:hover {
+    -fx-background-color: #2a4dc7;
+    -fx-effect: dropshadow(gaussian, rgba(54, 101, 243, 0.4), 14, 0, 0, 4);
+}
+
+.btn-premium:pressed {
+    -fx-background-color: #1f3bab;
+}
+
+/* Success button — green */
+.btn-success {
+    -fx-background-color: #5cb85c;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 24;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-padding: 10 24;
+    -fx-effect: dropshadow(gaussian, rgba(92, 184, 92, 0.25), 8, 0, 0, 2);
+}
+
+.btn-success:hover {
+    -fx-background-color: #4cae4c;
+    -fx-effect: dropshadow(gaussian, rgba(92, 184, 92, 0.35), 12, 0, 0, 3);
+}
+
+/* Warning button — amber */
+.btn-warning {
+    -fx-background-color: #f0ad4e;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 24;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-padding: 10 24;
+    -fx-effect: dropshadow(gaussian, rgba(240, 173, 78, 0.25), 8, 0, 0, 2);
+}
+
+.btn-warning:hover {
+    -fx-background-color: #ec971f;
+    -fx-effect: dropshadow(gaussian, rgba(240, 173, 78, 0.35), 12, 0, 0, 3);
+}
+
+/* Danger button — red */
+.btn-danger {
+    -fx-background-color: #e53238;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 24;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-padding: 10 24;
+    -fx-effect: dropshadow(gaussian, rgba(229, 50, 56, 0.25), 8, 0, 0, 2);
+}
+
+.btn-danger:hover {
+    -fx-background-color: #c62828;
+    -fx-effect: dropshadow(gaussian, rgba(229, 50, 56, 0.35), 12, 0, 0, 3);
+}
+
+/* ======== INPUT FIELDS ======== */
+
+.input-field {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 8;
+    -fx-border-color: #c7c7c7;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-padding: 8 14;
+    -fx-font-size: 14px;
+    -fx-text-fill: #191919;
+    -fx-prompt-text-fill: #a0a0a0;
+}
+
+.input-field:focused {
+    -fx-border-color: #3665f3;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(54, 101, 243, 0.15), 6, 0, 0, 0);
+}
+
+/* Large input field — for bid amounts */
+.input-field-large {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 10;
+    -fx-border-color: #c7c7c7;
+    -fx-border-radius: 10;
+    -fx-border-width: 1.5;
+    -fx-text-fill: #191919;
+    -fx-prompt-text-fill: #a0a0a0;
+    -fx-padding: 10 18;
+    -fx-font-size: 16px;
+}
+
+.input-field-large:focused {
+    -fx-border-color: #3665f3;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(54, 101, 243, 0.15), 6, 0, 0, 0);
+}
+
+/* Text area */
+.input-area {
+    -fx-background-color: #ffffff;
+    -fx-background: #ffffff;
+    -fx-background-radius: 8;
+    -fx-border-color: #c7c7c7;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-text-fill: #191919;
+    -fx-prompt-text-fill: #a0a0a0;
+    -fx-font-size: 14px;
+    -fx-padding: 10 14;
+}
+
+.input-area:focused {
+    -fx-border-color: #3665f3;
+    -fx-border-width: 2;
+}
+
+/* ======== SECTION HEADERS ======== */
+
+.section-header-box {
+    -fx-background-color: #f0f3ff;
+    -fx-background-radius: 8;
+    -fx-border-color: #d8dff8;
+    -fx-border-radius: 8;
+    -fx-padding: 8 16;
+}
+
+/* ======== FORM LABELS ======== */
+
+.form-label {
+    -fx-text-fill: #555555;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+}
+
+/* ======== TABLE VIEW ======== */
+
+.table-view-custom {
+    -fx-font-size: 13px;
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.table-view-custom .column-header {
+    -fx-background-color: #f7f7f7;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 0 0 1 0;
+}
+
+.table-view-custom .column-header .label {
+    -fx-text-fill: #555555;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
+.table-view-custom .table-row-cell {
+    -fx-border-color: transparent transparent #f0f0f0 transparent;
+}
+
+.table-view-custom .table-row-cell:hover {
+    -fx-background-color: #f0f3ff;
+}
+
+.table-view-custom .table-row-cell:selected {
+    -fx-background-color: #e0e7ff;
+    -fx-text-fill: #191919;
+}
+
+.table-view-custom .table-row-cell:selected .text {
+    -fx-fill: #191919;
+}
+
+/* ======== SPLIT PANE ======== */
+
+.split-pane-custom {
+    -fx-background-color: transparent;
+    -fx-padding: 16;
+}
+
+.split-pane-custom > .split-pane-divider {
+    -fx-background-color: #e0e0e0;
+    -fx-padding: 0 1 0 1;
+}
+
+/* ======== LIST VIEW ======== */
+
+.list-view-transparent {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-control-inner-background: transparent;
+    -fx-font-size: 13px;
+    -fx-text-fill: #333333;
+}
+
+.list-view-transparent .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 8 12;
+    -fx-border-color: transparent transparent #f0f0f0 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-text-fill: #191919;
+}
+
+.list-view-transparent .list-cell:hover {
+    -fx-background-color: #f8f9ff;
+    -fx-text-fill: #191919;
+}
+
+.list-view-transparent .list-cell:selected {
+    -fx-background-color: #e0e7ff;
+    -fx-text-fill: #191919;
+}
+
+.list-view-transparent .list-cell:selected .text {
+    -fx-fill: #191919;
+}
+
+/* ======== TIME DISPLAY ======== */
+
+.time-box {
+    -fx-background-color: #fef2f2;
+    -fx-background-radius: 8;
+    -fx-border-color: #fecaca;
+    -fx-border-radius: 8;
+    -fx-padding: 8 20;
+}
+
+.time-box-urgent {
+    -fx-background-color: #fef2f2;
+    -fx-background-radius: 10;
+    -fx-border-color: #fca5a5;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 10;
+    -fx-padding: 12 24;
+}
+
+/* ======== STATUS BADGES ======== */
+
+.status-badge-live {
+    -fx-background-color: #e53238;
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+    -fx-padding: 4 14;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.status-badge-ended {
+    -fx-background-color: #707070;
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+    -fx-padding: 4 14;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+/* ======== CHART (PRICE HISTORY) ======== */
+
+.premium-chart {
+    -fx-background-color: transparent;
+}
+.premium-chart .chart-plot-background {
+    -fx-background-color: #fafbfc;
+}
+.premium-chart .chart-vertical-grid-lines {
+    -fx-stroke: rgba(0, 0, 0, 0.04);
+}
+.premium-chart .chart-horizontal-grid-lines {
+    -fx-stroke: rgba(0, 0, 0, 0.06);
+}
+.premium-chart .default-color0.chart-series-line {
+    -fx-stroke: #3665f3;
+    -fx-stroke-width: 2.5px;
+}
+.premium-chart .chart-line-symbol {
+    -fx-background-color: #3665f3, white;
+    -fx-background-insets: 0, 2;
+    -fx-background-radius: 5px;
+    -fx-padding: 4px;
+}
+.premium-chart .axis-label {
+    -fx-text-fill: #707070;
+    -fx-font-size: 11px;
+}
+.premium-chart .axis-tick-mark {
+    -fx-stroke: #e0e0e0;
+}
+.premium-chart .axis-minor-tick-mark {
+    -fx-stroke: #f0f0f0;
+}
+.premium-chart .axis {
+    -fx-tick-label-fill: #555555;
+    -fx-tick-labels-visible: true;
+    -fx-tick-label-font-size: 11px;
+}
+
+/* ======== BOTTOM BAR ======== */
+
+.bottom-bar {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0 transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 8, 0, 0, -2);
+}
+
+/* ======== HAMBURGER & SIDE MENU (DASHBOARD) ======== */
+
+.hamburger-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #191919;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 6 14;
+    -fx-background-radius: 8;
+}
+
+.hamburger-btn:hover {
+    -fx-background-color: #f0f0f0;
+}
+
+/* Overlay behind menu */
+.menu-overlay {
+    -fx-background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Side menu panel */
+.side-menu {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 0 1 0 0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.12), 24, 0, 6, 0);
+}
+
+/* Menu items */
+.menu-item {
+    -fx-background-color: transparent;
+    -fx-text-fill: #333333;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-background-radius: 8;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.menu-item:hover {
+    -fx-background-color: #f0f3ff;
+    -fx-text-fill: #3665f3;
+}
+
+/* Active menu item */
+.menu-item-active {
+    -fx-background-color: #e8edff;
+    -fx-text-fill: #3665f3;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-background-radius: 8;
+    -fx-alignment: CENTER_LEFT;
+    -fx-border-color: #3665f3;
+    -fx-border-width: 0 0 0 3;
+    -fx-border-radius: 0 8 8 0;
+}
+
+/* Logout menu item */
+.menu-item-logout {
+    -fx-background-color: #fef2f2;
+    -fx-text-fill: #e53238;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-background-radius: 8;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.menu-item-logout:hover {
+    -fx-background-color: #fee2e2;
+    -fx-text-fill: #c62828;
+}
+
+/* ======== AUCTION CARD (DASHBOARD FEED) ======== */
+
+.auction-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 10;
+    -fx-border-color: #e5e5e5;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 8, 0, 0, 2);
+    -fx-cursor: hand;
+}
+
+.auction-card:hover {
+    -fx-border-color: #3665f3;
+    -fx-effect: dropshadow(gaussian, rgba(54, 101, 243, 0.12), 12, 0, 0, 3);
+}
+
+/* ======== SCROLLBAR STYLING ======== */
+
+.scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8;
+}
+
+.scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #c7c7c7;
+    -fx-background-radius: 4;
+}
+
+.scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #a0a0a0;
+}
+
+.scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-pref-height: 8;
+}
+
+.scroll-bar:horizontal .track {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:horizontal .thumb {
+    -fx-background-color: #c7c7c7;
+    -fx-background-radius: 4;
+}
+
+/* ======== CHECKBOX STYLING ======== */
+
+.check-box {
+    -fx-cursor: hand;
+}
+
+.check-box .box {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #c7c7c7;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 3;
+}
+
+.check-box:selected .box {
+    -fx-background-color: #3665f3;
+    -fx-border-color: #3665f3;
+}
+
+.check-box:selected .mark {
+    -fx-background-color: white;
+}
+
+/* ======== COMBO BOX ======== */
+
+.combo-box {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #c7c7c7;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.combo-box:focused {
+    -fx-border-color: #3665f3;
+}
+
+.combo-box .arrow-button {
+    -fx-background-color: transparent;
+}

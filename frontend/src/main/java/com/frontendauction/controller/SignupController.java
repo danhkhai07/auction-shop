@@ -1,11 +1,13 @@
 package com.frontendauction.controller;
 
+import com.frontendauction.AppWindow;
 import com.frontendauction.model.SignupResult;
 import com.frontendauction.service.AuthService;
 import com.frontendauction.service.HttpAuthService;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
@@ -14,6 +16,11 @@ import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.Objects;
+import javafx.scene.image.ImageView;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
+import javafx.scene.Node;
+import javafx.util.Duration;
 
 public class SignupController {
     private final AuthService authService;
@@ -38,7 +45,17 @@ public class SignupController {
     @FXML
     private Button backButton;
 
+    @FXML
+    private ImageView hammerImage;
+    @FXML
+    private ImageView diamondImage;
+    @FXML
+    private ImageView clockImage;
+
     public void initialize() {
+        applyFloatingEffect(hammerImage, 3.0, 15);
+        applyFloatingEffect(diamondImage, 3.0, 15);
+        applyFloatingEffect(clockImage, 3.0, 15);
         hideError();
     }
 
@@ -110,8 +127,6 @@ public class SignupController {
 
         if (result.success()) {
             hideError();
-            System.out.println("Signup success. Message = " + result.message());
-
             try {
                 handleBacktoLogin();
             } catch (IOException exception) {
@@ -152,8 +167,41 @@ public class SignupController {
             }
         });
         Stage stage = (Stage) backButton.getScene().getWindow();
-        Scene scene = new Scene(loader.load(), 600, 400);
-        stage.setScene(scene);
+        Parent root = loader.load();
+        AppWindow.applyScene(stage, root);
         stage.show();
+    }
+
+    private void applyFloatingEffect(Node node, double durationSec, double deltaY) {
+        TranslateTransition floatTransition = new TranslateTransition(Duration.seconds(durationSec), node);
+        floatTransition.setByY(deltaY);
+        floatTransition.setAutoReverse(true); // Đi xuống xong tự động đi ngược lên
+        floatTransition.setCycleCount(TranslateTransition.INDEFINITE); // Lặp lại vô hạn lần
+
+        // Tạo độ trễ ngẫu nhiên để các vật thể không trôi lên xuống cùng một nhịp
+        floatTransition.setDelay(Duration.seconds(Math.random()));
+        floatTransition.play();
+
+        // 2. Tạo hiệu ứng phóng to (Khi chuột chỉ vào)
+        ScaleTransition scaleUp = new ScaleTransition(Duration.millis(200), node);
+        scaleUp.setToX(1.1); // Phóng to 10% chiều ngang
+        scaleUp.setToY(1.1); // Phóng to 10% chiều dọc
+
+        // 3. Tạo hiệu ứng thu nhỏ (Khi chuột rời đi)
+        ScaleTransition scaleDown = new ScaleTransition(Duration.millis(200), node);
+        scaleDown.setToX(1.0); // Trở về kích thước gốc
+        scaleDown.setToY(1.0);
+
+        // 4. Bắt sự kiện tương tác chuột
+        node.setOnMouseEntered(e -> {
+            floatTransition.pause(); // Dừng lơ lửng
+            scaleUp.play(); // Phóng to lên
+        });
+
+        node.setOnMouseExited(e -> {
+            scaleDown.play(); // Thu nhỏ lại
+            // Đợi thu nhỏ xong thì mới cho trôi lơ lửng tiếp
+            scaleDown.setOnFinished(event -> floatTransition.play());
+        });
     }
 }

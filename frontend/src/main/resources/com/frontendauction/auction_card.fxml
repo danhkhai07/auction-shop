@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<HBox fx:id="cardContainer" alignment="CENTER_LEFT" onMouseClicked="#onCardClick" pickOnBounds="true" spacing="16.0" styleClass="auction-card" style="-fx-padding: 20 24;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.frontendauction.controller.AuctionCardController">
+    <children>
+        <VBox spacing="6.0" HBox.hgrow="ALWAYS">
+            <children>
+                <Label fx:id="lblAuctionName" text="Auction Name" textFill="#191919">
+                    <font>
+                        <Font name="System Bold" size="16.0" />
+                    </font>
+                </Label>
+                <Label fx:id="lblAuctionStatus" text="Loading auction..." textFill="#707070" wrapText="true">
+                    <font>
+                        <Font size="13.0" />
+                    </font>
+                </Label>
+                <Label fx:id="lblSellerName" text="Seller: " textFill="#707070" wrapText="true">
+                    <font>
+                        <Font size="13.0" />
+                    </font>
+                </Label>
+            </children>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS" />
+        <Label text="→" textFill="#3665f3" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+    </children>
+</HBox>
