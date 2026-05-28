@@ -98,6 +98,11 @@
                                         <Insets left="15.0" />
                                     </padding>
                                 </Button>
+                                <Button fx:id="btnAdminPanel" maxWidth="Infinity" mnemonicParsing="false" onAction="#goToAdminPanel" prefHeight="45.0" styleClass="menu-item" text="🛡  Admin Panel" visible="false" managed="false">
+                                    <padding>
+                                        <Insets left="15.0" />
+                                    </padding>
+                                </Button>
                             </children>
                         </VBox>
 
