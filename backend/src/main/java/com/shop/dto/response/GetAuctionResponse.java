@@ -12,7 +12,9 @@ import java.util.stream.Collectors;
 public record GetAuctionResponse(
     @JsonProperty("id") String id,
     @JsonProperty("name") String name,
+    @JsonProperty("seller") GetShortUserResponse seller,
     @JsonProperty("startingPrice") BigDecimal startingPrice,
+    @JsonProperty("minBidIncrement") BigDecimal minBidIncrement,
     @JsonProperty("currentHighestPrice") BigDecimal currentHighestPrice,
     @JsonProperty("currentHighestBidder") String currentHighestBidder,
     @JsonProperty("finalPrice") BigDecimal finalPrice,
@@ -24,7 +26,9 @@ public record GetAuctionResponse(
     public GetAuctionResponse(Auction auction) {
         this(auction.getId(),
                 auction.getItem().getName(),
+                new GetShortUserResponse(auction.getItem().getSeller()),
                 auction.getStartingPrice(),
+                auction.getMinBidIncrement(),
                 auction.getCurrentHighestPrice(),
                 (auction.getCurrentHighestBidder() == null ? null
                         : auction.getCurrentHighestBidder().getId()),

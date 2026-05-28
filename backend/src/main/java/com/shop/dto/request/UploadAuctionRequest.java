@@ -12,6 +12,7 @@ import java.util.List;
 public record UploadAuctionRequest(
     @JsonProperty("itemID") String itemID,
     @JsonProperty("startingPrice") BigDecimal startingPrice,
+    @JsonProperty("minBidIncrement") BigDecimal minBidIncrement,
     @JsonProperty("startTime") LocalDateTime startTime,
     @JsonProperty("endTime") LocalDateTime endTime
 ) {

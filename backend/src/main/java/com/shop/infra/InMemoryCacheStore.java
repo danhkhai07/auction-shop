@@ -11,10 +11,17 @@ public class InMemoryCacheStore<K, V> implements CacheStore<K, V> {
     // Khoi tao wrapper luu gia tri va thoi diem het han cua tung entry.
     private static class CacheEntry<V>{
         private final V value;
-        private final long expiredAt;
-        private CacheEntry(V value, long expiredAt){
+        private final long ttlMillis;
+        private volatile long expiredAt;
+
+        private CacheEntry(V value, long ttlMillis, long expiredAt){
             this.value = value;
+            this.ttlMillis = ttlMillis;
             this.expiredAt = expiredAt;
+        }
+
+        private void refresh(long currentTime) {
+            this.expiredAt = currentTime + ttlMillis;
         }
     }
 
@@ -28,12 +35,15 @@ public class InMemoryCacheStore<K, V> implements CacheStore<K, V> {
         }
 
         // Kiem tra xem du lieu da qua han chua.
-        if (isExpired(entry, System.currentTimeMillis())) {
+        long currentTime = System.currentTimeMillis();
+        if (isExpired(entry, currentTime)) {
             // Chi xoa dung entry vua doc ra de tranh xoa nham du lieu moi hon.
             cache.remove(key, entry);
             return null;
         }
 
+        // Sliding expiration: entry duoc doc thuong xuyen se song lau hon trong cache.
+        entry.refresh(currentTime);
         return entry.value;
     }
 
@@ -52,12 +62,12 @@ public class InMemoryCacheStore<K, V> implements CacheStore<K, V> {
     @Override
     public void put(K key, V value, long ttl) {
         if (ttl <= 0) {
-            throw new IllegalArgumentException("ttl can lon hon 0");
+            throw new IllegalArgumentException("ttl must be greater than 0");
         }
 
-        // Tinh thoi diem chinh xac ma du lieu het han.
-        long expiredAt = System.currentTimeMillis() + ttl * 1000L;
-        cache.put(key, new CacheEntry<>(value, expiredAt));
+        long ttlMillis = ttl * 1000L;
+        long expiredAt = System.currentTimeMillis() + ttlMillis;
+        cache.put(key, new CacheEntry<>(value, ttlMillis, expiredAt));
     }
 
     @Override

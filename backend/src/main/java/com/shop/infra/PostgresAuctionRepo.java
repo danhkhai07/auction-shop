@@ -31,7 +31,7 @@ public class PostgresAuctionRepo implements AuctionRepository {
     // Câu truy vấn gộp lấy thông tin Auction, Item (sản phẩm), Seller (người bán) và Highest Bidder (người trả giá cao nhất).
     // Sử dụng LEFT JOIN cho Highest Bidder vì lúc mới mở đấu giá có thể chưa có ai đặt giá.
     private static final String SELECT_AUCTION =
-            "SELECT a.id as a_id, a.starting_price, a.current_highest_price, a.final_price, a.start_time, a.end_time, a.status, " +
+            "SELECT a.id as a_id, a.starting_price, a.min_bid_increment, a.current_highest_price, a.final_price, a.start_time, a.end_time, a.status, " +
             "i.id as i_id, i.name as i_name, i.description as i_description, " +
             "s.id as s_id, s.username as s_username, " +
             "b.id as b_id, b.username as b_username " +
@@ -53,18 +53,26 @@ public class PostgresAuctionRepo implements AuctionRepository {
             "WHERE b.auction_id = :auctionId " +
             "ORDER BY b.timestamp ASC";
 
+    private static final String SELECT_BIDS_BY_AUCTION_IDS =
+            "SELECT b.auction_id, b.id, b.bid_amount, b.timestamp, u.id as u_id, u.username as u_username " +
+            "FROM bids b " +
+            "JOIN users u ON b.bidder_id = u.id " +
+            "WHERE b.auction_id IN (:auctionIds) " +
+            "ORDER BY b.auction_id, b.timestamp ASC";
+
     private static final String UPDATE_AUCTION_SQL =
             "UPDATE auctions " +
             "SET current_highest_price = :currentHighestPrice, " +
             "    current_highest_bidder_id = :currentHighestBidderId, " +
             "    final_price = :finalPrice, " +
+            "    min_bid_increment = :minBidIncrement, " +
             "    status = :status, " +
             "    updated_at = CURRENT_TIMESTAMP " +
             "WHERE id = :id";
 
     private static final String INSERT_AUCTION_SQL =
-            "INSERT INTO auctions (id, item_id, starting_price, current_highest_price, start_time, end_time, status) " +
-            "VALUES (:id, :itemId, :startingPrice, :currentHighestPrice, :startTime, :endTime, :status)";
+            "INSERT INTO auctions (id, item_id, starting_price, min_bid_increment, current_highest_price, start_time, end_time, status) " +
+            "VALUES (:id, :itemId, :startingPrice, :minBidIncrement, :currentHighestPrice, :startTime, :endTime, :status)";
 
     private static final String DELETE_AUCTION_SQL = "DELETE FROM auctions WHERE id = :id";
 
@@ -88,7 +96,8 @@ public class PostgresAuctionRepo implements AuctionRepository {
         return databaseClient.sql(SELECT_ALL_AUCTIONS)
                 .map(this::mapRowToAuction)
                 .all()
-                .flatMap(this::loadBidsForAuction);
+                .collectList()
+                .flatMapMany(this::loadBidsForAuctions);
     }
 
     @Override
@@ -107,7 +116,8 @@ public class PostgresAuctionRepo implements AuctionRepository {
         return databaseClient.sql(SELECT_ACTIVES)
                 .map(this::mapRowToAuction)
                 .all()
-                .flatMap(this::loadBidsForAuction); // Xử lý bất đồng bộ để load bids cho từng Auction đang RUNNING
+                .collectList()
+                .flatMapMany(this::loadBidsForAuctions); // Xử lý bất đồng bộ để load bids cho các Auction đang RUNNING
     }
 
     @Override
@@ -124,6 +134,7 @@ public class PostgresAuctionRepo implements AuctionRepository {
         DatabaseClient.GenericExecuteSpec spec = databaseClient.sql(UPDATE_AUCTION_SQL)
                 .bind("id", auction.getId())
                 .bind("currentHighestPrice", auction.getCurrentHighestPrice() != null ? auction.getCurrentHighestPrice() : auction.getStartingPrice())
+                .bind("minBidIncrement", auction.getMinBidIncrement())
                 .bind("status", auction.getStatus().name());
 
         if (bidderId != null) {
@@ -163,7 +174,24 @@ public class PostgresAuctionRepo implements AuctionRepository {
         if (!StringUtils.hasText(id)){
             return Mono.just(false);
         }
-        return Mono.just(true);
+        return databaseClient.sql("SELECT EXISTS (SELECT 1 FROM auctions WHERE id = :id) AS auction_exists")
+                .bind("id", id)
+                .map((row, metadata) -> Boolean.TRUE.equals(row.get("auction_exists", Boolean.class)))
+                .one()
+                .defaultIfEmpty(false);
+    }
+
+    @Override
+    public Mono<Boolean> existsRunningByItemID(String itemId) {
+        if (!StringUtils.hasText(itemId)) {
+            return Mono.just(false);
+        }
+
+        return databaseClient.sql("SELECT EXISTS (SELECT 1 FROM auctions WHERE item_id = :itemId AND status = 'RUNNING') AS auction_exists")
+                .bind("itemId", itemId)
+                .map((row, metadata) -> Boolean.TRUE.equals(row.get("auction_exists", Boolean.class)))
+                .one()
+                .defaultIfEmpty(false);
     }
 
     @Override
@@ -177,6 +205,7 @@ public class PostgresAuctionRepo implements AuctionRepository {
                 .bind("id", auction.getId())
                 .bind("itemId", auction.getItem().getId())
                 .bind("startingPrice", auction.getStartingPrice())
+                .bind("minBidIncrement", auction.getMinBidIncrement())
                 .bind("currentHighestPrice", auction.getCurrentHighestPrice() != null ? auction.getCurrentHighestPrice() : auction.getStartingPrice())
                 .bind("startTime", auction.getStartTime())
                 .bind("endTime", auction.getEndTime())
@@ -197,24 +226,32 @@ public class PostgresAuctionRepo implements AuctionRepository {
                 .map(this::mapRowToBid)
                 .all()
                 .collectList() // Gom kết quả thành List<BidTransaction>
-                .doOnNext(bids -> {
-                    if (!bids.isEmpty()) {
-                        // Do thuộc tính bidHistory trong Auction là 'private final' và không có hàm setter,
-                        // ta bắt buộc phải dùng Reflection để chèn dữ liệu lấy từ DB vào object này.
-                        Field field = ReflectionUtils.findField(Auction.class, "bidHistory");
-                        if (field != null) {
-                            ReflectionUtils.makeAccessible(field);
-                            try {
-                                @SuppressWarnings("unchecked")
-                                List<BidTransaction> history = (List<BidTransaction>) field.get(auction);
-                                history.clear(); // Ensure we don't duplicate on re-load
-                                history.addAll(bids);
-                            } catch (Exception ignored) {
-                            }
-                        }
-                    }
-                })
+                .doOnNext(bids -> setBidHistory(auction, bids))
                 .thenReturn(auction);
+    }
+
+    private Flux<Auction> loadBidsForAuctions(List<Auction> auctions) {
+        if (auctions.isEmpty()) {
+            return Flux.empty();
+        }
+
+        List<String> auctionIds = auctions.stream()
+                .map(Auction::getId)
+                .toList();
+
+        return databaseClient.sql(SELECT_BIDS_BY_AUCTION_IDS)
+                .bind("auctionIds", auctionIds)
+                .map(this::mapRowToAuctionBid)
+                .all()
+                .collectMultimap(AuctionBidRow::auctionId, AuctionBidRow::bid)
+                .map(bidsByAuctionId -> {
+                    auctions.forEach(auction -> setBidHistory(
+                            auction,
+                            List.copyOf(bidsByAuctionId.getOrDefault(auction.getId(), List.of()))
+                    ));
+                    return auctions;
+                })
+                .flatMapMany(Flux::fromIterable);
     }
 
     private Mono<Void> insertBids(String auctionId, List<BidTransaction> bids) {
@@ -243,6 +280,7 @@ public class PostgresAuctionRepo implements AuctionRepository {
                 row.get("a_id", String.class),
                 item,
                 row.get("starting_price", BigDecimal.class),
+                row.get("min_bid_increment", BigDecimal.class),
                 row.get("start_time", LocalDateTime.class),
                 row.get("end_time", LocalDateTime.class)
         );
@@ -285,6 +323,27 @@ public class PostgresAuctionRepo implements AuctionRepository {
         }
         
         return bid;
+    }
+
+    private AuctionBidRow mapRowToAuctionBid(Row row, RowMetadata metadata) {
+        return new AuctionBidRow(row.get("auction_id", String.class), mapRowToBid(row, metadata));
+    }
+
+    private void setBidHistory(Auction auction, List<BidTransaction> bids) {
+        Field field = ReflectionUtils.findField(Auction.class, "bidHistory");
+        if (field != null) {
+            ReflectionUtils.makeAccessible(field);
+            try {
+                @SuppressWarnings("unchecked")
+                List<BidTransaction> history = (List<BidTransaction>) field.get(auction);
+                history.clear();
+                history.addAll(bids);
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+    static record AuctionBidRow(String auctionId, BidTransaction bid) {
     }
 
     // Hàm tiện ích giúp dùng Reflection của Spring để ép gán giá trị cho một biến Private.
