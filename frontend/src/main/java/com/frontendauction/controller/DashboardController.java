@@ -39,7 +39,7 @@ public class DashboardController {
     private final UserProfileService userProfileService = new UserProfileService();
     private final LiveAuctionService liveAuctionService = new LiveAuctionService();
 
-    private String firstActiveAuctionId;
+    private List<String> activeAuctionIds;
 
     @FXML
     public void initialize() {
@@ -67,8 +67,9 @@ public class DashboardController {
         Parent root = loader.load();
 
         LiveAuctionController controller = loader.getController();
-        if (firstActiveAuctionId != null && !firstActiveAuctionId.isBlank()) {
-            controller.setAuctionId(firstActiveAuctionId);
+        if (activeAuctionIds != null && !activeAuctionIds.isEmpty()) {
+            String randomId = activeAuctionIds.get(new java.util.Random().nextInt(activeAuctionIds.size()));
+            controller.setAuctionId(randomId);
         }
 
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -141,7 +142,7 @@ public class DashboardController {
         int ownedAuctions = safeSize(user.getAuctionList());
         int activeCount = activeAuctions == null ? 0 : activeAuctions.size();
 
-        firstActiveAuctionId = activeCount > 0 ? activeAuctions.getFirst().getId() : null;
+        activeAuctionIds = activeCount > 0 ? activeAuctions.stream().map(LiveAuctionModel.AuctionDetail::getId).toList() : null;
 
         lblWelcome.setText("Welcome, " + fallback(user.getUsername(), "user"));
         lblSummary.setText("User ID: " + fallback(user.getId(), "-") + " | Roles: " + joinRoles(user.getRoles()));
@@ -184,7 +185,7 @@ public class DashboardController {
         if (lblProfileMeta != null) lblProfileMeta.setText("Unable to load profile");
         if (lblAuctionMeta != null) lblAuctionMeta.setText("Unable to load auctions");
         if (lblProductMeta != null) lblProductMeta.setText("Unable to load products");
-        firstActiveAuctionId = null;
+        activeAuctionIds = null;
     }
 
     private String joinRoles(Set<String> roles) {
