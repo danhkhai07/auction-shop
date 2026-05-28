@@ -19,6 +19,7 @@ public class AuctionCardController {
     @FXML private HBox cardContainer;
     @FXML private Label lblAuctionName;
     @FXML private Label lblAuctionStatus;
+    @FXML private Label lblSellerName;
 
     private LiveAuctionModel.AuctionDetail auction;
 
@@ -32,6 +33,10 @@ public class AuctionCardController {
         
         String status = auction.getStatus() != null ? auction.getStatus() : "OPEN";
         lblAuctionStatus.setText("Status: " + status);
+        
+        String sellerName = (auction.getSeller() != null && auction.getSeller().getUsername() != null)
+                ? auction.getSeller().getUsername() : "Unknown";
+        lblSellerName.setText("Seller: " + sellerName);
         
         if ("CLOSED".equalsIgnoreCase(status)) {
             cardContainer.setOpacity(0.6);

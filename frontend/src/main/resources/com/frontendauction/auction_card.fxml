@@ -20,6 +20,11 @@
                         <Font size="13.0" />
                     </font>
                 </Label>
+                <Label fx:id="lblSellerName" text="Seller: " textFill="#707070" wrapText="true">
+                    <font>
+                        <Font size="13.0" />
+                    </font>
+                </Label>
             </children>
         </VBox>
         <Region HBox.hgrow="ALWAYS" />
