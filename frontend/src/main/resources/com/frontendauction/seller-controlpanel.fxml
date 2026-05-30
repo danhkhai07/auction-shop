@@ -27,7 +27,7 @@
                                             </font>
                                         </Button>
                                         <Label text="  /  " textFill="#a0a0a0" />
-                                        <Label text="Live Auctions (Seller View)" textFill="#555555">
+                                        <Label text="Join an Auction (Seller View)" textFill="#555555">
                                             <font>
                                                 <Font name="System Bold" size="13.0" />
                                             </font>

@@ -16,17 +16,17 @@
    <children>
       <fx:include source="title-bar.fxml" />
 
-      <HBox alignment="CENTER_LEFT" prefHeight="60.0" spacing="15.0" style="-fx-background-color: white; -fx-border-color: #E2E8F0; -fx-border-width: 0 0 1 0;">
+      <HBox alignment="CENTER_LEFT" prefHeight="60.0" spacing="15.0" style="-fx-background-color: #4A72FF; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 2);">
          <padding>
-            <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+            <Insets bottom="10.0" left="28.0" right="28.0" top="10.0" />
          </padding>
          <children>
-            <Button mnemonicParsing="false" onAction="#goToDashboard" prefHeight="40.0" prefWidth="45.0" style="-fx-background-color: #EBF1FA; -fx-text-fill: #1E3A8A; -fx-background-radius: 8; -fx-cursor: hand;" text="←">
+            <Button mnemonicParsing="false" onAction="#goToDashboard" prefHeight="40.0" prefWidth="45.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-background-radius: 8; -fx-cursor: hand;" text="←">
                <font>
-                  <Font name="System Bold" size="18.0" />
+                  <Font name="System Bold" size="24.0" />
                </font>
             </Button>
-            <Label text="Admin Feed" textFill="#1e3a8a">
+            <Label text="Admin Feed" textFill="white">
                <font>
                   <Font name="System Bold" size="20.0" />
                </font>
@@ -47,7 +47,7 @@
                         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                      </padding>
                      <children>
-                        <Label text="User Management" textFill="#1e3a8a">
+                        <Label text="User Management" textFill="#4A72FF">
                            <font>
                               <Font name="System Bold" size="22.0" />
                            </font>
@@ -56,13 +56,13 @@
                         <HBox alignment="CENTER_LEFT" spacing="10.0">
                            <children>
                               <TextField fx:id="searchUserField" prefHeight="35.0" prefWidth="300.0" promptText="Search by username..." style="-fx-background-color: #F8FAFC; -fx-border-color: #E2E8F0; -fx-border-radius: 4; -fx-background-radius: 4;" />
-                              <Button fx:id="btnSearchUser" mnemonicParsing="false" prefHeight="35.0" style="-fx-background-color: #1E3A8A; -fx-text-fill: white; -fx-background-radius: 4; -fx-cursor: hand;" text="Search User">
+                              <Button fx:id="btnSearchUser" mnemonicParsing="false" prefHeight="35.0" style="-fx-background-color: #4A72FF; -fx-text-fill: white; -fx-background-radius: 4; -fx-cursor: hand;" text="Search User">
                                  <font>
                                     <Font name="System Bold" size="13.0" />
                                  </font>
                               </Button>
                               <Region HBox.hgrow="ALWAYS" />
-                              <Button fx:id="btnGetAllUsers" mnemonicParsing="false" prefHeight="35.0" style="-fx-background-color: #EBF1FA; -fx-text-fill: #1E3A8A; -fx-background-radius: 4; -fx-cursor: hand;" text="Get All Users">
+                              <Button fx:id="btnGetAllUsers" mnemonicParsing="false" prefHeight="35.0" style="-fx-background-color: #EBF1FA; -fx-text-fill: #4A72FF; -fx-background-radius: 4; -fx-cursor: hand;" text="Get All Users">
                                  <font>
                                     <Font name="System Bold" size="13.0" />
                                  </font>
@@ -75,7 +75,7 @@
                               <Button fx:id="btnDeleteUser" mnemonicParsing="false" prefHeight="30.0" style="-fx-background-color: #FEE2E2; -fx-text-fill: #DC2626; -fx-background-radius: 4; -fx-cursor: hand;" text="Delete Selected" />
                               <Button fx:id="btnBanUser" mnemonicParsing="false" prefHeight="30.0" style="-fx-background-color: #FEF3C7; -fx-text-fill: #D97706; -fx-background-radius: 4; -fx-cursor: hand;" text="Ban User" />
                               <Button fx:id="btnUnbanUser" mnemonicParsing="false" prefHeight="30.0" style="-fx-background-color: #D1FAE5; -fx-text-fill: #059669; -fx-background-radius: 4; -fx-cursor: hand;" text="Unban User" />
-                              <Button fx:id="btnUnbanUser1" mnemonicParsing="false" prefHeight="30.0" style="-fx-background-color: #EBF1FA; -fx-text-fill: #1E3A8A; -fx-background-radius: 4; -fx-cursor: hand;" text="Elevate User" />
+                              <Button fx:id="btnUnbanUser1" mnemonicParsing="false" prefHeight="30.0" style="-fx-background-color: #EBF1FA; -fx-text-fill: #4A72FF; -fx-background-radius: 4; -fx-cursor: hand;" text="Elevate User" />
                            </children>
                         </HBox>
 
@@ -98,7 +98,7 @@
                         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                      </padding>
                      <children>
-                        <Label text="Auction Management" textFill="#1e3a8a">
+                        <Label text="Auction Management" textFill="#4A72FF">
                            <font>
                               <Font name="System Bold" size="22.0" />
                            </font>
@@ -107,13 +107,13 @@
                         <HBox alignment="CENTER_LEFT" spacing="10.0">
                            <children>
                               <TextField fx:id="searchAuctionField" prefHeight="35.0" prefWidth="300.0" promptText="Search by auction name..." style="-fx-background-color: #F8FAFC; -fx-border-color: #E2E8F0; -fx-border-radius: 4; -fx-background-radius: 4;" />
-                              <Button fx:id="btnSearchAuction" mnemonicParsing="false" prefHeight="35.0" style="-fx-background-color: #1E3A8A; -fx-text-fill: white; -fx-background-radius: 4; -fx-cursor: hand;" text="Search Auction">
+                              <Button fx:id="btnSearchAuction" mnemonicParsing="false" prefHeight="35.0" style="-fx-background-color: #4A72FF; -fx-text-fill: white; -fx-background-radius: 4; -fx-cursor: hand;" text="Search Auction">
                                  <font>
                                     <Font name="System Bold" size="13.0" />
                                  </font>
                               </Button>
                               <Region HBox.hgrow="ALWAYS" />
-                              <Button fx:id="btnGetAllAuctions" mnemonicParsing="false" prefHeight="35.0" style="-fx-background-color: #EBF1FA; -fx-text-fill: #1E3A8A; -fx-background-radius: 4; -fx-cursor: hand;" text="Get All Auctions">
+                              <Button fx:id="btnGetAllAuctions" mnemonicParsing="false" prefHeight="35.0" style="-fx-background-color: #EBF1FA; -fx-text-fill: #4A72FF; -fx-background-radius: 4; -fx-cursor: hand;" text="Get All Auctions">
                                  <font>
                                     <Font name="System Bold" size="13.0" />
                                  </font>
