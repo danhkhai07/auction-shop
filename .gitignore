@@ -1,9 +1,13 @@
-/.idea/
+# ide
+.idea/
+.vscode/
+
+# build
 backend/target/
 frontend/target/
 /draft_notes/
 /target/
 
+# config
 /.env
-# direnv config file
 /.envrc
