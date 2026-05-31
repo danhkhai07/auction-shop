@@ -144,23 +144,13 @@ public class LiveAuctionService {
                             onEvent.accept(event);
                         }
 
-                        // 3. Check for status changes
-                        if (lastStatus != null && currentStatus != null && !lastStatus.equals(currentStatus)) {
-                            AuctionEventData event = new AuctionEventData();
-                            event.setType("AUCTION_" + currentStatus.toUpperCase());
-                            
-                            if ("FINISHED".equalsIgnoreCase(currentStatus) && currentBidCount > 0) {
-                                event.setFinalPrice(currentPrice);
-                                LiveAuctionModel.BidEntry lastBid = detail.getBidHistory().get(currentBidCount - 1);
-                                if (lastBid.getBidder() != null) {
-                                    AuctionEventData.BidderInfo bidder = new AuctionEventData.BidderInfo();
-                                    bidder.setUsername(lastBid.getBidder().getUsername());
-                                    event.setCurrentHighestBidder(bidder);
-                                }
-                            }
-                            onEvent.accept(event);
-                            
-                            if ("FINISHED".equalsIgnoreCase(currentStatus) || "CANCELLED".equalsIgnoreCase(currentStatus)) {
+                        // 3. Check for status changes. Also emit terminal status if the first poll already sees it.
+                        if (currentStatus != null
+                                && ((lastStatus != null && !lastStatus.equals(currentStatus))
+                                || (lastStatus == null && isTerminalStatus(currentStatus)))) {
+                            onEvent.accept(buildStatusEvent(currentStatus, currentPrice, detail, currentBidCount));
+
+                            if (isTerminalStatus(currentStatus)) {
                                 break;
                             }
                         }
@@ -178,6 +168,28 @@ public class LiveAuctionService {
 
         sseThread.setDaemon(true);
         sseThread.start();
+    }
+
+    private AuctionEventData buildStatusEvent(String status, Double currentPrice,
+                                              LiveAuctionModel.AuctionDetail detail, int currentBidCount) {
+        AuctionEventData event = new AuctionEventData();
+        event.setType("AUCTION_" + status.toUpperCase());
+
+        if ("FINISHED".equalsIgnoreCase(status) && currentBidCount > 0) {
+            event.setFinalPrice(currentPrice);
+            LiveAuctionModel.BidEntry lastBid = detail.getBidHistory().get(currentBidCount - 1);
+            if (lastBid.getBidder() != null) {
+                AuctionEventData.BidderInfo bidder = new AuctionEventData.BidderInfo();
+                bidder.setUsername(lastBid.getBidder().getUsername());
+                event.setCurrentHighestBidder(bidder);
+            }
+        }
+
+        return event;
+    }
+
+    private boolean isTerminalStatus(String status) {
+        return "FINISHED".equalsIgnoreCase(status) || "CANCELLED".equalsIgnoreCase(status);
     }
 
     /**

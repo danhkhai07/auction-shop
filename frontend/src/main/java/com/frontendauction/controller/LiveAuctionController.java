@@ -66,6 +66,7 @@ public class LiveAuctionController {
     private long timeLeftSeconds;
     private Timeline countdownTimeline;
     private boolean hasFinishedAuction;
+    private boolean hasReturnedToDashboard;
 
     protected String getCurrentAuctionId() {
         return currentAuctionId;
@@ -118,6 +119,7 @@ public class LiveAuctionController {
     protected void loadAuctionData() {
         initialLoadDone = true;
         hasFinishedAuction = false;
+        hasReturnedToDashboard = false;
         setLoadingState(true);
 
         resolveAuctionDetail()
@@ -161,6 +163,11 @@ public class LiveAuctionController {
 
     private void updateAuctionUI(LiveAuctionModel.AuctionDetail auction) {
         currentAuctionId = normalizeAuctionId(auction.getId());
+
+        if ("CANCELLED".equalsIgnoreCase(auction.getStatus())) {
+            returnToDashboardAfterCancellation();
+            return;
+        }
 
         if (lblProductName != null) {
             lblProductName.setText(fallback(auction.getName(), "Unnamed auction"));
@@ -268,7 +275,8 @@ public class LiveAuctionController {
                 }
 
             }
-            case "AUCTION_FINISHED", "AUCTION_CANCELLED" -> {
+            case "AUCTION_CANCELLED" -> returnToDashboardAfterCancellation();
+            case "AUCTION_FINISHED" -> {
                 timeLeftSeconds = 0;
                 updateTimeLabel();
                 disableBidControls();
@@ -731,12 +739,30 @@ public class LiveAuctionController {
 
     @FXML
     public void handleBackToDashboard(ActionEvent event) {
+        navigateToDashboard(resolveStage(event == null ? null : (Node) event.getSource()));
+    }
+
+    private void returnToDashboardAfterCancellation() {
+        if (hasReturnedToDashboard) {
+            return;
+        }
+        hasReturnedToDashboard = true;
+        timeLeftSeconds = 0;
+        updateTimeLabel();
+        disableBidControls();
+        navigateToDashboard(resolveStage(rootPane));
+    }
+
+    private void navigateToDashboard(Stage stage) {
         stopCountdown();
         auctionService.disconnectEventStream();
+        if (stage == null) {
+            showError("Failed to return to Dashboard: current window is unavailable.");
+            return;
+        }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/frontendauction/dashboard.fxml"));
             Parent root = loader.load();
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             AppWindow.applyScene(stage, root);
             stage.show();
         } catch (IOException exception) {
@@ -745,5 +771,17 @@ public class LiveAuctionController {
         }
     }
 
+    private Stage resolveStage(Node node) {
+        if (node != null && node.getScene() != null && node.getScene().getWindow() instanceof Stage stage) {
+            return stage;
+        }
+        if (rootPane != null && rootPane.getScene() != null && rootPane.getScene().getWindow() instanceof Stage stage) {
+            return stage;
+        }
+        if (btnBack != null && btnBack.getScene() != null && btnBack.getScene().getWindow() instanceof Stage stage) {
+            return stage;
+        }
+        return null;
+    }
 
 }
