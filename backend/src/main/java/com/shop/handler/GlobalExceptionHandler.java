@@ -28,6 +28,7 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
         } else {
             status = HttpStatus.INTERNAL_SERVER_ERROR;
             message = "internal error";
+            ex.printStackTrace();
         }
 
         byte[] bytes = toJson(Map.of(

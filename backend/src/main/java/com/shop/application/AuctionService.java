@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
@@ -39,6 +40,7 @@ public class AuctionService {
                 .switchIfEmpty(Mono.error(new IllegalStateException("auction not found")));
     }
 
+    @Transactional
     public Mono<Auction> getAuctionByIDForUpdate(String id){
         return auctionRepository.getByIDForUpdate(id)
                 .switchIfEmpty(Mono.error(new IllegalStateException("auction not found")));
@@ -157,6 +159,7 @@ public class AuctionService {
                 });
     }
 
+    @Transactional
     public Mono<Void> updateAuctionStatus(Auction auction) {
         return auctionRepository.saveAuction(auction)
                 .then(Mono.fromRunnable(() -> {
