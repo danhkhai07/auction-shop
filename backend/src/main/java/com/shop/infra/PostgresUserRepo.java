@@ -99,7 +99,7 @@ public class PostgresUserRepo implements UserRepository {
                     "FROM auctions a " +
                     "JOIN items i ON a.item_id = i.id " +
                     "LEFT JOIN users b ON a.current_highest_bidder_id = b.id " +
-                    "WHERE a.seller_id = :userId " +
+                    "WHERE i.seller_id = :userId " +
                     "ORDER BY a.start_time DESC";
 
     private static final String SELECT_BIDS_BY_AUCTION_ID =
