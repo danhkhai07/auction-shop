@@ -65,6 +65,7 @@ public class LiveAuctionController {
     private boolean hasPlacedBid;
     private long timeLeftSeconds;
     private Timeline countdownTimeline;
+    private boolean hasFinishedAuction;
 
     protected String getCurrentAuctionId() {
         return currentAuctionId;
@@ -116,6 +117,7 @@ public class LiveAuctionController {
 
     protected void loadAuctionData() {
         initialLoadDone = true;
+        hasFinishedAuction = false;
         setLoadingState(true);
 
         resolveAuctionDetail()
@@ -234,6 +236,8 @@ public class LiveAuctionController {
     private void connectSseStream() {
         if (currentAuctionId == null || currentAuctionId.isBlank()) return;
 
+        auctionService.disconnectEventStream();
+
         auctionService.connectToEventStream(
                 currentAuctionId,
                 event -> Platform.runLater(() -> handleSseEvent(event)),
@@ -269,6 +273,10 @@ public class LiveAuctionController {
                 updateTimeLabel();
                 disableBidControls();
                 stopCountdown();
+
+                if (hasFinishedAuction) return;
+                hasFinishedAuction = true;
+
                 if (lblSeller != null) {
                     // Load real seller reputation
                     final String sellerName = fallback(currentSellerName, "Unknown");
@@ -704,7 +712,7 @@ public class LiveAuctionController {
                     .thenAccept(v -> {
                         System.out.println("Review submitted successfully for " + targetUser);
                         Platform.runLater(() -> {
-                            showSuccess("Đánh giá đã được lưu thành công!");
+                            showSuccess("Cảm ơn bạn đã gửi đánh giá (" + selectedRating[0] + " \u2605) cho " + targetUser + "!");
                             loadAuctionData();
                         });
                     })
@@ -714,8 +722,6 @@ public class LiveAuctionController {
                         Platform.runLater(() -> showError("Lỗi khi gửi đánh giá: " + e.getMessage()));
                         return null;
                     });
-
-                showSuccess("Cảm ơn bạn đã gửi đánh giá (" + selectedRating[0] + " \u2605) cho " + targetUser + "!");
             }
             return null;
         });
