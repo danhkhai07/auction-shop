@@ -47,7 +47,7 @@ public class AuctionEventStream {
         if (sink != null) {
             sink.tryEmitNext(event);
         }
-        // fire-and-forget webhook notification for external server
+        // fire-and-forget webhook notification
         webhookNotifier.notify(event).subscribe();
     }
 }
