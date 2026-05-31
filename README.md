@@ -183,8 +183,7 @@ The backend provides the following REST API endpoints:
 
 For detailed documentation and feature demonstration, refer to the following resources:
 
-- **Project Report (PDF)**: [report.pdf](report.pdf)
-- **Video Demo**: [Link to demo video]
+- **Project Report (PDF) & Video Demo**: [auction-shop-report](https://drive.google.com/drive/folders/1iTyB82dVeNVgNrrzJ3uyFQbxkCa8HXAY?usp=sharing)
 
 ## Troubleshooting
 
