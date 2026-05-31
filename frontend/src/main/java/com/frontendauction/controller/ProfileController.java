@@ -267,7 +267,7 @@ public class ProfileController {
                             double sum = 0;
                             int count = 0;
                             for (com.frontendauction.model.ReviewModel r : reviews) {
-                                if (r.getTargetUser().equalsIgnoreCase(myUsername)) {
+                                if (r.getTargetUser() != null && r.getTargetUser().equalsIgnoreCase(myUsername)) {
                                     sum += r.getStars();
                                     count++;
                                 }

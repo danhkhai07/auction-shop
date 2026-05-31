@@ -62,6 +62,7 @@ public class LiveAuctionController {
     private String currentAuctionId;
     private String currentSellerName;
     private boolean initialLoadDone;
+    private boolean hasPlacedBid;
     private long timeLeftSeconds;
     private Timeline countdownTimeline;
 
@@ -166,13 +167,33 @@ public class LiveAuctionController {
         currentSellerName = (auction.getSeller() != null && auction.getSeller().getUsername() != null)
                 ? auction.getSeller().getUsername() : "Unknown";
 
-        // Add mocked seller reputation
-        double mockSellerReputation = 4.5 + Math.random() * 0.5;
-        String sellerReputationStr = String.format(Locale.US, " (%.1f \u2605)", mockSellerReputation);
-
         if (lblSeller != null) {
-            lblSeller.setText("Seller: " + currentSellerName + sellerReputationStr + " | Status: " + formatStatus(auction.getStatus())
+            lblSeller.setText("Seller: " + currentSellerName + " | Status: " + formatStatus(auction.getStatus())
                     + " | Auction ID: " + fallback(auction.getId(), "-"));
+        }
+
+        // Load real seller reputation from API
+        if (!"Unknown".equals(currentSellerName)) {
+            reviewService.getReviewsForUser(currentSellerName)
+                .thenAccept(reviews -> Platform.runLater(() -> {
+                    double sum = 0;
+                    int count = 0;
+                    for (com.frontendauction.model.ReviewModel r : reviews) {
+                        if (r.getTargetUser() != null && r.getTargetUser().equalsIgnoreCase(currentSellerName)) {
+                            sum += r.getStars();
+                            count++;
+                        }
+                    }
+                    String repStr = count > 0 ? String.format(Locale.US, " (%.1f \u2605)", sum / count) : " (- \u2605)";
+                    if (lblSeller != null) {
+                        lblSeller.setText("Seller: " + currentSellerName + repStr + " | Status: " + formatStatus(auction.getStatus())
+                                + " | Auction ID: " + fallback(auction.getId(), "-"));
+                    }
+                })).exceptionally(e -> {
+                    System.err.println("Failed to fetch reviews for seller " + currentSellerName + ": " + e.getMessage());
+                    e.printStackTrace();
+                    return null;
+                });
         }
 
         if (lblDescription != null) {
@@ -249,27 +270,39 @@ public class LiveAuctionController {
                 disableBidControls();
                 stopCountdown();
                 if (lblSeller != null) {
-                    String sellerRep = String.format(Locale.US, " (%.1f \u2605)", 4.8);
-                    lblSeller.setText("Seller: " + fallback(currentSellerName, "Unknown") + sellerRep + " | Status: " + type.replace("AUCTION_", "") + " | Auction ID: " + fallback(currentAuctionId, "-"));
+                    // Load real seller reputation
+                    final String sellerName = fallback(currentSellerName, "Unknown");
+                    if (!"Unknown".equals(sellerName)) {
+                        reviewService.getReviewsForUser(sellerName)
+                            .thenAccept(reviews -> Platform.runLater(() -> {
+                                double sum = 0;
+                                int count = 0;
+                                for (com.frontendauction.model.ReviewModel r : reviews) {
+                                    if (r.getTargetUser() != null && r.getTargetUser().equalsIgnoreCase(sellerName)) {
+                                        sum += r.getStars();
+                                        count++;
+                                    }
+                                }
+                                String repStr = count > 0 ? String.format(Locale.US, " (%.1f \u2605)", sum / count) : " (- \u2605)";
+                                lblSeller.setText("Seller: " + sellerName + repStr + " | Status: " + type.replace("AUCTION_", "") + " | Auction ID: " + fallback(currentAuctionId, "-"));
+                            }));
+                    } else {
+                        lblSeller.setText("Seller: " + sellerName + " | Status: " + type.replace("AUCTION_", "") + " | Auction ID: " + fallback(currentAuctionId, "-"));
+                    }
                 }
                 
                 if ("AUCTION_FINISHED".equals(type) && event.getCurrentHighestBidder() != null && event.getFinalPrice() != null) {
                     String winnerName = event.getCurrentHighestBidder().getUsername();
                     Double finalPrice = event.getFinalPrice();
                     
-                    // Trigger rating popup if current user is Seller or Winner
+                    // Trigger rating popup if current user has bid in this auction
                     userProfileService.getCurrentUser().thenAccept(user -> Platform.runLater(() -> {
                         if (user == null) return;
-                        boolean isSeller = user.getAuctionList() != null && currentAuctionId != null && 
-                                           user.getAuctionList().stream().anyMatch(id -> id.trim().equalsIgnoreCase(currentAuctionId.trim()));
-                        boolean isWinner = user.getUsername() != null && winnerName != null && 
-                                           user.getUsername().trim().equalsIgnoreCase(winnerName.trim());
+                        boolean isWinner = user.getUsername().equalsIgnoreCase(winnerName);
                         
                         showSuccess("Phiên đấu giá đã kết thúc!\nNgười chiến thắng: " + winnerName + "\nVới giá: " + formatCurrency(finalPrice));
                         
-                        if (isSeller) {
-                            showRatingDialog(winnerName, "Người mua");
-                        } else if (isWinner) {
+                        if (isWinner) {
                             showRatingDialog(currentSellerName, "Người bán");
                         }
                     })).exceptionally(e -> {
@@ -409,6 +442,7 @@ public class LiveAuctionController {
         resetBidButton();
 
         if (result.success()) {
+            hasPlacedBid = true;
             showSuccess("Bid placed successfully.");
             loadAuctionData();
             loadWalletBalance();
@@ -667,8 +701,17 @@ public class LiveAuctionController {
                 
                 // Save real rating
                 reviewService.submitReview(targetUser, selectedRating[0], commentArea.getText())
+                    .thenAccept(v -> {
+                        System.out.println("Review submitted successfully for " + targetUser);
+                        Platform.runLater(() -> {
+                            showSuccess("Đánh giá đã được lưu thành công!");
+                            loadAuctionData();
+                        });
+                    })
                     .exceptionally(e -> {
+                        System.err.println("Failed to submit review: " + e.getMessage());
                         e.printStackTrace();
+                        Platform.runLater(() -> showError("Lỗi khi gửi đánh giá: " + e.getMessage()));
                         return null;
                     });
 

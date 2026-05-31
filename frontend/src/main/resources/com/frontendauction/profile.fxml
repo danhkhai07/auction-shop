@@ -36,74 +36,75 @@
 
             <!-- Left sidebar — Account info -->
             <left>
-                <VBox prefWidth="280.0" spacing="16.0" style="-fx-background-color: #ffffff; -fx-padding: 28; -fx-border-color: #e5e5e5; -fx-border-width: 0 1 0 0;">
-                    <children>
-                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                <ScrollPane fitToWidth="true" prefWidth="280.0" style="-fx-background-color: #ffffff; -fx-background: #ffffff; -fx-border-color: transparent;">
+                    <content>
+                        <VBox spacing="16.0" style="-fx-background-color: #ffffff; -fx-padding: 28; -fx-border-color: #e5e5e5; -fx-border-width: 0 1 0 0;">
                             <children>
-                                <Label style="-fx-font-size: 20px;" text="👤" />
-                                <Label text="Account" textFill="#191919">
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Label style="-fx-font-size: 20px;" text="👤" />
+                                        <Label text="Account" textFill="#191919">
+                                            <font>
+                                                <Font name="System Bold" size="17.0" />
+                                            </font>
+                                        </Label>
+                                    </children>
+                                </HBox>
+                                <Separator />
+                                <Label fx:id="lblUsername" text="Loading..." textFill="#191919" wrapText="true">
                                     <font>
-                                        <Font name="System Bold" size="17.0" />
+                                        <Font name="System Bold" size="20.0" />
                                     </font>
                                 </Label>
-                            </children>
-                        </HBox>
-                        <Separator />
-                        <Label fx:id="lblUsername" text="Loading..." textFill="#191919" wrapText="true">
-                            <font>
-                                <Font name="System Bold" size="20.0" />
-                            </font>
-                        </Label>
-                        <Label fx:id="lblUserId" style="-fx-font-size: 12px;" text="User ID: -" textFill="#707070" wrapText="true" />
-                        <Label fx:id="lblRoles" style="-fx-font-size: 12px;" text="Roles: -" textFill="#707070" wrapText="true" />
-                        <Separator />
-
-                        <!-- Stats cards -->
-                        <VBox spacing="6.0" style="-fx-background-color: #f7f7f7; -fx-background-radius: 10; -fx-padding: 16; -fx-border-color: #e5e5e5; -fx-border-radius: 10;">
-                            <children>
-                                <Label style="-fx-font-size: 12px;" text="Owned Items" textFill="#707070" />
-                                <Label fx:id="lblItemCount" text="0" textFill="#3665f3">
-                                    <font>
-                                        <Font name="System Bold" size="28.0" />
-                                    </font>
-                                </Label>
+                                <Label fx:id="lblUserId" style="-fx-font-size: 12px;" text="User ID: -" textFill="#707070" wrapText="true" />
+                                <Label fx:id="lblRoles" style="-fx-font-size: 12px;" text="Roles: -" textFill="#707070" wrapText="true" />
+                                <Separator />
+                                <VBox spacing="6.0" style="-fx-background-color: #f7f7f7; -fx-background-radius: 10; -fx-padding: 16; -fx-border-color: #e5e5e5; -fx-border-radius: 10;">
+                                    <children>
+                                        <Label style="-fx-font-size: 12px;" text="Owned Items" textFill="#707070" />
+                                        <Label fx:id="lblItemCount" text="0" textFill="#3665f3">
+                                            <font>
+                                                <Font name="System Bold" size="28.0" />
+                                            </font>
+                                        </Label>
+                                    </children>
+                                </VBox>
+                                <VBox spacing="6.0" style="-fx-background-color: #f7f7f7; -fx-background-radius: 10; -fx-padding: 16; -fx-border-color: #e5e5e5; -fx-border-radius: 10;">
+                                    <children>
+                                        <Label style="-fx-font-size: 12px;" text="Owned Auctions" textFill="#707070" />
+                                        <Label fx:id="lblAuctionCount" text="0" textFill="#3665f3">
+                                            <font>
+                                                <Font name="System Bold" size="28.0" />
+                                            </font>
+                                        </Label>
+                                    </children>
+                                </VBox>
+                                <VBox spacing="6.0" style="-fx-background-color: #f7f7f7; -fx-background-radius: 10; -fx-padding: 16; -fx-border-color: #e5e5e5; -fx-border-radius: 10;">
+                                    <children>
+                                        <Label style="-fx-font-size: 12px;" text="Wallet Balance" textFill="#707070" />
+                                        <Label fx:id="lblBalance" text="0" textFill="#27ae60" wrapText="true">
+                                            <font>
+                                                <Font name="System Bold" size="24.0" />
+                                            </font>
+                                        </Label>
+                                        <Button mnemonicParsing="false" onAction="#handleDeposit" prefHeight="35.0" prefWidth="240.0" style="-fx-margin-top: 10px;" styleClass="btn-primary" text="Deposit" />
+                                        <Button mnemonicParsing="false" onAction="#handleWithdraw" prefHeight="35.0" prefWidth="240.0" style="-fx-margin-top: 10px;" styleClass="btn-danger" text="Withdraw" />
+                                    </children>
+                                </VBox>
+                                <VBox spacing="6.0" style="-fx-background-color: #f7f7f7; -fx-background-radius: 10; -fx-padding: 16; -fx-border-color: #e5e5e5; -fx-border-radius: 10;">
+                                    <children>
+                                        <Label style="-fx-font-size: 12px;" text="Reputation" textFill="#707070" />
+                                        <Label fx:id="lblAverageStars" text="- ★" textFill="#eab308">
+                                            <font>
+                                                <Font name="System Bold" size="28.0" />
+                                            </font>
+                                        </Label>
+                                    </children>
+                                </VBox>
                             </children>
                         </VBox>
-                        <VBox spacing="6.0" style="-fx-background-color: #f7f7f7; -fx-background-radius: 10; -fx-padding: 16; -fx-border-color: #e5e5e5; -fx-border-radius: 10;">
-                            <children>
-                                <Label style="-fx-font-size: 12px;" text="Owned Auctions" textFill="#707070" />
-                                <Label fx:id="lblAuctionCount" text="0" textFill="#3665f3">
-                                    <font>
-                                        <Font name="System Bold" size="28.0" />
-                                    </font>
-                                </Label>
-                            </children>
-                        </VBox>
-                        <VBox spacing="6.0" style="-fx-background-color: #f7f7f7; -fx-background-radius: 10; -fx-padding: 16; -fx-border-color: #e5e5e5; -fx-border-radius: 10;">
-                            <children>
-                                <Label style="-fx-font-size: 12px;" text="Wallet Balance" textFill="#707070" />
-                                <Label fx:id="lblBalance" text="0" textFill="#27ae60" wrapText="true">
-                                    <font>
-                                        <Font name="System Bold" size="24.0" />
-                                    </font>
-                                </Label>
-                                <Button mnemonicParsing="false" onAction="#handleDeposit" prefHeight="35.0" prefWidth="240.0" style="-fx-margin-top: 10px;" styleClass="btn-primary" text="Deposit" />
-                                <Button mnemonicParsing="false" onAction="#handleWithdraw" prefHeight="35.0" prefWidth="240.0" style="-fx-margin-top: 10px;" styleClass="btn-danger" text="Withdraw" />
-                            </children>
-                        </VBox>
-                        <VBox spacing="6.0" style="-fx-background-color: #f7f7f7; -fx-background-radius: 10; -fx-padding: 16; -fx-border-color: #e5e5e5; -fx-border-radius: 10;">
-                            <children>
-                                <Label style="-fx-font-size: 12px;" text="Reputation" textFill="#707070" />
-                                <Label fx:id="lblAverageStars" text="- ★" textFill="#eab308">
-                                    <font>
-                                        <Font name="System Bold" size="28.0" />
-                                    </font>
-                                </Label>
-                            </children>
-                        </VBox>
-                        <Region VBox.vgrow="ALWAYS" />
-                    </children>
-                </VBox>
+                    </content>
+                </ScrollPane>
             </left>
 
             <!-- Center — Owned Items + Owned Auctions Tables -->

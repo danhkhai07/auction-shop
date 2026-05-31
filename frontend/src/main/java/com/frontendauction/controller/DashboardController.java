@@ -38,6 +38,7 @@ public class DashboardController {
 
     private final UserProfileService userProfileService = new UserProfileService();
     private final LiveAuctionService liveAuctionService = new LiveAuctionService();
+    private final com.frontendauction.service.ReviewService reviewService = new com.frontendauction.service.ReviewService();
 
     private List<String> activeAuctionIds;
     private UserProfileModel currentUser;

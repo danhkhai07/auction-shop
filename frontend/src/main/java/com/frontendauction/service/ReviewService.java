@@ -16,7 +16,7 @@ import java.util.concurrent.CompletableFuture;
 public class ReviewService {
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
-    private final String baseUrl = "http://localhost:8080/review";
+    private final String baseUrl = "http://103.75.182.151:1234/review";
 
     public ReviewService() {
         this.httpClient = HttpClient.newBuilder()
