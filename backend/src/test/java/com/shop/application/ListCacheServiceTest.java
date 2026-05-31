@@ -199,5 +199,15 @@ class ListCacheServiceTest {
         public Mono<Void> unbanByID(String id) {
             return Mono.empty();
         }
+
+        @Override
+        public Mono<Void> addBalance(String id, BigDecimal amount) {
+            return Mono.empty();
+        }
+
+        @Override
+        public Mono<Void> deductBalance(String id, BigDecimal amount) {
+            return Mono.empty();
+        }
     }
 }
