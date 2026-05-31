@@ -81,7 +81,7 @@ public class AuctionHandler {
                                 });
                             });
                 })
-                .flatMap(v -> ServerResponse.status(201).build());
+                .then(ServerResponse.status(201).build());
     }
 
     @Transactional
@@ -110,7 +110,7 @@ public class AuctionHandler {
                                             });
                                 })
                 )
-                .flatMap(v -> ServerResponse.status(201).build());
+                .then(ServerResponse.status(201).build());
     }
 
     @Transactional
@@ -131,7 +131,7 @@ public class AuctionHandler {
                                         });
                                 })
                 )
-                .flatMap(v -> ServerResponse.status(201).build());
+                .then(ServerResponse.status(201).build());
     }
 
     @Transactional
@@ -152,7 +152,7 @@ public class AuctionHandler {
                                             });
                                 })
                 )
-                .flatMap(v -> ServerResponse.status(201).build());
+                .then(ServerResponse.status(201).build());
     }
 
     @Transactional
@@ -173,7 +173,7 @@ public class AuctionHandler {
                                             });
                                 })
                 )
-                .flatMap(v -> ServerResponse.status(201).build());
+                .then(ServerResponse.status(201).build());
     }
 
     @Transactional
@@ -201,7 +201,7 @@ public class AuctionHandler {
                                     });
                         })
                 )
-                .flatMap(v -> ServerResponse.status(201).build());
+                .then(ServerResponse.status(201).build());
     }
 
     @Transactional
@@ -230,7 +230,7 @@ public class AuctionHandler {
                                         });
                             });
                 })
-                .flatMap(v -> ServerResponse.status(201).build());
+                .then(ServerResponse.status(201).build());
     }
 
     public Mono<ServerResponse> stream(ServerRequest request) {
