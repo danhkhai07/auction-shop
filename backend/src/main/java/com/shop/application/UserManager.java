@@ -24,9 +24,15 @@ public class UserManager {
         return "username$" + name;
     }
 
-    private void evictUserCache(User user) {
+    public void evictUserCache(User user) {
+        if (user == null) {
+            return;
+        }
+
         cacheManager.delete(user.getId());
-        cacheManager.delete(addNameCachePrefix(user.getUsername()));
+        if (user.getUsername() != null && !user.getUsername().isBlank()) {
+            cacheManager.delete(addNameCachePrefix(user.getUsername()));
+        }
         cacheManager.delete(ALL_USERS_CACHE_KEY);
     }
 

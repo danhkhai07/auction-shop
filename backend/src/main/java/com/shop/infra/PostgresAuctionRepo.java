@@ -37,7 +37,7 @@ public class PostgresAuctionRepo implements AuctionRepository {
             "b.id as b_id, b.username as b_username " +
             "FROM auctions a " +
             "JOIN items i ON a.item_id = i.id " +
-            "JOIN users s ON i.seller_id = s.id " +
+            "JOIN users s ON s.id = COALESCE(a.seller_id, i.seller_id) " +
             "LEFT JOIN users b ON a.current_highest_bidder_id = b.id ";
 
     private static final String SELECT_AUCTION_BY_ID = SELECT_AUCTION + "WHERE a.id = :id";
@@ -64,7 +64,8 @@ public class PostgresAuctionRepo implements AuctionRepository {
 
     private static final String UPDATE_AUCTION_SQL =
             "UPDATE auctions " +
-            "SET current_highest_price = :currentHighestPrice, " +
+            "SET seller_id = :sellerId, " +
+            "    current_highest_price = :currentHighestPrice, " +
             "    current_highest_bidder_id = :currentHighestBidderId, " +
             "    final_price = :finalPrice, " +
             "    min_bid_increment = :minBidIncrement, " +
@@ -73,8 +74,8 @@ public class PostgresAuctionRepo implements AuctionRepository {
             "WHERE id = :id";
 
     private static final String INSERT_AUCTION_SQL =
-            "INSERT INTO auctions (id, item_id, starting_price, min_bid_increment, current_highest_price, start_time, end_time, status) " +
-            "VALUES (:id, :itemId, :startingPrice, :minBidIncrement, :currentHighestPrice, :startTime, :endTime, :status)";
+            "INSERT INTO auctions (id, item_id, seller_id, starting_price, min_bid_increment, current_highest_price, start_time, end_time, status) " +
+            "VALUES (:id, :itemId, :sellerId, :startingPrice, :minBidIncrement, :currentHighestPrice, :startTime, :endTime, :status)";
 
     private static final String DELETE_AUCTION_SQL = "DELETE FROM auctions WHERE id = :id";
 
@@ -146,6 +147,7 @@ public class PostgresAuctionRepo implements AuctionRepository {
         // 2. Chuẩn bị câu lệnh cập nhật thông tin Auction
         DatabaseClient.GenericExecuteSpec spec = databaseClient.sql(UPDATE_AUCTION_SQL)
                 .bind("id", auction.getId())
+                .bind("sellerId", auction.getItem().getSeller().getId())
                 .bind("currentHighestPrice", auction.getCurrentHighestPrice() != null ? auction.getCurrentHighestPrice() : auction.getStartingPrice())
                 .bind("minBidIncrement", auction.getMinBidIncrement())
                 .bind("status", auction.getStatus().name());
@@ -217,6 +219,7 @@ public class PostgresAuctionRepo implements AuctionRepository {
         return databaseClient.sql(INSERT_AUCTION_SQL)
                 .bind("id", auction.getId())
                 .bind("itemId", auction.getItem().getId())
+                .bind("sellerId", auction.getItem().getSeller().getId())
                 .bind("startingPrice", auction.getStartingPrice())
                 .bind("minBidIncrement", auction.getMinBidIncrement())
                 .bind("currentHighestPrice", auction.getCurrentHighestPrice() != null ? auction.getCurrentHighestPrice() : auction.getStartingPrice())

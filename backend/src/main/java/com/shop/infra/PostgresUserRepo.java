@@ -100,13 +100,13 @@ public class PostgresUserRepo implements UserRepository {
 
     private static final String SELECT_AUCTIONS_BY_USER_ID =
             "SELECT a.id as a_id, a.starting_price, a.min_bid_increment, a.current_highest_price, a.final_price, a.start_time, a.end_time, a.status, " +
-                    "i.id as i_id, i.name as i_name, i.description as i_description, " +
-                    "b.id as b_id, b.username as b_username " +
-                    "FROM auctions a " +
-                    "JOIN items i ON a.item_id = i.id " +
-                    "LEFT JOIN users b ON a.current_highest_bidder_id = b.id " +
-                    "WHERE i.seller_id = :userId " +
-                    "ORDER BY a.start_time DESC";
+            "i.id as i_id, i.name as i_name, i.description as i_description, " +
+            "b.id as b_id, b.username as b_username " +
+            "FROM auctions a " +
+            "JOIN items i ON a.item_id = i.id " +
+            "LEFT JOIN users b ON a.current_highest_bidder_id = b.id " +
+            "WHERE COALESCE(a.seller_id, i.seller_id) = :userId " +
+            "ORDER BY a.start_time DESC";
 
     private static final String SELECT_BIDS_BY_AUCTION_ID =
             "SELECT b.id, b.bid_amount, b.timestamp, u.id as u_id, u.username as u_username " +

@@ -5,6 +5,7 @@ import com.shop.domain.Item;
 import com.shop.domain.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.r2dbc.core.DatabaseClient;
+import org.springframework.r2dbc.core.FetchSpec;
 import org.springframework.r2dbc.core.RowsFetchSpec;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -86,6 +87,34 @@ class PostgresAuctionRepoTest {
 
         verify(databaseClient, times(1)).sql(contains("ORDER BY a.start_time DESC"));
         verify(databaseClient, times(1)).sql(contains("WHERE b.auction_id IN"));
+    }
+
+    @Test
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    void saveAuctionPersistsOriginalSellerId() {
+        DatabaseClient databaseClient = mock(DatabaseClient.class);
+        DatabaseClient.GenericExecuteSpec spec = mock(DatabaseClient.GenericExecuteSpec.class);
+        FetchSpec<java.util.Map<String, Object>> fetchSpec = mock(FetchSpec.class);
+        Auction auction = auction("auction-1");
+
+        when(databaseClient.sql(contains("UPDATE auctions"))).thenReturn(spec);
+        when(spec.bind(eq("id"), eq("auction-1"))).thenReturn(spec);
+        when(spec.bind(eq("sellerId"), eq("seller-auction-1"))).thenReturn(spec);
+        when(spec.bind(eq("currentHighestPrice"), any(java.math.BigDecimal.class))).thenReturn(spec);
+        when(spec.bind(eq("minBidIncrement"), any(java.math.BigDecimal.class))).thenReturn(spec);
+        when(spec.bind(eq("status"), eq(auction.getStatus().name()))).thenReturn(spec);
+        when(spec.bindNull(eq("currentHighestBidderId"), eq(String.class))).thenReturn(spec);
+        when(spec.bindNull(eq("finalPrice"), eq(java.math.BigDecimal.class))).thenReturn(spec);
+        when(spec.fetch()).thenReturn(fetchSpec);
+        when(fetchSpec.rowsUpdated()).thenReturn(Mono.just(1L));
+
+        PostgresAuctionRepo repo = new PostgresAuctionRepo(databaseClient);
+
+        StepVerifier.create(repo.saveAuction(auction))
+                .verifyComplete();
+
+        verify(spec).bind(eq("sellerId"), eq("seller-auction-1"));
+        verify(databaseClient).sql(contains("seller_id = :sellerId"));
     }
 
     private static Auction auction(String id) {
