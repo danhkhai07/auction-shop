@@ -51,14 +51,19 @@ public class AuctionHandler {
                                 java.math.BigDecimal previousPrice = auction.getCurrentHighestPrice();
 
                                 auction.placeBid(bidder, bidRequest.amount());
-                                // Deduct bid amount from user balance
-                                bidder.deductFromBalance(bidRequest.amount());
                                 
                                 Mono<Void> updatePreviousBidder = Mono.empty();
-                                if (previousBidder != null && !previousBidder.getId().equals(bidder.getId())) {
-                                    previousBidder.addToBalance(previousPrice);
-                                    updatePreviousBidder = userManager.updateUser(previousBidder);
+                                if (previousBidder != null) {
+                                    if (previousBidder.getId().equals(bidder.getId())) {
+                                        bidder.addToBalance(previousPrice);
+                                    } else {
+                                        previousBidder.addToBalance(previousPrice);
+                                        updatePreviousBidder = userManager.updateUser(previousBidder);
+                                    }
                                 }
+
+                                // Deduct bid amount from user balance
+                                bidder.deductFromBalance(bidRequest.amount());
 
                                 boolean antiSniped = LocalDateTime.now().isAfter(auction.getEndTime().minusMinutes(1));
                                 if (antiSniped) {
@@ -91,8 +96,18 @@ public class AuctionHandler {
                         auctionService.getAuctionByIDForUpdate(auctionID)
                                 .switchIfEmpty(Mono.error(new IllegalStateException("auction does not exist")))
                                 .flatMap(auction -> {
+                                    User highestBidder = auction.getCurrentHighestBidder();
+                                    java.math.BigDecimal highestPrice = auction.getCurrentHighestPrice();
+
                                     auction.cancelAuction(user);
-                                    return auctionService.updateAuctionStatus(auction)
+
+                                    Mono<Void> updateHighestBidder = Mono.empty();
+                                    if (highestBidder != null) {
+                                        highestBidder.addToBalance(highestPrice);
+                                        updateHighestBidder = userManager.updateUser(highestBidder);
+                                    }
+
+                                    return updateHighestBidder.then(auctionService.updateAuctionStatus(auction))
                                             .doOnSuccess(v -> {
                                                 stream.publish(auctionID,
                                                         new AuctionEvent("AUCTION_CANCELLED", auction));
