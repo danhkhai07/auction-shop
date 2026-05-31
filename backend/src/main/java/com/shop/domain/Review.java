@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.domain.Persistable;
+
 import java.time.Instant;
 
 @Data
@@ -14,7 +17,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table("reviews")
-public class Review {
+public class Review implements Persistable<String> {
     @Id
     private String id;
     private String reviewerUsername;
@@ -22,4 +25,13 @@ public class Review {
     private Integer stars;
     private String comment;
     private Instant createdAt;
+
+    @Transient
+    @Builder.Default
+    private boolean isNew = true;
+
+    @Override
+    public boolean isNew() {
+        return isNew;
+    }
 }
