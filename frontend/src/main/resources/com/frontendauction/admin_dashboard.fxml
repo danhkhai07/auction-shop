@@ -21,9 +21,9 @@
             <Insets bottom="10.0" left="28.0" right="28.0" top="10.0" />
          </padding>
          <children>
-            <Button mnemonicParsing="false" onAction="#goToDashboard" prefHeight="40.0" prefWidth="45.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-background-radius: 8; -fx-cursor: hand;" text="←">
+            <Button mnemonicParsing="false" onAction="#goToDashboard" prefHeight="40.0" prefWidth="90.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-background-radius: 8; -fx-cursor: hand;" text="&lt; Home">
                <font>
-                  <Font name="System Bold" size="24.0" />
+                  <Font name="System Bold" size="15.0" />
                </font>
             </Button>
             <Label text="Admin Feed" textFill="white">

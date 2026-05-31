@@ -15,6 +15,7 @@ public class UserProfileModel {
     private List<String> itemList;
     @JsonAlias({"auctions", "auctionList"})
     private List<String> auctionList;
+    private Boolean banned;
     private String status;
 
     public UserProfileModel() {
@@ -61,10 +62,21 @@ public class UserProfileModel {
     }
 
     public String getStatus() {
-        return status;
+        if (status != null && !status.isBlank()) {
+            return status;
+        }
+        return Boolean.TRUE.equals(banned) ? "BANNED" : "ACTIVE";
     }
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Boolean getBanned() {
+        return banned;
+    }
+
+    public void setBanned(Boolean banned) {
+        this.banned = banned;
     }
 }
