@@ -22,6 +22,7 @@ public class AuctionCardController {
     @FXML private Label lblSellerName;
 
     private LiveAuctionModel.AuctionDetail auction;
+    private final com.frontendauction.service.ReviewService reviewService = new com.frontendauction.service.ReviewService();
 
     public void setAuction(LiveAuctionModel.AuctionDetail auction) {
         this.auction = auction;
@@ -37,6 +38,25 @@ public class AuctionCardController {
         String sellerName = (auction.getSeller() != null && auction.getSeller().getUsername() != null)
                 ? auction.getSeller().getUsername() : "Unknown";
         lblSellerName.setText("Seller: " + sellerName);
+
+        if (!"Unknown".equals(sellerName)) {
+            reviewService.getReviewsForUser(sellerName)
+                .thenAccept(reviews -> javafx.application.Platform.runLater(() -> {
+                    double sum = 0;
+                    int count = 0;
+                    for (com.frontendauction.model.ReviewModel r : reviews) {
+                        if (r.getTargetUser().equalsIgnoreCase(sellerName)) {
+                            sum += r.getStars();
+                            count++;
+                        }
+                    }
+                    if (count > 0) {
+                        lblSellerName.setText("Seller: " + sellerName + " (" + String.format("%.1f \u2605", sum / count) + ")");
+                    } else {
+                        lblSellerName.setText("Seller: " + sellerName + " (- \u2605)");
+                    }
+                }));
+        }
         
         if ("CLOSED".equalsIgnoreCase(status)) {
             cardContainer.setOpacity(0.6);
