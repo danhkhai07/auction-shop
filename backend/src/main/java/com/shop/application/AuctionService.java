@@ -39,6 +39,11 @@ public class AuctionService {
                 .switchIfEmpty(Mono.error(new IllegalStateException("auction not found")));
     }
 
+    public Mono<Auction> getAuctionByIDForUpdate(String id){
+        return auctionRepository.getByIDForUpdate(id)
+                .switchIfEmpty(Mono.error(new IllegalStateException("auction not found")));
+    }
+
     public Mono<GetAuctionResponse> getAuctionResponseByID(String id){
         return getAuctionByID(id)
                 .map(this::toResponse);

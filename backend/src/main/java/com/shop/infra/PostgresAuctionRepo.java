@@ -42,6 +42,8 @@ public class PostgresAuctionRepo implements AuctionRepository {
 
     private static final String SELECT_AUCTION_BY_ID = SELECT_AUCTION + "WHERE a.id = :id";
     
+    private static final String SELECT_AUCTION_BY_ID_FOR_UPDATE = SELECT_AUCTION_BY_ID + " FOR UPDATE";
+    
     private static final String SELECT_ALL_AUCTIONS = SELECT_AUCTION + "ORDER BY a.start_time DESC";
 
     private static final String SELECT_ACTIVES = SELECT_AUCTION + "WHERE a.status IN ('OPEN', 'RUNNING', 'PAUSED')";
@@ -109,6 +111,17 @@ public class PostgresAuctionRepo implements AuctionRepository {
                 .map(this::mapRowToAuction) // Chuyển Row thành Auction object
                 .one()
                 .flatMap(this::loadBidsForAuction); // Truy vấn tiếp danh sách Lịch sử đấu giá (bids) và nạp vào Auction
+    }
+
+    @Override
+    public Mono<Auction> getByIDForUpdate(String id) {
+        if (!StringUtils.hasText(id)) return Mono.empty();
+        
+        return databaseClient.sql(SELECT_AUCTION_BY_ID_FOR_UPDATE)
+                .bind("id", id)
+                .map(this::mapRowToAuction)
+                .one()
+                .flatMap(this::loadBidsForAuction);
     }
 
     @Override

@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -25,6 +26,7 @@ public class AuctionHandler {
     private final UserManager userManager;
     private final AuctionEventStream stream;
 
+    @Transactional
     public Mono<ServerResponse> placeBid(ServerRequest request) {
         String auctionID = request.pathVariable("id");
 
@@ -43,7 +45,7 @@ public class AuctionHandler {
                         return Mono.error(new IllegalArgumentException("Insufficient balance. Available: " + bidder.getBalance() + ", Required: " + bidRequest.amount()));
                     }
 
-                    return auctionService.getAuctionByID(auctionID)
+                    return auctionService.getAuctionByIDForUpdate(auctionID)
                             .flatMap(auction -> {
                                 User previousBidder = auction.getCurrentHighestBidder();
                                 java.math.BigDecimal previousPrice = auction.getCurrentHighestPrice();
@@ -81,11 +83,12 @@ public class AuctionHandler {
                 .flatMap(v -> ServerResponse.status(201).build());
     }
 
+    @Transactional
     public Mono<ServerResponse> cancelAuction(ServerRequest request) {
         String auctionID = request.pathVariable("id");
         return userManager.getUserByID(request.attributes().get("userID").toString())
                 .flatMap(user ->
-                        auctionService.getAuctionByID(auctionID)
+                        auctionService.getAuctionByIDForUpdate(auctionID)
                                 .switchIfEmpty(Mono.error(new IllegalStateException("auction does not exist")))
                                 .flatMap(auction -> {
                                     auction.cancelAuction(user);
@@ -100,11 +103,12 @@ public class AuctionHandler {
                 .flatMap(v -> ServerResponse.status(201).build());
     }
 
+    @Transactional
     public Mono<ServerResponse> startAuction(ServerRequest request) {
         String auctionID = request.pathVariable("id");
         return userManager.getUserByID(request.attributes().get("userID").toString())
                 .flatMap(user ->
-                        auctionService.getAuctionByID(auctionID)
+                        auctionService.getAuctionByIDForUpdate(auctionID)
                                 .filter(auction -> auction.getItem().getSeller().getId().equals(user.getId()))
                                 .switchIfEmpty(Mono.error(new IllegalStateException("unauthorized")))
                                 .flatMap(auction -> {
@@ -120,11 +124,12 @@ public class AuctionHandler {
                 .flatMap(v -> ServerResponse.status(201).build());
     }
 
+    @Transactional
     public Mono<ServerResponse> pauseAuction(ServerRequest request) {
         String auctionID = request.pathVariable("id");
         return userManager.getUserByID(request.attributes().get("userID").toString())
                 .flatMap(user ->
-                        auctionService.getAuctionByID(auctionID)
+                        auctionService.getAuctionByIDForUpdate(auctionID)
                                 .filter(auction -> auction.getItem().getSeller().getId().equals(user.getId()))
                                 .switchIfEmpty(Mono.error(new IllegalStateException("unauthorized")))
                                 .flatMap(auction -> {
@@ -140,11 +145,12 @@ public class AuctionHandler {
                 .flatMap(v -> ServerResponse.status(201).build());
     }
 
+    @Transactional
     public Mono<ServerResponse> unpauseAuction(ServerRequest request) {
         String auctionID = request.pathVariable("id");
         return userManager.getUserByID(request.attributes().get("userID").toString())
                 .flatMap(user ->
-                        auctionService.getAuctionByID(auctionID)
+                        auctionService.getAuctionByIDForUpdate(auctionID)
                                 .filter(auction -> auction.getItem().getSeller().getId().equals(user.getId()))
                                 .switchIfEmpty(Mono.error(new IllegalStateException("unauthorized")))
                                 .flatMap(auction -> {
@@ -160,11 +166,12 @@ public class AuctionHandler {
                 .flatMap(v -> ServerResponse.status(201).build());
     }
 
+    @Transactional
     public Mono<ServerResponse> finishAuction(ServerRequest request) {
         String auctionID = request.pathVariable("id");
         return userManager.getUserByID(request.attributes().get("userID").toString())
                 .flatMap(user ->
-                    auctionService.getAuctionByID(auctionID)
+                    auctionService.getAuctionByIDForUpdate(auctionID)
                         .filter(auction -> auction.getItem().getSeller().getId().equals(user.getId()))
                         .switchIfEmpty(Mono.error(new IllegalStateException("unauthorized")))
                         .flatMap(auction -> {
@@ -188,6 +195,7 @@ public class AuctionHandler {
                 .flatMap(v -> ServerResponse.status(201).build());
     }
 
+    @Transactional
     public Mono<ServerResponse> extendEndtime(ServerRequest request) {
         String auctionID = request.pathVariable("id");
 
@@ -201,7 +209,7 @@ public class AuctionHandler {
                     ExtendAuctionTime extendTimeRequest = tuple.getT1();
                     User user = tuple.getT2();
 
-                    return auctionService.getAuctionByID(auctionID)
+                    return auctionService.getAuctionByIDForUpdate(auctionID)
                             .filter(auction -> auction.getItem().getSeller().getId().equals(user.getId()))
                             .switchIfEmpty(Mono.error(new IllegalStateException("unauthorized")))
                             .flatMap(auction -> {
