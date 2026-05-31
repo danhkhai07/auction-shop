@@ -13,7 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
-import org.springframework.transaction.annotation.Transactional;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -26,7 +26,6 @@ public class AuctionHandler {
     private final UserManager userManager;
     private final AuctionEventStream stream;
 
-    @Transactional
     public Mono<ServerResponse> placeBid(ServerRequest request) {
         String auctionID = request.pathVariable("id");
 
@@ -81,10 +80,9 @@ public class AuctionHandler {
                                 });
                             });
                 })
-                .flatMap(v -> ServerResponse.status(201).build());
+                .then(ServerResponse.status(201).build());
     }
 
-    @Transactional
     public Mono<ServerResponse> cancelAuction(ServerRequest request) {
         String auctionID = request.pathVariable("id");
         return userManager.getUserByID(request.attributes().get("userID").toString())
@@ -110,10 +108,9 @@ public class AuctionHandler {
                                             });
                                 })
                 )
-                .flatMap(v -> ServerResponse.status(201).build());
+                .then(ServerResponse.status(201).build());
     }
 
-    @Transactional
     public Mono<ServerResponse> startAuction(ServerRequest request) {
         String auctionID = request.pathVariable("id");
         return userManager.getUserByID(request.attributes().get("userID").toString())
@@ -131,10 +128,9 @@ public class AuctionHandler {
                                         });
                                 })
                 )
-                .flatMap(v -> ServerResponse.status(201).build());
+                .then(ServerResponse.status(201).build());
     }
 
-    @Transactional
     public Mono<ServerResponse> pauseAuction(ServerRequest request) {
         String auctionID = request.pathVariable("id");
         return userManager.getUserByID(request.attributes().get("userID").toString())
@@ -152,10 +148,9 @@ public class AuctionHandler {
                                             });
                                 })
                 )
-                .flatMap(v -> ServerResponse.status(201).build());
+                .then(ServerResponse.status(201).build());
     }
 
-    @Transactional
     public Mono<ServerResponse> unpauseAuction(ServerRequest request) {
         String auctionID = request.pathVariable("id");
         return userManager.getUserByID(request.attributes().get("userID").toString())
@@ -173,10 +168,9 @@ public class AuctionHandler {
                                             });
                                 })
                 )
-                .flatMap(v -> ServerResponse.status(201).build());
+                .then(ServerResponse.status(201).build());
     }
 
-    @Transactional
     public Mono<ServerResponse> finishAuction(ServerRequest request) {
         String auctionID = request.pathVariable("id");
         return userManager.getUserByID(request.attributes().get("userID").toString())
@@ -201,10 +195,9 @@ public class AuctionHandler {
                                     });
                         })
                 )
-                .flatMap(v -> ServerResponse.status(201).build());
+                .then(ServerResponse.status(201).build());
     }
 
-    @Transactional
     public Mono<ServerResponse> extendEndtime(ServerRequest request) {
         String auctionID = request.pathVariable("id");
 
@@ -230,7 +223,7 @@ public class AuctionHandler {
                                         });
                             });
                 })
-                .flatMap(v -> ServerResponse.status(201).build());
+                .then(ServerResponse.status(201).build());
     }
 
     public Mono<ServerResponse> stream(ServerRequest request) {

@@ -42,7 +42,7 @@ public class PostgresAuctionRepo implements AuctionRepository {
 
     private static final String SELECT_AUCTION_BY_ID = SELECT_AUCTION + "WHERE a.id = :id";
     
-    private static final String SELECT_AUCTION_BY_ID_FOR_UPDATE = SELECT_AUCTION_BY_ID + " FOR UPDATE";
+    private static final String SELECT_AUCTION_BY_ID_FOR_UPDATE = SELECT_AUCTION_BY_ID + " FOR UPDATE OF a";
     
     private static final String SELECT_ALL_AUCTIONS = SELECT_AUCTION + "ORDER BY a.start_time DESC";
 
