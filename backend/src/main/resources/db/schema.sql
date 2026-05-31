@@ -173,3 +173,17 @@ ON CONFLICT (id) DO NOTHING;
 CREATE INDEX IF NOT EXISTS idx_bids_auction_id ON bids(auction_id);
 CREATE INDEX IF NOT EXISTS idx_bids_bidder_id ON bids(bidder_id);
 CREATE INDEX IF NOT EXISTS idx_bids_auction_timestamp ON bids(auction_id, timestamp DESC);
+
+CREATE TABLE IF NOT EXISTS reviews (
+    id VARCHAR(64) PRIMARY KEY,
+    reviewer_username VARCHAR(120) NOT NULL REFERENCES users(username) ON DELETE CASCADE,
+    target_username VARCHAR(120) NOT NULL REFERENCES users(username) ON DELETE CASCADE,
+    stars INTEGER NOT NULL,
+    comment TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_reviews_stars CHECK (stars >= 1 AND stars <= 5)
+);
+
+CREATE INDEX IF NOT EXISTS idx_reviews_target_username ON reviews(target_username);
+CREATE INDEX IF NOT EXISTS idx_reviews_reviewer_username ON reviews(reviewer_username);
+

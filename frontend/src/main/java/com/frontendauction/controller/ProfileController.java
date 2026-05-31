@@ -35,6 +35,7 @@ public class ProfileController {
     @FXML private Label lblItemCount;
     @FXML private Label lblAuctionCount;
     @FXML private Label lblBalance;
+    @FXML private Label lblAverageStars;
 
     @FXML private TableView<ProductManagementModel> tvOwnedItems;
     @FXML private TableColumn<ProductManagementModel, String> colOwnedItemId;
@@ -48,7 +49,15 @@ public class ProfileController {
     @FXML private TableColumn<LiveAuctionModel.AuctionDetail, String> colOwnedAuctionStatus;
     @FXML private TableColumn<LiveAuctionModel.AuctionDetail, Void> colOwnedAuctionAction;
 
+    @FXML private TableView<com.frontendauction.model.ReviewModel> tvReviews;
+    @FXML private TableColumn<com.frontendauction.model.ReviewModel, String> colReviewTime;
+    @FXML private TableColumn<com.frontendauction.model.ReviewModel, String> colReviewer;
+    @FXML private TableColumn<com.frontendauction.model.ReviewModel, String> colReviewTarget;
+    @FXML private TableColumn<com.frontendauction.model.ReviewModel, Integer> colReviewStars;
+    @FXML private TableColumn<com.frontendauction.model.ReviewModel, String> colReviewComment;
+
     private final UserProfileService userProfileService = new UserProfileService();
+    private final com.frontendauction.service.ReviewService reviewService = new com.frontendauction.service.ReviewService();
 
     @FXML
     public void initialize() {
@@ -143,6 +152,27 @@ public class ProfileController {
         colOwnedAuctionPrice.setCellValueFactory(new PropertyValueFactory<>("currentPrice"));
         colOwnedAuctionStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
 
+        if (tvReviews != null) {
+            colReviewTime.setCellValueFactory(new PropertyValueFactory<>("timestamp"));
+            colReviewer.setCellValueFactory(new PropertyValueFactory<>("reviewer"));
+            colReviewTarget.setCellValueFactory(new PropertyValueFactory<>("targetUser"));
+            colReviewStars.setCellValueFactory(new PropertyValueFactory<>("stars"));
+            colReviewComment.setCellValueFactory(new PropertyValueFactory<>("comment"));
+            
+            colReviewStars.setCellFactory(column -> new TableCell<>() {
+                @Override
+                protected void updateItem(Integer item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                    } else {
+                        setText(item + " \u2605");
+                        setStyle("-fx-text-fill: #eab308; -fx-font-weight: bold;"); // gold color
+                    }
+                }
+            });
+        }
+
         colOwnedAuctionPrice.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(Double value, boolean empty) {
@@ -226,6 +256,34 @@ public class ProfileController {
         tvOwnedAuctions.setItems(FXCollections.observableArrayList(data.auctions()));
         lblItemCount.setText(String.valueOf(data.items().size()));
         lblAuctionCount.setText(String.valueOf(data.auctions().size()));
+        
+        if (tvReviews != null && data.user() != null && data.user().getUsername() != null) {
+            String myUsername = data.user().getUsername();
+            reviewService.getReviewsForUser(myUsername)
+                    .thenAccept(reviews -> Platform.runLater(() -> {
+                        tvReviews.setItems(FXCollections.observableArrayList(reviews));
+                        
+                        if (lblAverageStars != null) {
+                            double sum = 0;
+                            int count = 0;
+                            for (com.frontendauction.model.ReviewModel r : reviews) {
+                                if (r.getTargetUser().equalsIgnoreCase(myUsername)) {
+                                    sum += r.getStars();
+                                    count++;
+                                }
+                            }
+                            if (count > 0) {
+                                lblAverageStars.setText(String.format("%.1f \u2605", sum / count));
+                            } else {
+                                lblAverageStars.setText("- \u2605");
+                            }
+                        }
+                    }))
+                    .exceptionally(e -> {
+                        e.printStackTrace();
+                        return null;
+                    });
+        }
     }
 
     private void showLoadFailure(String message) {
@@ -236,6 +294,7 @@ public class ProfileController {
         lblAuctionCount.setText("0");
         tvOwnedItems.setItems(FXCollections.observableArrayList());
         tvOwnedAuctions.setItems(FXCollections.observableArrayList());
+        if (tvReviews != null) tvReviews.setItems(FXCollections.observableArrayList());
 
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Profile");
