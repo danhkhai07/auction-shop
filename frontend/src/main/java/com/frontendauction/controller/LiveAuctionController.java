@@ -189,7 +189,11 @@ public class LiveAuctionController {
                         lblSeller.setText("Seller: " + currentSellerName + repStr + " | Status: " + formatStatus(auction.getStatus())
                                 + " | Auction ID: " + fallback(auction.getId(), "-"));
                     }
-                }));
+                })).exceptionally(e -> {
+                    System.err.println("Failed to fetch reviews for seller " + currentSellerName + ": " + e.getMessage());
+                    e.printStackTrace();
+                    return null;
+                });
         }
 
         if (lblDescription != null) {
@@ -294,11 +298,11 @@ public class LiveAuctionController {
                     // Trigger rating popup if current user has bid in this auction
                     userProfileService.getCurrentUser().thenAccept(user -> Platform.runLater(() -> {
                         if (user == null) return;
-                        boolean isBidder = hasPlacedBid;
+                        boolean isWinner = user.getUsername().equalsIgnoreCase(winnerName);
                         
                         showSuccess("Phiên đấu giá đã kết thúc!\nNgười chiến thắng: " + winnerName + "\nVới giá: " + formatCurrency(finalPrice));
                         
-                        if (isBidder) {
+                        if (isWinner) {
                             showRatingDialog(currentSellerName, "Người bán");
                         }
                     })).exceptionally(e -> {
@@ -699,7 +703,10 @@ public class LiveAuctionController {
                 reviewService.submitReview(targetUser, selectedRating[0], commentArea.getText())
                     .thenAccept(v -> {
                         System.out.println("Review submitted successfully for " + targetUser);
-                        Platform.runLater(() -> showSuccess("Đánh giá đã được lưu thành công!"));
+                        Platform.runLater(() -> {
+                            showSuccess("Đánh giá đã được lưu thành công!");
+                            loadAuctionData();
+                        });
                     })
                     .exceptionally(e -> {
                         System.err.println("Failed to submit review: " + e.getMessage());

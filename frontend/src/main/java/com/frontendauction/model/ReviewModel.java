@@ -33,4 +33,11 @@ public class ReviewModel {
     public String getReviewer() { return reviewerUsername; }
     public String getTargetUser() { return targetUsername; }
     public String getTimestamp() { return createdAt; }
+
+    public void setId(String id) { this.id = id; }
+    public void setReviewerUsername(String reviewerUsername) { this.reviewerUsername = reviewerUsername; }
+    public void setTargetUsername(String targetUsername) { this.targetUsername = targetUsername; }
+    public void setStars(int stars) { this.stars = stars; }
+    public void setComment(String comment) { this.comment = comment; }
+    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
 }

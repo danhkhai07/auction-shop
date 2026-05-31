@@ -45,7 +45,7 @@ public class AuctionCardController {
                     double sum = 0;
                     int count = 0;
                     for (com.frontendauction.model.ReviewModel r : reviews) {
-                        if (r.getTargetUser().equalsIgnoreCase(sellerName)) {
+                        if (r.getTargetUser() != null && r.getTargetUser().equalsIgnoreCase(sellerName)) {
                             sum += r.getStars();
                             count++;
                         }
