@@ -125,18 +125,17 @@ public class ItemService {
             return Mono.error(new IllegalArgumentException("item and new owner are required"));
         }
 
-        Item transferredItem = new Item(
-                item.getId(),
+        Item newItem = new Item(
+                ulid.nextULID(),
                 item.getName(),
                 item.getDescription(),
                 newOwner
         );
 
-        return itemRepository.saveItem(transferredItem)
+        return itemRepository.newItem(newItem)
                 .then(Mono.fromRunnable(() -> {
-                    cacheManager.put(transferredItem.getId(), transferredItem);
+                    cacheManager.put(newItem.getId(), newItem);
                     cacheManager.delete(ALL_ITEMS_CACHE_KEY);
-                    cacheManager.delete(item.getSeller().getId());
                     cacheManager.delete(newOwner.getId());
                 }));
     }

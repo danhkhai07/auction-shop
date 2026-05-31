@@ -57,6 +57,7 @@ public class LiveAuctionController {
 
     private final LiveAuctionService auctionService = new LiveAuctionService();
     private final com.frontendauction.service.UserProfileService userProfileService = new com.frontendauction.service.UserProfileService();
+    private final com.frontendauction.service.ReviewService reviewService = new com.frontendauction.service.ReviewService();
 
     private String currentAuctionId;
     private String currentSellerName;
@@ -165,8 +166,12 @@ public class LiveAuctionController {
         currentSellerName = (auction.getSeller() != null && auction.getSeller().getUsername() != null)
                 ? auction.getSeller().getUsername() : "Unknown";
 
+        // Add mocked seller reputation
+        double mockSellerReputation = 4.5 + Math.random() * 0.5;
+        String sellerReputationStr = String.format(Locale.US, " (%.1f \u2605)", mockSellerReputation);
+
         if (lblSeller != null) {
-            lblSeller.setText("Seller: " + currentSellerName + " | Status: " + formatStatus(auction.getStatus())
+            lblSeller.setText("Seller: " + currentSellerName + sellerReputationStr + " | Status: " + formatStatus(auction.getStatus())
                     + " | Auction ID: " + fallback(auction.getId(), "-"));
         }
 
@@ -244,13 +249,33 @@ public class LiveAuctionController {
                 disableBidControls();
                 stopCountdown();
                 if (lblSeller != null) {
-                    lblSeller.setText("Seller: " + fallback(currentSellerName, "Unknown") + " | Status: " + type.replace("AUCTION_", "") + " | Auction ID: " + fallback(currentAuctionId, "-"));
+                    String sellerRep = String.format(Locale.US, " (%.1f \u2605)", 4.8);
+                    lblSeller.setText("Seller: " + fallback(currentSellerName, "Unknown") + sellerRep + " | Status: " + type.replace("AUCTION_", "") + " | Auction ID: " + fallback(currentAuctionId, "-"));
                 }
                 
                 if ("AUCTION_FINISHED".equals(type) && event.getCurrentHighestBidder() != null && event.getFinalPrice() != null) {
                     String winnerName = event.getCurrentHighestBidder().getUsername();
                     Double finalPrice = event.getFinalPrice();
-                    showSuccess("Phiên đấu giá đã kết thúc!\nNgười chiến thắng: " + winnerName + "\nVới giá: " + formatCurrency(finalPrice));
+                    
+                    // Trigger rating popup if current user is Seller or Winner
+                    userProfileService.getCurrentUser().thenAccept(user -> Platform.runLater(() -> {
+                        if (user == null) return;
+                        boolean isSeller = user.getAuctionList() != null && currentAuctionId != null && 
+                                           user.getAuctionList().stream().anyMatch(id -> id.trim().equalsIgnoreCase(currentAuctionId.trim()));
+                        boolean isWinner = user.getUsername() != null && winnerName != null && 
+                                           user.getUsername().trim().equalsIgnoreCase(winnerName.trim());
+                        
+                        showSuccess("Phiên đấu giá đã kết thúc!\nNgười chiến thắng: " + winnerName + "\nVới giá: " + formatCurrency(finalPrice));
+                        
+                        if (isSeller) {
+                            showRatingDialog(winnerName, "Người mua");
+                        } else if (isWinner) {
+                            showRatingDialog(currentSellerName, "Người bán");
+                        }
+                    })).exceptionally(e -> {
+                        Platform.runLater(() -> showSuccess("Phiên đấu giá đã kết thúc!\nNgười chiến thắng: " + winnerName + "\nVới giá: " + formatCurrency(finalPrice)));
+                        return null;
+                    });
                 } else if ("AUCTION_FINISHED".equals(type)) {
                     showSuccess("Phiên đấu giá đã kết thúc!\nKhông có người chiến thắng (Chưa có ai đặt giá).");
                 }
@@ -598,6 +623,61 @@ public class LiveAuctionController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void showRatingDialog(String targetUser, String role) {
+        javafx.scene.control.Dialog<Void> dialog = new javafx.scene.control.Dialog<>();
+        dialog.setTitle("Đánh giá " + role);
+        dialog.setHeaderText("Vui lòng đánh giá " + targetUser + " cho giao dịch này");
+
+        javafx.scene.control.ButtonType submitButtonType = new javafx.scene.control.ButtonType("Gửi đánh giá", javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(submitButtonType, javafx.scene.control.ButtonType.CANCEL);
+
+        javafx.scene.layout.VBox vbox = new javafx.scene.layout.VBox();
+        vbox.setSpacing(10);
+
+        javafx.scene.layout.HBox starBox = new javafx.scene.layout.HBox();
+        starBox.setSpacing(5);
+        final int[] selectedRating = {5};
+        Label[] stars = new Label[5];
+        for (int i = 0; i < 5; i++) {
+            Label star = new Label("★");
+            star.setStyle("-fx-font-size: 32px; -fx-text-fill: gold; -fx-cursor: hand;");
+            final int index = i;
+            star.setOnMouseClicked(e -> {
+                selectedRating[0] = index + 1;
+                for (int j = 0; j < 5; j++) {
+                    stars[j].setStyle("-fx-font-size: 32px; -fx-text-fill: " + (j <= index ? "gold" : "gray") + "; -fx-cursor: hand;");
+                }
+            });
+            stars[i] = star;
+            starBox.getChildren().add(star);
+        }
+
+        javafx.scene.control.TextArea commentArea = new javafx.scene.control.TextArea();
+        commentArea.setPromptText("Nhập nhận xét của bạn...");
+        commentArea.setPrefRowCount(3);
+
+        vbox.getChildren().addAll(new Label("Đánh giá bằng sao:"), starBox, new Label("Nhận xét:"), commentArea);
+        dialog.getDialogPane().setContent(vbox);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == submitButtonType) {
+                System.out.println("Mock Rating submitted: " + selectedRating[0] + " stars for " + targetUser + ". Comment: " + commentArea.getText());
+                
+                // Save real rating
+                reviewService.submitReview(targetUser, selectedRating[0], commentArea.getText())
+                    .exceptionally(e -> {
+                        e.printStackTrace();
+                        return null;
+                    });
+
+                showSuccess("Cảm ơn bạn đã gửi đánh giá (" + selectedRating[0] + " \u2605) cho " + targetUser + "!");
+            }
+            return null;
+        });
+
+        dialog.showAndWait();
     }
 
     @FXML

@@ -57,14 +57,14 @@
 
                                                 <Separator styleClass="separator-custom" />
 
-                                                <VBox spacing="6.0">
+                                                <VBox spacing="6.0" VBox.vgrow="ALWAYS">
                                                     <children>
                                                         <Label text="ITEM DESCRIPTION" textFill="#707070">
                                                             <font>
                                                                 <Font name="System Bold" size="11.0" />
                                                             </font>
                                                         </Label>
-                                                        <ScrollPane fitToWidth="true" minHeight="80.0" prefHeight="100.0" styleClass="scroll-pane-custom">
+                                                        <ScrollPane fitToWidth="true" minHeight="150.0" prefHeight="250.0" styleClass="scroll-pane-custom" VBox.vgrow="ALWAYS">
                                                             <content>
                                                                 <Label fx:id="lblDescription" alignment="TOP_LEFT" text="Loading auction details..." textFill="#333333" wrapText="true">
                                                                     <font>

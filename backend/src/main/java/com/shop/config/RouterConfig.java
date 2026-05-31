@@ -26,6 +26,7 @@ public class RouterConfig {
         AuctionHandler auctionHandler,
         AdminActionsHandler elevateUserHandler,
         BalanceHandler balanceHandler,
+        ReviewHandler reviewHandler,
 
         AuthFilter authFilter,
         RoleFilter roleFilter,
@@ -74,6 +75,10 @@ public class RouterConfig {
                 )
                 .path("/feed", builder -> builder
                         .GET("", viewHandler::getFeed)
+                )
+                .path("/review", builder -> builder
+                        .POST("", contentType(MediaType.APPLICATION_JSON), reviewHandler::createReview).filter(authFilter)
+                        .GET("", reviewHandler::getReviews)
                 )
                 .path("/admin", builder -> builder
                         .filter(roleFilter)
