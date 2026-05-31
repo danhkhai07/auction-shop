@@ -36,11 +36,7 @@ public class AuctionCardController {
         
         String sellerName = (auction.getSeller() != null && auction.getSeller().getUsername() != null)
                 ? auction.getSeller().getUsername() : "Unknown";
-        
-        // Add mocked reputation display
-        double mockReputation = 4.5 + Math.random() * 0.5; // Mock seller reputation
-        String sellerReputation = String.format(java.util.Locale.US, "%.1f \u2605", mockReputation);
-        lblSellerName.setText("Seller: " + sellerName + " (" + sellerReputation + ")");
+        lblSellerName.setText("Seller: " + sellerName);
         
         if ("CLOSED".equalsIgnoreCase(status)) {
             cardContainer.setOpacity(0.6);
@@ -66,20 +62,8 @@ public class AuctionCardController {
                 .thenAccept(user -> {
                     javafx.application.Platform.runLater(() -> {
                         source.setDisable(false);
-                        boolean isSeller = user != null && user.getAuctionList() != null && user.getAuctionList().contains(auction.getId());
-                        
-                        // Mock Reputation Check
-                        double mockReputation = Math.random() < 0.3 ? 2.5 : 4.8; // 30% chance of low reputation for demo
-                        boolean isHighValue = auction.getStartingPrice() != null && auction.getStartingPrice() > 5000000;
-                        if (!isSeller && isHighValue && mockReputation < 3.0) {
-                            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
-                            alert.setTitle("Tín nhiệm thấp");
-                            alert.setHeaderText("Không thể tham gia phiên đấu giá");
-                            alert.setContentText(String.format("Điểm tín nhiệm của bạn (%.1f \u2605) quá thấp để tham gia các phiên đấu giá có giá trị cao (trên 5,000,000 VND).", mockReputation));
-                            alert.showAndWait();
-                        } else {
-                            navigateToAuction(event, isSeller);
-                        }
+                        boolean isSeller = user != null && user.getId() != null && auction.getSeller() != null && user.getId().equals(auction.getSeller().getId());
+                        navigateToAuction(event, isSeller);
                     });
                 })
                 .exceptionally(ex -> {

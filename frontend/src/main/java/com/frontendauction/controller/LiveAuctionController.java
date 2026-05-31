@@ -315,6 +315,9 @@ public class LiveAuctionController {
 
     private String buildDescription(LiveAuctionModel.AuctionDetail auction) {
         StringBuilder builder = new StringBuilder();
+        if (auction.getDescription() != null && !auction.getDescription().isBlank()) {
+            builder.append(auction.getDescription()).append("\n\n");
+        }
         builder.append("Starting price: ").append(formatCurrency(auction.getStartingPrice())).append("\n");
         builder.append("End time: ").append(formatDateTime(auction.getEndTime())).append("\n");
         builder.append("Bid count: ")

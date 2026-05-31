@@ -40,6 +40,8 @@ public class DashboardController {
     private final LiveAuctionService liveAuctionService = new LiveAuctionService();
 
     private List<String> activeAuctionIds;
+    private UserProfileModel currentUser;
+    private List<LiveAuctionModel.AuctionDetail> activeAuctionsList;
 
     @FXML
     public void initialize() {
@@ -62,14 +64,23 @@ public class DashboardController {
 
     @FXML
     public void goToLiveAuction(Event event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(
-                Objects.requireNonNull(getClass().getResource("/com/frontendauction/live-auction.fxml")));
+        LiveAuctionModel.AuctionDetail selectedAuction = null;
+        if (activeAuctionsList != null && !activeAuctionsList.isEmpty()) {
+            selectedAuction = activeAuctionsList.get(new java.util.Random().nextInt(activeAuctionsList.size()));
+        }
+
+        boolean isSeller = false;
+        if (selectedAuction != null && currentUser != null && currentUser.getId() != null && selectedAuction.getSeller() != null) {
+            isSeller = currentUser.getId().equals(selectedAuction.getSeller().getId());
+        }
+
+        String fxmlFile = isSeller ? "/com/frontendauction/seller-controlpanel.fxml" : "/com/frontendauction/live-auction.fxml";
+        FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getResource(fxmlFile)));
         Parent root = loader.load();
 
         LiveAuctionController controller = loader.getController();
-        if (activeAuctionIds != null && !activeAuctionIds.isEmpty()) {
-            String randomId = activeAuctionIds.get(new java.util.Random().nextInt(activeAuctionIds.size()));
-            controller.setAuctionId(randomId);
+        if (selectedAuction != null) {
+            controller.setAuctionId(selectedAuction.getId());
         }
 
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -131,6 +142,9 @@ public class DashboardController {
     private void updateDashboard(DashboardData data) {
         UserProfileModel user = data.user();
         List<LiveAuctionModel.AuctionDetail> activeAuctions = data.activeAuctions();
+        
+        this.currentUser = user;
+        this.activeAuctionsList = activeAuctions;
         
         if (activeAuctions != null) {
             activeAuctions = activeAuctions.stream()
