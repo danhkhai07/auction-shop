@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 public record GetAuctionResponse(
     @JsonProperty("id") String id,
     @JsonProperty("name") String name,
+    @JsonProperty("description") String description,
     @JsonProperty("seller") GetShortUserResponse seller,
     @JsonProperty("startingPrice") BigDecimal startingPrice,
     @JsonProperty("minBidIncrement") BigDecimal minBidIncrement,
@@ -26,6 +27,7 @@ public record GetAuctionResponse(
     public GetAuctionResponse(Auction auction) {
         this(auction.getId(),
                 auction.getItem().getName(),
+                auction.getItem().getDescription(),
                 new GetShortUserResponse(auction.getItem().getSeller()),
                 auction.getStartingPrice(),
                 auction.getMinBidIncrement(),

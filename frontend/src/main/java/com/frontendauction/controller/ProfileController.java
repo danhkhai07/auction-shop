@@ -106,6 +106,33 @@ public class ProfileController {
         }
     }
 
+    @FXML
+    public void handleWithdraw(javafx.event.ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/frontendauction/withdraw-popup.fxml"));
+            Parent root = loader.load();
+
+            WithdrawController withdrawController = loader.getController();
+            withdrawController.setOnSuccessCallback(() -> loadProfile());
+
+            Stage stage = new Stage();
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            stage.setTitle("Withdraw");
+
+            Stage owner = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.initOwner(owner);
+
+            javafx.scene.Scene scene = new javafx.scene.Scene(root);
+            stage.setScene(scene);
+            stage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Failed to open withdraw window.");
+            alert.showAndWait();
+        }
+    }
+
     private void setupTables() {
         colOwnedItemId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colOwnedItemName.setCellValueFactory(new PropertyValueFactory<>("name"));

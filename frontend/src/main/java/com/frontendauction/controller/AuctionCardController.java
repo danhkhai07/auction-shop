@@ -62,7 +62,7 @@ public class AuctionCardController {
                 .thenAccept(user -> {
                     javafx.application.Platform.runLater(() -> {
                         source.setDisable(false);
-                        boolean isSeller = user != null && user.getAuctionList() != null && user.getAuctionList().contains(auction.getId());
+                        boolean isSeller = user != null && user.getId() != null && auction.getSeller() != null && user.getId().equals(auction.getSeller().getId());
                         navigateToAuction(event, isSeller);
                     });
                 })

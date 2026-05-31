@@ -318,4 +318,37 @@ public class UserProfileService {
             return CompletableFuture.failedFuture(e);
         }
     }
+
+    public CompletableFuture<BalanceResponse> withdraw(double amount) {
+        if (!TokenStore.hasToken()) {
+            return CompletableFuture.failedFuture(new IllegalStateException("You must login first."));
+        }
+
+        try {
+            String jsonPayload = objectMapper.writeValueAsString(Map.of("amount", amount));
+            HttpRequest request = authorizedRequest("/balance/withdraw")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                    .header("Content-Type", "application/json")
+                    .build();
+
+            return client.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8))
+                    .thenCompose(response -> {
+                        if (response.statusCode() == 200 || response.statusCode() == 201) {
+                            try {
+                                BalanceResponse balanceData = objectMapper.readValue(response.body(), BalanceResponse.class);
+                                return CompletableFuture.completedFuture(balanceData);
+                            } catch (Exception exception) {
+                                return CompletableFuture.failedFuture(
+                                        new IllegalStateException("Invalid withdraw response", exception)
+                                );
+                            }
+                        }
+                        return CompletableFuture.failedFuture(
+                                new RuntimeException("Failed to withdraw. Server returned: " + response.statusCode() + " " + response.body())
+                        );
+                    });
+        } catch (Exception e) {
+            return CompletableFuture.failedFuture(e);
+        }
+    }
 }

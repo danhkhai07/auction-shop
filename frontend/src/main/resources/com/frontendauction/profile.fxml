@@ -87,6 +87,7 @@
                                     </font>
                                 </Label>
                                 <Button mnemonicParsing="false" onAction="#handleDeposit" prefHeight="35.0" prefWidth="240.0" style="-fx-margin-top: 10px;" styleClass="btn-primary" text="Deposit" />
+                                <Button mnemonicParsing="false" onAction="#handleWithdraw" prefHeight="35.0" prefWidth="240.0" style="-fx-margin-top: 10px;" styleClass="btn-danger" text="Withdraw" />
                             </children>
                         </VBox>
                         <Region VBox.vgrow="ALWAYS" />

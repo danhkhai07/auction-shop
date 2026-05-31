@@ -21,7 +21,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
+
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -49,8 +49,7 @@ public class LiveAuctionController {
     @FXML private Label lblDescription;
     @FXML private Label lblCurrentPrice;
     @FXML private Label lblTimeLeft;
-    @FXML private CheckBox chkAutoBid;
-    @FXML private TextField txtMaxAutoBid;
+
     @FXML private TextField txtBidAmount;
     @FXML private Button btnPlaceBid;
     @FXML private LineChart<String, Number> priceChart;
@@ -75,10 +74,6 @@ public class LiveAuctionController {
 
     @FXML
     public void initialize() {
-        if (txtMaxAutoBid != null && chkAutoBid != null) {
-            txtMaxAutoBid.disableProperty().bind(chkAutoBid.selectedProperty().not());
-        }
-
         if (btnPlaceBid != null) {
             btnPlaceBid.setOnAction(event -> handlePlaceBid());
         }
@@ -148,7 +143,7 @@ public class LiveAuctionController {
                         );
                     }
 
-                    currentAuctionId = normalizeAuctionId(auctions.getFirst().getId());
+                    currentAuctionId = normalizeAuctionId(auctions.get(0).getId());
                     return auctionService.getAuctionDetails(currentAuctionId).thenCompose(this::requireAuction);
                 });
     }
@@ -241,8 +236,7 @@ public class LiveAuctionController {
                             }))
                             .exceptionally(ex -> { ex.printStackTrace(); return null; });
                 }
-                // Auto bid logic
-                handleAutoBid(event.getCurrentHighestPrice());
+
             }
             case "AUCTION_FINISHED", "AUCTION_CANCELLED" -> {
                 timeLeftSeconds = 0;
@@ -292,52 +286,13 @@ public class LiveAuctionController {
         }
     }
 
-    private void handleAutoBid(Double currentHighestPrice) {
-        if (chkAutoBid == null || !chkAutoBid.isSelected()) return;
-        if (txtMaxAutoBid == null || txtMaxAutoBid.getText() == null) return;
-        if (currentAuctionId == null || !TokenStore.hasToken()) return;
 
-        try {
-            double maxBid = Double.parseDouble(txtMaxAutoBid.getText().trim());
-            if (currentHighestPrice == null) return;
-
-            // Auto bid = current price + 10% of starting increment, but not exceeding max
-            double autoBidAmount = currentHighestPrice + Math.max(1000, currentHighestPrice * 0.01);
-            if (autoBidAmount > maxBid) {
-                System.out.println("[AutoBid] Price " + autoBidAmount + " exceeds max " + maxBid + ", skipping.");
-                return;
-            }
-
-            System.out.println("[AutoBid] Placing auto bid: " + autoBidAmount);
-            LiveAuctionModel.BidRequest request = new LiveAuctionModel.BidRequest(autoBidAmount);
-            auctionService.placeBid(currentAuctionId, request)
-                    .thenAccept(result -> Platform.runLater(() -> {
-                        if (result.success()) {
-                            System.out.println("[AutoBid] Success: " + autoBidAmount);
-                            loadWalletBalance();
-                        } else {
-                            System.out.println("[AutoBid] Failed: " + result.errorMessage());
-                            handleAutoBidError(result.errorMessage());
-                        }
-                    }))
-                    .exceptionally(ex -> { 
-                        Platform.runLater(() -> handleAutoBidError(resolveErrorMessage(ex)));
-                        return null; 
-                    });
-        } catch (NumberFormatException e) {
-            System.err.println("[AutoBid] Invalid max auto bid amount");
-        }
-    }
-
-    private void handleAutoBidError(String errorMessage) {
-        if (chkAutoBid != null) {
-            chkAutoBid.setSelected(false);
-        }
-        showError("Auto Bid Failed: " + errorMessage);
-    }
 
     private String buildDescription(LiveAuctionModel.AuctionDetail auction) {
         StringBuilder builder = new StringBuilder();
+        if (auction.getDescription() != null && !auction.getDescription().isBlank()) {
+            builder.append(auction.getDescription()).append("\n\n");
+        }
         builder.append("Starting price: ").append(formatCurrency(auction.getStartingPrice())).append("\n");
         builder.append("End time: ").append(formatDateTime(auction.getEndTime())).append("\n");
         builder.append("Bid count: ")
@@ -492,12 +447,6 @@ public class LiveAuctionController {
             txtBidAmount.setDisable(!canBid);
         }
 
-        if (chkAutoBid != null) {
-            chkAutoBid.setDisable(!canBid);
-            if (!canBid) {
-                chkAutoBid.setSelected(false);
-            }
-        }
 
         if (btnPlaceBid != null) {
             btnPlaceBid.setDisable(!canBid);
@@ -525,20 +474,14 @@ public class LiveAuctionController {
         if (txtBidAmount != null && loading) {
             txtBidAmount.setDisable(true);
         }
-        if (chkAutoBid != null && loading) {
-            chkAutoBid.setDisable(true);
-            chkAutoBid.setSelected(false);
-        }
+
     }
 
     private void disableBidControls() {
         if (txtBidAmount != null) {
             txtBidAmount.setDisable(true);
         }
-        if (chkAutoBid != null) {
-            chkAutoBid.setDisable(true);
-            chkAutoBid.setSelected(false);
-        }
+
         if (btnPlaceBid != null) {
             btnPlaceBid.setDisable(true);
             btnPlaceBid.setText("Auction ended");

@@ -13,6 +13,7 @@ public class LiveAuctionModel {
     public static class AuctionDetail {
         private String id;
         private String name;
+        private String description;
         private Double startingPrice;
         private Double currentHighestPrice;
         private String startTime;
@@ -28,6 +29,8 @@ public class LiveAuctionModel {
         public void setId(String id) { this.id = id; }
         public String getName() { return name; }
         public void setName(String name) { this.name = name; }
+        public String getDescription() { return description; }
+        public void setDescription(String description) { this.description = description; }
         public Double getStartingPrice() { return startingPrice; }
         public void setStartingPrice(Double startingPrice) { this.startingPrice = startingPrice; }
         public Double getCurrentHighestPrice() { return currentHighestPrice; }
@@ -48,7 +51,7 @@ public class LiveAuctionModel {
                 return currentHighestPrice;
             }
             if (bidHistory != null && !bidHistory.isEmpty()) {
-                return bidHistory.getLast().getBidAmount();
+                return bidHistory.get(bidHistory.size() - 1).getBidAmount();
             }
             return startingPrice;
         }

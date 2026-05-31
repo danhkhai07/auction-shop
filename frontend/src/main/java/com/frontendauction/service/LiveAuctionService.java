@@ -112,60 +112,69 @@ public class LiveAuctionService {
 
         sseConnected = true;
         sseThread = new Thread(() -> {
-            try {
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(BASE_URL + "/auction/" + auctionId + "/events"))
-                        .header("Accept", "text/event-stream")
-                        .GET()
-                        .build();
+            int lastBidCount = -1;
+            String lastStatus = null;
+            String lastEndTime = null;
 
-                HttpResponse<InputStream> response = client.send(request,
-                        HttpResponse.BodyHandlers.ofInputStream());
+            while (sseConnected) {
+                try {
+                    Thread.sleep(2000); // Poll every 2 seconds
+                    if (!sseConnected) break;
 
-                if (response.statusCode() != 200) {
-                    System.err.println("SSE connection failed: status " + response.statusCode());
-                    if (onError != null) onError.run();
-                    return;
-                }
+                    LiveAuctionModel.AuctionDetail detail = getAuctionDetails(auctionId).join();
+                    if (detail != null) {
+                        int currentBidCount = detail.getBidHistory() == null ? 0 : detail.getBidHistory().size();
+                        String currentStatus = detail.getStatus();
+                        Double currentPrice = detail.getCurrentPrice();
+                        String currentEndTime = detail.getEndTime();
 
-                System.out.println("SSE connected to auction: " + auctionId);
-
-                try (BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(response.body(), StandardCharsets.UTF_8))) {
-                    StringBuilder dataBuffer = new StringBuilder();
-                    String line;
-
-                    while (sseConnected && (line = reader.readLine()) != null) {
-                        if (Thread.currentThread().isInterrupted()) break;
-
-                        if (line.startsWith("data:")) {
-                            String data = line.substring(5).trim();
-                            dataBuffer.append(data);
-                        } else if (line.isEmpty() && !dataBuffer.isEmpty()) {
-                            // Empty line = end of SSE event
-                            try {
-                                String jsonData = dataBuffer.toString();
-                                AuctionEventData event = objectMapper.readValue(
-                                        jsonData, AuctionEventData.class);
-                                onEvent.accept(event);
-                            } catch (Exception e) {
-                                System.err.println("Failed to parse SSE event: " + dataBuffer);
-                                e.printStackTrace();
-                            }
-                            dataBuffer.setLength(0);
+                        // 1. Check for new bids
+                        if (lastBidCount != -1 && currentBidCount > lastBidCount) {
+                            AuctionEventData event = new AuctionEventData();
+                            event.setType("BID_PLACED");
+                            event.setCurrentHighestPrice(currentPrice);
+                            onEvent.accept(event);
                         }
-                        // Ignore "event:", "id:", "retry:" lines
+
+                        // 2. Check for time extensions
+                        if (lastEndTime != null && currentEndTime != null && !lastEndTime.equals(currentEndTime)) {
+                            AuctionEventData event = new AuctionEventData();
+                            event.setType("AUCTION_EXTENDED");
+                            event.setEndTime(currentEndTime);
+                            onEvent.accept(event);
+                        }
+
+                        // 3. Check for status changes
+                        if (lastStatus != null && currentStatus != null && !lastStatus.equals(currentStatus)) {
+                            AuctionEventData event = new AuctionEventData();
+                            event.setType("AUCTION_" + currentStatus.toUpperCase());
+                            
+                            if ("FINISHED".equalsIgnoreCase(currentStatus) && currentBidCount > 0) {
+                                event.setFinalPrice(currentPrice);
+                                LiveAuctionModel.BidEntry lastBid = detail.getBidHistory().get(currentBidCount - 1);
+                                if (lastBid.getBidder() != null) {
+                                    AuctionEventData.BidderInfo bidder = new AuctionEventData.BidderInfo();
+                                    bidder.setUsername(lastBid.getBidder().getUsername());
+                                    event.setCurrentHighestBidder(bidder);
+                                }
+                            }
+                            onEvent.accept(event);
+                            
+                            if ("FINISHED".equalsIgnoreCase(currentStatus) || "CANCELLED".equalsIgnoreCase(currentStatus)) {
+                                break;
+                            }
+                        }
+
+                        lastBidCount = currentBidCount;
+                        lastStatus = currentStatus;
+                        lastEndTime = currentEndTime;
                     }
-                }
-            } catch (Exception e) {
-                if (sseConnected) {
-                    System.err.println("SSE stream error: " + e.getMessage());
-                    if (onError != null) onError.run();
+                } catch (Exception e) {
+                    // Ignore transient errors
                 }
             }
-
-            System.out.println("SSE disconnected from auction: " + auctionId);
-        }, "SSE-AuctionStream-" + auctionId);
+            System.out.println("Polling disconnected from auction: " + auctionId);
+        }, "Polling-AuctionStream-" + auctionId);
 
         sseThread.setDaemon(true);
         sseThread.start();

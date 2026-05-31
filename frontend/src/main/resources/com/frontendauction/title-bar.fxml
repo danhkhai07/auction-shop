@@ -4,12 +4,18 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 
-<HBox fx:id="titleBarContainer" alignment="CENTER_RIGHT" prefHeight="36.0" prefWidth="600.0" style="-fx-background-color: #191919; -fx-padding: 0 0 0 14;" stylesheets="@css/title-bar.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.frontendauction.controller.TitleBarController">
+<HBox fx:id="titleBarContainer" alignment="CENTER_RIGHT" prefHeight="36.0" prefWidth="600.0" style="-fx-background-color: #ffffff; -fx-padding: 0 0 0 14; -fx-border-color: #e5e5e5; -fx-border-width: 0 0 1 0;" stylesheets="@css/title-bar.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.frontendauction.controller.TitleBarController">
     <children>
 
-        <Label text="🏪" style="-fx-font-size: 13px;" />
-        <Label text="  Auction Shop" style="-fx-text-fill: #ffffff; -fx-font-weight: bold; -fx-font-size: 13px;" />
+        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+                <Image url="@images/logo.png" />
+            </image>
+        </ImageView>
+        <Label text="  Auction Shop" style="-fx-text-fill: #191919; -fx-font-weight: bold; -fx-font-size: 13px;" />
 
         <Region HBox.hgrow="ALWAYS" />
 
