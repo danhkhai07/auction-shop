@@ -48,7 +48,7 @@ public class LiveAuctionModel {
                 return currentHighestPrice;
             }
             if (bidHistory != null && !bidHistory.isEmpty()) {
-                return bidHistory.getLast().getBidAmount();
+                return bidHistory.get(bidHistory.size() - 1).getBidAmount();
             }
             return startingPrice;
         }

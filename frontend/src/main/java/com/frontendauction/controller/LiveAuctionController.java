@@ -148,7 +148,7 @@ public class LiveAuctionController {
                         );
                     }
 
-                    currentAuctionId = normalizeAuctionId(auctions.getFirst().getId());
+                    currentAuctionId = normalizeAuctionId(auctions.get(0).getId());
                     return auctionService.getAuctionDetails(currentAuctionId).thenCompose(this::requireAuction);
                 });
     }
