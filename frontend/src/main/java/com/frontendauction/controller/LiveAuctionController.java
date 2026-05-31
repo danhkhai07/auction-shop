@@ -33,8 +33,10 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class LiveAuctionController {
 
@@ -65,6 +67,7 @@ public class LiveAuctionController {
     private boolean hasPlacedBid;
     private long timeLeftSeconds;
     private Timeline countdownTimeline;
+    private final AtomicLong sellerRatingRequestSeq = new AtomicLong();
 
     protected String getCurrentAuctionId() {
         return currentAuctionId;
@@ -172,29 +175,7 @@ public class LiveAuctionController {
                     + " | Auction ID: " + fallback(auction.getId(), "-"));
         }
 
-        // Load real seller reputation from API
-        if (!"Unknown".equals(currentSellerName)) {
-            reviewService.getReviewsForUser(currentSellerName)
-                .thenAccept(reviews -> Platform.runLater(() -> {
-                    double sum = 0;
-                    int count = 0;
-                    for (com.frontendauction.model.ReviewModel r : reviews) {
-                        if (r.getTargetUser() != null && r.getTargetUser().equalsIgnoreCase(currentSellerName)) {
-                            sum += r.getStars();
-                            count++;
-                        }
-                    }
-                    String repStr = count > 0 ? String.format(Locale.US, " (%.1f \u2605)", sum / count) : " (- \u2605)";
-                    if (lblSeller != null) {
-                        lblSeller.setText("Seller: " + currentSellerName + repStr + " | Status: " + formatStatus(auction.getStatus())
-                                + " | Auction ID: " + fallback(auction.getId(), "-"));
-                    }
-                })).exceptionally(e -> {
-                    System.err.println("Failed to fetch reviews for seller " + currentSellerName + ": " + e.getMessage());
-                    e.printStackTrace();
-                    return null;
-                });
-        }
+        refreshSellerRating(auction, formatStatus(auction.getStatus()));
 
         if (lblDescription != null) {
             lblDescription.setText(buildDescription(auction));
@@ -227,6 +208,56 @@ public class LiveAuctionController {
                     Platform.runLater(() -> {
                         if (lblLiveBalance != null) lblLiveBalance.setText("Error");
                     });
+                    return null;
+                });
+    }
+
+    private void refreshSellerRating(LiveAuctionModel.AuctionDetail auction, String status) {
+        if (auction == null) {
+            return;
+        }
+
+        refreshSellerRating(
+                auction.getSeller() != null ? auction.getSeller().getUsername() : null,
+                auction.getId(),
+                status
+        );
+    }
+
+    private void refreshSellerRating(String sellerName, String auctionId, String status) {
+        if (lblSeller == null) {
+            return;
+        }
+
+        if (sellerName == null || sellerName.isBlank() || "Unknown".equalsIgnoreCase(sellerName)) {
+            lblSeller.setText("Seller: " + fallback(sellerName, "Unknown")
+                    + " | Status: " + fallback(status, "Unknown")
+                    + " | Auction ID: " + fallback(auctionId, "-"));
+            return;
+        }
+
+        long requestId = sellerRatingRequestSeq.incrementAndGet();
+        String normalizedAuctionId = normalizeAuctionId(auctionId);
+
+        reviewService.getReviewsForUser(sellerName)
+                .thenAccept(reviews -> Platform.runLater(() -> {
+                    if (requestId != sellerRatingRequestSeq.get()) {
+                        return;
+                    }
+                    if (!Objects.equals(normalizedAuctionId, normalizeAuctionId(currentAuctionId))) {
+                        return;
+                    }
+
+                    Double average = reviewService.averageRating(reviews, sellerName);
+                    String repStr = average != null
+                            ? String.format(Locale.US, " (%.1f \u2605)", average)
+                            : " (- \u2605)";
+                    lblSeller.setText("Seller: " + sellerName + repStr
+                            + " | Status: " + fallback(status, "Unknown")
+                            + " | Auction ID: " + fallback(normalizedAuctionId, "-"));
+                }))
+                .exceptionally(exception -> {
+                    System.err.println("Failed to fetch reviews for seller " + sellerName + ": " + exception.getMessage());
                     return null;
                 });
     }
@@ -270,26 +301,11 @@ public class LiveAuctionController {
                 disableBidControls();
                 stopCountdown();
                 if (lblSeller != null) {
-                    // Load real seller reputation
-                    final String sellerName = fallback(currentSellerName, "Unknown");
-                    if (!"Unknown".equals(sellerName)) {
-                        reviewService.getReviewsForUser(sellerName)
-                            .thenAccept(reviews -> Platform.runLater(() -> {
-                                double sum = 0;
-                                int count = 0;
-                                for (com.frontendauction.model.ReviewModel r : reviews) {
-                                    if (r.getTargetUser() != null && r.getTargetUser().equalsIgnoreCase(sellerName)) {
-                                        sum += r.getStars();
-                                        count++;
-                                    }
-                                }
-                                String repStr = count > 0 ? String.format(Locale.US, " (%.1f \u2605)", sum / count) : " (- \u2605)";
-                                lblSeller.setText("Seller: " + sellerName + repStr + " | Status: " + type.replace("AUCTION_", "") + " | Auction ID: " + fallback(currentAuctionId, "-"));
-                            }));
-                    } else {
-                        lblSeller.setText("Seller: " + sellerName + " | Status: " + type.replace("AUCTION_", "") + " | Auction ID: " + fallback(currentAuctionId, "-"));
-                    }
+                    lblSeller.setText("Seller: " + fallback(currentSellerName, "Unknown")
+                            + " | Status: " + type.replace("AUCTION_", "")
+                            + " | Auction ID: " + fallback(currentAuctionId, "-"));
                 }
+                refreshSellerRating(currentSellerName, currentAuctionId, type.replace("AUCTION_", ""));
                 
                 if ("AUCTION_FINISHED".equals(type) && event.getCurrentHighestBidder() != null && event.getFinalPrice() != null) {
                     String winnerName = event.getCurrentHighestBidder().getUsername();

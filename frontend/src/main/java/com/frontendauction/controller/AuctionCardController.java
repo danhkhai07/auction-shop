@@ -13,6 +13,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class AuctionCardController {
 
@@ -23,6 +24,7 @@ public class AuctionCardController {
 
     private LiveAuctionModel.AuctionDetail auction;
     private final com.frontendauction.service.ReviewService reviewService = new com.frontendauction.service.ReviewService();
+    private final AtomicLong ratingRequestSeq = new AtomicLong();
 
     public void setAuction(LiveAuctionModel.AuctionDetail auction) {
         this.auction = auction;
@@ -39,24 +41,7 @@ public class AuctionCardController {
                 ? auction.getSeller().getUsername() : "Unknown";
         lblSellerName.setText("Seller: " + sellerName);
 
-        if (!"Unknown".equals(sellerName)) {
-            reviewService.getReviewsForUser(sellerName)
-                .thenAccept(reviews -> javafx.application.Platform.runLater(() -> {
-                    double sum = 0;
-                    int count = 0;
-                    for (com.frontendauction.model.ReviewModel r : reviews) {
-                        if (r.getTargetUser() != null && r.getTargetUser().equalsIgnoreCase(sellerName)) {
-                            sum += r.getStars();
-                            count++;
-                        }
-                    }
-                    if (count > 0) {
-                        lblSellerName.setText("Seller: " + sellerName + " (" + String.format("%.1f \u2605", sum / count) + ")");
-                    } else {
-                        lblSellerName.setText("Seller: " + sellerName + " (- \u2605)");
-                    }
-                }));
-        }
+        refreshSellerRating(auction.getId(), sellerName);
         
         if ("CLOSED".equalsIgnoreCase(status)) {
             cardContainer.setOpacity(0.6);
@@ -64,6 +49,34 @@ public class AuctionCardController {
         } else {
             cardContainer.setStyle("-fx-padding: 20 24; -fx-cursor: hand;");
         }
+    }
+
+    private void refreshSellerRating(String auctionId, String sellerName) {
+        if (sellerName == null || sellerName.isBlank() || "Unknown".equalsIgnoreCase(sellerName)) {
+            return;
+        }
+
+        long requestId = ratingRequestSeq.incrementAndGet();
+        reviewService.getReviewsForUser(sellerName)
+                .thenAccept(reviews -> javafx.application.Platform.runLater(() -> {
+                    if (requestId != ratingRequestSeq.get()) {
+                        return;
+                    }
+                    if (auction == null || !Objects.equals(auction.getId(), auctionId)) {
+                        return;
+                    }
+
+                    Double average = reviewService.averageRating(reviews, sellerName);
+                    if (average != null) {
+                        lblSellerName.setText("Seller: " + sellerName + " (" + String.format("%.1f \u2605", average) + ")");
+                    } else {
+                        lblSellerName.setText("Seller: " + sellerName + " (- \u2605)");
+                    }
+                }))
+                .exceptionally(exception -> {
+                    System.err.println("Failed to fetch reviews for seller " + sellerName + ": " + exception.getMessage());
+                    return null;
+                });
     }
 
     @FXML

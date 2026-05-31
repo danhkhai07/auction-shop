@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class ProfileController {
 
@@ -58,6 +59,7 @@ public class ProfileController {
 
     private final UserProfileService userProfileService = new UserProfileService();
     private final com.frontendauction.service.ReviewService reviewService = new com.frontendauction.service.ReviewService();
+    private final AtomicLong reviewRequestSeq = new AtomicLong();
 
     @FXML
     public void initialize() {
@@ -258,32 +260,34 @@ public class ProfileController {
         lblAuctionCount.setText(String.valueOf(data.auctions().size()));
         
         if (tvReviews != null && data.user() != null && data.user().getUsername() != null) {
-            String myUsername = data.user().getUsername();
-            reviewService.getReviewsForUser(myUsername)
-                    .thenAccept(reviews -> Platform.runLater(() -> {
-                        tvReviews.setItems(FXCollections.observableArrayList(reviews));
-                        
-                        if (lblAverageStars != null) {
-                            double sum = 0;
-                            int count = 0;
-                            for (com.frontendauction.model.ReviewModel r : reviews) {
-                                if (r.getTargetUser() != null && r.getTargetUser().equalsIgnoreCase(myUsername)) {
-                                    sum += r.getStars();
-                                    count++;
-                                }
-                            }
-                            if (count > 0) {
-                                lblAverageStars.setText(String.format("%.1f \u2605", sum / count));
-                            } else {
-                                lblAverageStars.setText("- \u2605");
-                            }
-                        }
-                    }))
-                    .exceptionally(e -> {
-                        e.printStackTrace();
-                        return null;
-                    });
+            refreshReviews(data.user().getUsername());
         }
+    }
+
+    private void refreshReviews(String username) {
+        long requestId = reviewRequestSeq.incrementAndGet();
+
+        reviewService.getReviewsForUser(username)
+                .thenAccept(reviews -> Platform.runLater(() -> {
+                    if (requestId != reviewRequestSeq.get()) {
+                        return;
+                    }
+
+                    tvReviews.setItems(FXCollections.observableArrayList(reviews));
+
+                    if (lblAverageStars != null) {
+                        Double average = reviewService.averageRating(reviews, username);
+                        if (average != null) {
+                            lblAverageStars.setText(String.format("%.1f \u2605", average));
+                        } else {
+                            lblAverageStars.setText("- \u2605");
+                        }
+                    }
+                }))
+                .exceptionally(e -> {
+                    e.printStackTrace();
+                    return null;
+                });
     }
 
     private void showLoadFailure(String message) {
@@ -292,6 +296,7 @@ public class ProfileController {
         lblRoles.setText("Roles: -");
         lblItemCount.setText("0");
         lblAuctionCount.setText("0");
+        if (lblAverageStars != null) lblAverageStars.setText("- \u2605");
         tvOwnedItems.setItems(FXCollections.observableArrayList());
         tvOwnedAuctions.setItems(FXCollections.observableArrayList());
         if (tvReviews != null) tvReviews.setItems(FXCollections.observableArrayList());
