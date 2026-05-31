@@ -55,26 +55,22 @@ public class AuctionHandler {
                                 Mono<Void> updatePreviousBidder = Mono.empty();
                                 if (previousBidder != null) {
                                     if (previousBidder.getId().equals(bidder.getId())) {
-                                        bidder.addToBalance(previousPrice);
+                                        updatePreviousBidder = userManager.addBalance(bidder.getId(), previousPrice);
                                     } else {
-                                        previousBidder.addToBalance(previousPrice);
-                                        updatePreviousBidder = userManager.updateUser(previousBidder);
+                                        updatePreviousBidder = userManager.addBalance(previousBidder.getId(), previousPrice);
                                     }
                                 }
 
-                                // Deduct bid amount from user balance
-                                bidder.deductFromBalance(bidRequest.amount());
+                                Mono<Void> deductNewBid = userManager.deductBalance(bidder.getId(), bidRequest.amount());
 
                                 boolean antiSniped = LocalDateTime.now().isAfter(auction.getEndTime().minusMinutes(1));
                                 if (antiSniped) {
                                     auction.extendEndtime(LocalDateTime.now().plusMinutes(1));
                                 }
                                 
-                                // Update user balance, previous bidder balance, and auction status
-                                return updatePreviousBidder.then(Mono.zip(
-                                    userManager.updateUser(bidder),
+                                return updatePreviousBidder.then(deductNewBid).then(
                                     auctionService.updateAuctionStatus(auction)
-                                ))
+                                )
                                 .doOnSuccess(v -> {
                                     stream.publish(auctionID,
                                             new AuctionEvent("BID_PLACED", auction));
@@ -103,8 +99,7 @@ public class AuctionHandler {
 
                                     Mono<Void> updateHighestBidder = Mono.empty();
                                     if (highestBidder != null) {
-                                        highestBidder.addToBalance(highestPrice);
-                                        updateHighestBidder = userManager.updateUser(highestBidder);
+                                        updateHighestBidder = userManager.addBalance(highestBidder.getId(), highestPrice);
                                     }
 
                                     return updateHighestBidder.then(auctionService.updateAuctionStatus(auction))
@@ -195,8 +190,7 @@ public class AuctionHandler {
                             Mono<Void> updateSeller = Mono.empty();
                             if (auction.hasWinner()) {
                                 User seller = auction.getItem().getSeller();
-                                seller.addToBalance(auction.getFinalPrice());
-                                updateSeller = userManager.updateUser(seller);
+                                updateSeller = userManager.addBalance(seller.getId(), auction.getFinalPrice());
                             }
 
                             return updateSeller.then(auctionService.finishAuction(auction))

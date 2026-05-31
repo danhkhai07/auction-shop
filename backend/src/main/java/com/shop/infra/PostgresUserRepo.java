@@ -81,6 +81,12 @@ public class PostgresUserRepo implements UserRepository {
                     "    updated_at = CURRENT_TIMESTAMP " +
                     "WHERE id = :id";
 
+    private static final String ADD_BALANCE_SQL =
+            "UPDATE users SET balance = balance + :amount, updated_at = CURRENT_TIMESTAMP WHERE id = :id";
+
+    private static final String DEDUCT_BALANCE_SQL =
+            "UPDATE users SET balance = balance - :amount, updated_at = CURRENT_TIMESTAMP WHERE id = :id AND balance >= :amount";
+
     private static final String INSERT_ROLE_SQL =
             "INSERT INTO user_roles (user_id, role_name) " +
                     "VALUES (:userId, :roleName) " +
@@ -305,6 +311,39 @@ public class PostgresUserRepo implements UserRepository {
                 .fetch()
                 .rowsUpdated()
                 .then();
+    }
+
+    @Override
+    @Transactional
+    public Mono<Void> addBalance(String id, BigDecimal amount) {
+        if (!StringUtils.hasText(id) || amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            return Mono.error(new IllegalArgumentException("invalid id or amount"));
+        }
+        return databaseClient.sql(ADD_BALANCE_SQL)
+                .bind("id", id)
+                .bind("amount", amount)
+                .fetch()
+                .rowsUpdated()
+                .then();
+    }
+
+    @Override
+    @Transactional
+    public Mono<Void> deductBalance(String id, BigDecimal amount) {
+        if (!StringUtils.hasText(id) || amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            return Mono.error(new IllegalArgumentException("invalid id or amount"));
+        }
+        return databaseClient.sql(DEDUCT_BALANCE_SQL)
+                .bind("id", id)
+                .bind("amount", amount)
+                .fetch()
+                .rowsUpdated()
+                .flatMap(updatedRows -> {
+                    if (updatedRows == 0) {
+                        return Mono.error(new IllegalArgumentException("Insufficient balance"));
+                    }
+                    return Mono.empty();
+                });
     }
 
     private Mono<User> mapUser(List<UserRow> rows) {

@@ -130,6 +130,26 @@ public class UserManager {
                         .then(Mono.fromRunnable(() -> evictUserCache(user))));
     }
 
+    public Mono<Void> addBalance(String id, java.math.BigDecimal amount) {
+        return userRepository.addBalance(id, amount)
+                .then(userRepository.getByID(id))
+                .flatMap(user -> Mono.fromRunnable(() -> {
+                     cacheManager.put(user.getId(), user);
+                     cacheManager.put(addNameCachePrefix(user.getUsername()), user);
+                     cacheManager.delete(ALL_USERS_CACHE_KEY);
+                }));
+    }
+
+    public Mono<Void> deductBalance(String id, java.math.BigDecimal amount) {
+        return userRepository.deductBalance(id, amount)
+                .then(userRepository.getByID(id))
+                .flatMap(user -> Mono.fromRunnable(() -> {
+                     cacheManager.put(user.getId(), user);
+                     cacheManager.put(addNameCachePrefix(user.getUsername()), user);
+                     cacheManager.delete(ALL_USERS_CACHE_KEY);
+                }));
+    }
+
     private <T> java.util.Optional<List<T>> cachedList(String key, Class<T> itemType) {
         return cacheManager.getAs(key, List.class)
                 .filter(list -> list.stream().allMatch(itemType::isInstance))

@@ -31,17 +31,14 @@ public class BalanceHandler {
                 .filter(req -> !req.hasEmptyFields())
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("Invalid deposit amount")))
                 .flatMap(depositRequest ->
-                        userManager.getUserByID(userID)
-                                .flatMap(user -> {
-                                    user.deposit(depositRequest.amount());
-                                    return userManager.updateUser(user)
-                                            .thenReturn(new BalanceResponse(
-                                                    user.getId(),
-                                                    user.getUsername(),
-                                                    user.getBalance(),
-                                                    "Deposit successful"
-                                            ));
-                                })
+                        userManager.addBalance(userID, depositRequest.amount())
+                                .then(userManager.getUserByID(userID))
+                                .map(user -> new BalanceResponse(
+                                        user.getId(),
+                                        user.getUsername(),
+                                        user.getBalance(),
+                                        "Deposit successful"
+                                ))
                 )
                 .flatMap(response -> ServerResponse.status(200).bodyValue(response));
     }
@@ -53,21 +50,15 @@ public class BalanceHandler {
                 .filter(req -> !req.hasEmptyFields())
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("Invalid withdrawal amount")))
                 .flatMap(withdrawRequest ->
-                        userManager.getUserByID(userID)
-                                .flatMap(user -> {
-                                    try {
-                                        user.withdraw(withdrawRequest.amount());
-                                        return userManager.updateUser(user)
-                                                .thenReturn(new BalanceResponse(
-                                                        user.getId(),
-                                                        user.getUsername(),
-                                                        user.getBalance(),
-                                                        "Withdrawal successful"
-                                                ));
-                                    } catch (IllegalArgumentException e) {
-                                        return Mono.error(e);
-                                    }
-                                })
+                        userManager.deductBalance(userID, withdrawRequest.amount())
+                                .then(userManager.getUserByID(userID))
+                                .map(user -> new BalanceResponse(
+                                        user.getId(),
+                                        user.getUsername(),
+                                        user.getBalance(),
+                                        "Withdrawal successful"
+                                ))
+                                .onErrorResume(IllegalArgumentException.class, Mono::error)
                 )
                 .flatMap(response -> ServerResponse.status(200).bodyValue(response));
     }

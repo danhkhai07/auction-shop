@@ -19,4 +19,6 @@ public interface UserRepository {
     Mono<Void> changePassword(String id, String password);
     Mono<Void> banByID(String id, String reason, String bannedBy);
     Mono<Void> unbanByID(String id);
+    Mono<Void> addBalance(String id, java.math.BigDecimal amount);
+    Mono<Void> deductBalance(String id, java.math.BigDecimal amount);
 }
