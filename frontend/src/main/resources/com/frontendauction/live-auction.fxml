@@ -178,18 +178,7 @@
 
                                                         <Separator styleClass="separator-custom" />
 
-                                                        <!-- Auto-bid section -->
-                                                        <HBox alignment="CENTER_LEFT" spacing="12.0">
-                                                            <children>
-                                                                <CheckBox fx:id="chkAutoBid" text="Auto bid" textFill="#333333">
-                                                                    <font>
-                                                                        <Font name="System Bold" size="13.0" />
-                                                                    </font>
-                                                                </CheckBox>
-                                                                <TextField fx:id="txtMaxAutoBid" prefHeight="36.0" prefWidth="200.0" promptText="Max auto bid limit..." styleClass="input-field" />
-                                                                <Region HBox.hgrow="ALWAYS" />
-                                                            </children>
-                                                        </HBox>
+
                                                     </children>
                                                 </VBox>
                                             </children>
