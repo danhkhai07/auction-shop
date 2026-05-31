@@ -158,24 +158,21 @@ The backend provides the following REST API endpoints:
 **Authentication**
 - `POST /auth/register` - Create a new user account
 - `POST /auth/login` - Obtain JWT token
-- `POST /auth/refresh` - Refresh expired token
+- `POST /auth/me` - User profile infos
 
 **Auctions**
 - `GET /auctions` - List all auctions with pagination
 - `POST /auctions` - Create new auction
 - `GET /auctions/{id}` - Get auction details
-- `PUT /auctions/{id}` - Update auction (seller only)
-- `DELETE /auctions/{id}` - Cancel auction (seller only)
+- `POST /auctions/delete/{id}` - Cancel auction (seller only)
 
 **Bids**
 - `POST /auctions/{id}/bids` - Place a bid
-- `GET /auctions/{id}/bids` - Get bid history
 
 **Items**
 - `GET /items` - List items
 - `POST /items` - Create new item
-- `PUT /items/{id}` - Update item
-- `DELETE /items/{id}` - Delete item
+- `POST /items/delete/{id}` - Delete item
 
 **And more, all included as features in the JavaFX client.**
 
