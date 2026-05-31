@@ -35,6 +35,7 @@ public class DashboardController {
     @FXML private VBox sideMenu;
     @FXML private VBox auctionListContainer;
     @FXML private Button btnAdminPanel;
+    @FXML private Button btnRefreshFeed;
 
     private final UserProfileService userProfileService = new UserProfileService();
     private final LiveAuctionService liveAuctionService = new LiveAuctionService();
@@ -46,6 +47,17 @@ public class DashboardController {
 
     @FXML
     public void initialize() {
+        loadDashboardData();
+    }
+
+    @FXML
+    public void refreshFeed() {
+        if (auctionListContainer != null) {
+            auctionListContainer.getChildren().clear();
+            Label loadingLabel = new Label("Refreshing...");
+            loadingLabel.setStyle("-fx-text-fill: #707070; -fx-font-size: 14px;");
+            auctionListContainer.getChildren().add(loadingLabel);
+        }
         loadDashboardData();
     }
 
