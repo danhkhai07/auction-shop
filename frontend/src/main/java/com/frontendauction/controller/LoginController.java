@@ -51,13 +51,6 @@ public class LoginController {
     @FXML
     private Button loginButton;
 
-    @FXML
-    private ImageView hammerImage;
-    @FXML
-    private ImageView diamondImage;
-    @FXML
-    private ImageView clockImage;
-
     @FXML // Danh dau la ham duoc goi tu FXML qua OnAction
     private void handleSignup() throws IOException {
         FXMLLoader loader = new FXMLLoader(
@@ -83,35 +76,7 @@ public class LoginController {
 
     @FXML
     public void initialize() {
-        applyFloatingEffect(hammerImage, 3.0, 15);
-        applyFloatingEffect(diamondImage, 3.0, 15);
-        applyFloatingEffect(clockImage, 3.0, 15);
-        loginContainer.widthProperty().addListener((observable, oldValue, newValue) -> scaleFormProportionally());
-        loginContainer.heightProperty().addListener((observable, oldValue, newValue) -> scaleFormProportionally());
         hideError();
-    }
-
-    private void scaleFormProportionally() {
-        double containerWidth = loginContainer.getWidth();
-        double containerHeight = loginContainer.getHeight();
-
-        if (containerWidth == 0 || containerHeight == 0) {
-            return;
-        }
-
-        double scaleX = containerWidth / 600.0;
-        double scaleY = containerHeight / 400.0;
-
-        // Chọn tỷ lệ nhỏ hơn để đảm bảo Form đăng nhập luôn vừa vặn, không bị tràn/bị
-        // cắt mất góc
-        double finalScale = Math.min(scaleX, scaleY);
-
-        if (finalScale < 1.0) {
-            finalScale = 1.0;
-        }
-
-        loginForm.setScaleX(finalScale);
-        loginForm.setScaleY(finalScale);
     }
 
     private void showError(String message) {
@@ -215,36 +180,5 @@ public class LoginController {
         return message;
     }
 
-    private void applyFloatingEffect(Node node, double durationSec, double deltaY) {
-        TranslateTransition floatTransition = new TranslateTransition(Duration.seconds(durationSec), node);
-        floatTransition.setByY(deltaY);
-        floatTransition.setAutoReverse(true); // Đi xuống xong tự động đi ngược lên
-        floatTransition.setCycleCount(TranslateTransition.INDEFINITE); // Lặp lại vô hạn lần
 
-        // Tạo độ trễ ngẫu nhiên để các vật thể không trôi lên xuống cùng một nhịp
-        floatTransition.setDelay(Duration.seconds(Math.random()));
-        floatTransition.play();
-
-        // 2. Tạo hiệu ứng phóng to (Khi chuột chỉ vào)
-        ScaleTransition scaleUp = new ScaleTransition(Duration.millis(200), node);
-        scaleUp.setToX(1.1); // Phóng to 10% chiều ngang
-        scaleUp.setToY(1.1); // Phóng to 10% chiều dọc
-
-        // 3. Tạo hiệu ứng thu nhỏ (Khi chuột rời đi)
-        ScaleTransition scaleDown = new ScaleTransition(Duration.millis(200), node);
-        scaleDown.setToX(1.0); // Trở về kích thước gốc
-        scaleDown.setToY(1.0);
-
-        // 4. Bắt sự kiện tương tác chuột
-        node.setOnMouseEntered(e -> {
-            floatTransition.pause(); // Dừng lơ lửng
-            scaleUp.play(); // Phóng to lên
-        });
-
-        node.setOnMouseExited(e -> {
-            scaleDown.play(); // Thu nhỏ lại
-            // Đợi thu nhỏ xong thì mới cho trôi lơ lửng tiếp
-            scaleDown.setOnFinished(event -> floatTransition.play());
-        });
-    }
 }

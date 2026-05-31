@@ -94,7 +94,7 @@
 }
 
 .text-accent {
-    -fx-text-fill: #3665f3; /* eBay blue */
+    -fx-text-fill: #4A72FF; /* eBay blue */
 }
 
 /* ======== BUTTONS ======== */
@@ -102,57 +102,57 @@
 /* Text-only button (back navigation) */
 .btn-text-only {
     -fx-background-color: transparent;
-    -fx-text-fill: #3665f3;
+    -fx-text-fill: #4A72FF;
     -fx-font-weight: bold;
     -fx-cursor: hand;
     -fx-padding: 6 12;
 }
 
 .btn-text-only:hover {
-    -fx-text-fill: #2a4dc7;
+    -fx-text-fill: #3A5ED9;
     -fx-underline: true;
 }
 
 /* Primary action button — eBay blue */
 .btn-primary {
-    -fx-background-color: #3665f3;
+    -fx-background-color: #4A72FF;
     -fx-text-fill: white;
     -fx-background-radius: 24;
     -fx-font-weight: bold;
     -fx-font-size: 15px;
     -fx-cursor: hand;
     -fx-padding: 10 28;
-    -fx-effect: dropshadow(gaussian, rgba(54, 101, 243, 0.25), 8, 0, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(74, 114, 255, 0.25), 8, 0, 0, 2);
 }
 
 .btn-primary:hover {
-    -fx-background-color: #2a4dc7;
-    -fx-effect: dropshadow(gaussian, rgba(54, 101, 243, 0.35), 12, 0, 0, 3);
+    -fx-background-color: #3A5ED9;
+    -fx-effect: dropshadow(gaussian, rgba(74, 114, 255, 0.35), 12, 0, 0, 3);
 }
 
 .btn-primary:pressed {
-    -fx-background-color: #1f3bab;
+    -fx-background-color: #2C4BAA;
 }
 
 /* Premium bid button — bold eBay blue */
 .btn-premium {
-    -fx-background-color: #3665f3;
+    -fx-background-color: #4A72FF;
     -fx-text-fill: white;
     -fx-background-radius: 24;
     -fx-font-weight: bold;
     -fx-font-size: 16px;
     -fx-cursor: hand;
     -fx-padding: 12 32;
-    -fx-effect: dropshadow(gaussian, rgba(54, 101, 243, 0.3), 10, 0, 0, 3);
+    -fx-effect: dropshadow(gaussian, rgba(74, 114, 255, 0.3), 10, 0, 0, 3);
 }
 
 .btn-premium:hover {
-    -fx-background-color: #2a4dc7;
-    -fx-effect: dropshadow(gaussian, rgba(54, 101, 243, 0.4), 14, 0, 0, 4);
+    -fx-background-color: #3A5ED9;
+    -fx-effect: dropshadow(gaussian, rgba(74, 114, 255, 0.4), 14, 0, 0, 4);
 }
 
 .btn-premium:pressed {
-    -fx-background-color: #1f3bab;
+    -fx-background-color: #2C4BAA;
 }
 
 /* Success button — green */
@@ -221,9 +221,9 @@
 }
 
 .input-field:focused {
-    -fx-border-color: #3665f3;
+    -fx-border-color: #4A72FF;
     -fx-border-width: 2;
-    -fx-effect: dropshadow(gaussian, rgba(54, 101, 243, 0.15), 6, 0, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(74, 114, 255, 0.15), 6, 0, 0, 0);
 }
 
 /* Large input field — for bid amounts */
@@ -240,9 +240,9 @@
 }
 
 .input-field-large:focused {
-    -fx-border-color: #3665f3;
+    -fx-border-color: #4A72FF;
     -fx-border-width: 2;
-    -fx-effect: dropshadow(gaussian, rgba(54, 101, 243, 0.15), 6, 0, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(74, 114, 255, 0.15), 6, 0, 0, 0);
 }
 
 /* Text area */
@@ -260,7 +260,7 @@
 }
 
 .input-area:focused {
-    -fx-border-color: #3665f3;
+    -fx-border-color: #4A72FF;
     -fx-border-width: 2;
 }
 
@@ -419,11 +419,11 @@
     -fx-stroke: rgba(0, 0, 0, 0.06);
 }
 .premium-chart .default-color0.chart-series-line {
-    -fx-stroke: #3665f3;
+    -fx-stroke: #4A72FF;
     -fx-stroke-width: 2.5px;
 }
 .premium-chart .chart-line-symbol {
-    -fx-background-color: #3665f3, white;
+    -fx-background-color: #4A72FF, white;
     -fx-background-insets: 0, 2;
     -fx-background-radius: 5px;
     -fx-padding: 4px;
@@ -495,19 +495,19 @@
 
 .menu-item:hover {
     -fx-background-color: #f0f3ff;
-    -fx-text-fill: #3665f3;
+    -fx-text-fill: #4A72FF;
 }
 
 /* Active menu item */
 .menu-item-active {
     -fx-background-color: #e8edff;
-    -fx-text-fill: #3665f3;
+    -fx-text-fill: #4A72FF;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
     -fx-cursor: hand;
     -fx-background-radius: 8;
     -fx-alignment: CENTER_LEFT;
-    -fx-border-color: #3665f3;
+    -fx-border-color: #4A72FF;
     -fx-border-width: 0 0 0 3;
     -fx-border-radius: 0 8 8 0;
 }
@@ -541,8 +541,8 @@
 }
 
 .auction-card:hover {
-    -fx-border-color: #3665f3;
-    -fx-effect: dropshadow(gaussian, rgba(54, 101, 243, 0.12), 12, 0, 0, 3);
+    -fx-border-color: #4A72FF;
+    -fx-effect: dropshadow(gaussian, rgba(74, 114, 255, 0.12), 12, 0, 0, 3);
 }
 
 /* ======== SCROLLBAR STYLING ======== */
@@ -594,8 +594,8 @@
 }
 
 .check-box:selected .box {
-    -fx-background-color: #3665f3;
-    -fx-border-color: #3665f3;
+    -fx-background-color: #4A72FF;
+    -fx-border-color: #4A72FF;
 }
 
 .check-box:selected .mark {
@@ -613,7 +613,7 @@
 }
 
 .combo-box:focused {
-    -fx-border-color: #3665f3;
+    -fx-border-color: #4A72FF;
 }
 
 .combo-box .arrow-button {

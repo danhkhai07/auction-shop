@@ -33,13 +33,13 @@
                                 <!-- Breadcrumb Navigation and Wallet Balance -->
                                 <HBox alignment="CENTER_LEFT" spacing="8.0">
                                     <children>
-                                        <Button fx:id="btnBack" mnemonicParsing="false" onAction="#handleBackToDashboard" styleClass="btn-text-only" text="← Dashboard">
+                                        <Button fx:id="btnBack" mnemonicParsing="false" onAction="#handleBackToDashboard" styleClass="btn-text-only" text="← Home">
                                             <font>
                                                 <Font size="13.0" />
                                             </font>
                                         </Button>
                                         <Label text="  /  " textFill="#a0a0a0" />
-                                        <Label text="Live Auctions" textFill="#555555">
+                                        <Label text="Join an Auction" textFill="#555555">
                                             <font>
                                                 <Font name="System Bold" size="13.0" />
                                             </font>
@@ -218,10 +218,10 @@
                                                 <Separator styleClass="separator-custom" />
                                                 <LineChart fx:id="priceChart" prefHeight="260.0" styleClass="premium-chart" VBox.vgrow="ALWAYS">
                                                     <xAxis>
-                                                        <CategoryAxis label="Time" side="BOTTOM" tickLabelsVisible="true" animated="false" />
+                                                        <CategoryAxis animated="false" label="Time" side="BOTTOM" tickLabelsVisible="true" />
                                                     </xAxis>
                                                     <yAxis>
-                                                        <NumberAxis label="Price (VND)" side="LEFT" tickLabelsVisible="true" autoRanging="true" forceZeroInRange="false" animated="false" />
+                                                        <NumberAxis animated="false" autoRanging="true" forceZeroInRange="false" label="Price (VND)" side="LEFT" tickLabelsVisible="true" />
                                                     </yAxis>
                                                 </LineChart>
                                             </children>
