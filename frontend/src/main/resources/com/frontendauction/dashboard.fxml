@@ -4,11 +4,14 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
 <?import javafx.scene.text.Font?>
 
 <VBox prefHeight="720.0" prefWidth="1280.0" stylesheets="@css/global.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.frontendauction.controller.DashboardController">
@@ -16,15 +19,23 @@
         <fx:include source="title-bar.fxml" />
         <StackPane VBox.vgrow="ALWAYS">
             <!-- Main content layer -->
-            <VBox style="-fx-background-color: #f7f7f7;">
+            <VBox style="-fx-background-color: #f4f6f9;">
 
                 <!-- Top navigation bar -->
-                <HBox alignment="CENTER_LEFT" prefHeight="52.0" spacing="16.0" style="-fx-background-color: #ffffff; -fx-border-color: #e5e5e5; -fx-border-width: 0 0 1 0; -fx-padding: 0 28;">
+                <HBox alignment="CENTER_LEFT" prefHeight="60.0" spacing="16.0" style="-fx-background-color: #4A72FF; -fx-padding: 0 28; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 2);">
                     <children>
-                        <Button fx:id="btnHamburger" mnemonicParsing="false" onAction="#toggleMenu" styleClass="hamburger-btn" text="☰" />
-                        <Label text="Auction Feed" textFill="#191919">
+                        <Button fx:id="btnHamburger" mnemonicParsing="false" onAction="#toggleMenu" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 22px; -fx-cursor: hand;" text="☰" />
+                        <ImageView fitHeight="36.0" fitWidth="36.0" preserveRatio="true">
+                            <image>
+                                <Image url="@/images/logo.jpg" />
+                            </image>
+                            <clip>
+                                <Circle centerX="18.0" centerY="18.0" radius="18.0" />
+                            </clip>
+                        </ImageView>
+                        <Label text="Auction Home" textFill="white">
                             <font>
-                                <Font name="System Bold" size="17.0" />
+                                <Font name="System Bold" size="20.0" />
                             </font>
                         </Label>
                         <Region HBox.hgrow="ALWAYS" />
@@ -36,26 +47,26 @@
                     <children>
 
                         <!-- Welcome hero card -->
-                        <VBox spacing="8.0" style="-fx-background-color: #ffffff; -fx-background-radius: 12; -fx-padding: 28 32; -fx-border-color: #e5e5e5; -fx-border-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2);">
+                        <VBox spacing="10.0" style="-fx-background-color: #ffffff; -fx-background-radius: 12; -fx-padding: 32; -fx-border-color: transparent transparent transparent #4A72FF; -fx-border-width: 0 0 0 6; -fx-border-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 15, 0, 0, 5);">
                             <children>
                                 <HBox alignment="CENTER_LEFT" spacing="12.0">
                                     <children>
-                                        <Label text="🏠" style="-fx-font-size: 20px;" />
-                                        <Label text="HOME" textFill="#191919">
+                                        <Label style="-fx-font-size: 22px;" text="🏠" />
+                                        <Label text="HOME" textFill="#4A72FF">
                                             <font>
-                                                <Font name="System Bold" size="22.0" />
+                                                <Font name="System Bold" size="24.0" />
                                             </font>
                                         </Label>
                                     </children>
                                 </HBox>
                                 <Label fx:id="lblWelcome" text="Loading user..." textFill="#191919">
                                     <font>
-                                        <Font name="System Bold" size="18.0" />
+                                        <Font name="System Bold" size="20.0" />
                                     </font>
                                 </Label>
                                 <Label fx:id="lblSummary" text="Loading dashboard data..." textFill="#707070" wrapText="true">
                                     <font>
-                                        <Font size="13.0" />
+                                        <Font size="14.0" />
                                     </font>
                                 </Label>
                             </children>
@@ -64,16 +75,16 @@
                         <!-- Auctions section header -->
                         <HBox alignment="CENTER_LEFT" spacing="10.0">
                             <children>
-                                <Label text="🔴" style="-fx-font-size: 14px;" />
-                                <Label text="Live Auctions" textFill="#191919">
+                                <Label style="-fx-font-size: 18px;" text="🔹" />
+                                <Label text="Join an Auction" textFill="#4A72FF">
                                     <font>
-                                        <Font name="System Bold" size="18.0" />
+                                        <Font name="System Bold" size="20.0" />
                                     </font>
                                 </Label>
                                 <Region HBox.hgrow="ALWAYS" />
                             </children>
                             <padding>
-                                <Insets top="4.0" bottom="4.0" />
+                                <Insets bottom="8.0" top="12.0" />
                             </padding>
                         </HBox>
 
@@ -98,7 +109,7 @@
                         <!-- Menu header -->
                         <HBox alignment="CENTER_LEFT" spacing="10.0">
                             <children>
-                                <Label text="🏪" style="-fx-font-size: 18px;" />
+                                <Label style="-fx-font-size: 18px;" text="🏪" />
                                 <Label text="AUCTION SHOP" textFill="#191919">
                                     <font>
                                         <Font name="System Bold" size="16.0" />
@@ -117,7 +128,7 @@
                                         <Insets left="16.0" />
                                     </padding>
                                 </Button>
-                                <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#goToLiveAuction" prefHeight="44.0" styleClass="menu-item" text="🔴  Live Auctions">
+                                <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#goToLiveAuction" prefHeight="44.0" styleClass="menu-item" text="🔴  Join an Auction">
                                     <padding>
                                         <Insets left="16.0" />
                                     </padding>
@@ -127,7 +138,7 @@
                                         <Insets left="16.0" />
                                     </padding>
                                 </Button>
-                                <Button fx:id="btnAdminPanel" maxWidth="Infinity" mnemonicParsing="false" onAction="#goToAdminPanel" prefHeight="45.0" styleClass="menu-item" text="🛡  Admin Panel" visible="false" managed="false">
+                                <Button fx:id="btnAdminPanel" managed="false" maxWidth="Infinity" mnemonicParsing="false" onAction="#goToAdminPanel" prefHeight="45.0" styleClass="menu-item" text="🛡  Admin Panel" visible="false">
                                     <padding>
                                         <Insets left="15.0" />
                                     </padding>

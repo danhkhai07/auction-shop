@@ -14,9 +14,9 @@
 
 <VBox alignment="CENTER" prefWidth="400.0" spacing="20.0" style="-fx-background-color: #ffffff; -fx-padding: 30; -fx-border-color: #e5e5e5; -fx-border-radius: 12; -fx-background-radius: 12;" stylesheets="@css/global.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.frontendauction.controller.DepositController">
     <children>
-        <Label text="Deposit Information" textFill="#191919">
+        <Label text="Deposit Information" textFill="#4A72FF">
             <font>
-                <Font name="System Bold" size="22.0" />
+                <Font name="System Bold" size="24.0" />
             </font>
         </Label>
         
