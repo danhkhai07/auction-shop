@@ -31,7 +31,7 @@
 
         <Region VBox.vgrow="ALWAYS" />
 
-        <Button fx:id="btnWithdraw" mnemonicParsing="false" onAction="#handleWithdrawAction" prefHeight="40.0" prefWidth="340.0" styleClass="btn-primary" text="Withdraw" />
-        <Button mnemonicParsing="false" onAction="#handleClose" prefHeight="40.0" prefWidth="340.0" styleClass="btn-secondary" text="Close" />
+        <Button fx:id="btnWithdraw" mnemonicParsing="false" onAction="#handleWithdrawAction" prefHeight="40.0" prefWidth="340.0" styleClass="btn-danger" text="Withdraw" />
+        <Button mnemonicParsing="false" onAction="#handleClose" prefHeight="40.0" prefWidth="340.0" styleClass="btn-danger" text="Close" />
     </children>
 </VBox>

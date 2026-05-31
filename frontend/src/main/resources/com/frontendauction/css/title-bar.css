@@ -1,6 +1,6 @@
 .title-btn {
     -fx-background-color: transparent;
-    -fx-text-fill: #b0b0b0;
+    -fx-text-fill: #707070;
     -fx-background-radius: 0;
     -fx-cursor: hand;
     -fx-pref-width: 44px;
@@ -8,8 +8,8 @@
 }
 
 .title-btn:hover {
-    -fx-background-color: #333333;
-    -fx-text-fill: #ffffff;
+    -fx-background-color: #f0f0f0;
+    -fx-text-fill: #191919;
 }
 
 .close-btn:hover {
